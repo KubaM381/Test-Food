@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Food Marketplace</title>
+
+<style>
+:root{
+  --bg:#f6f5f2;
+  --card:#ffffff;
+  --text:#1d1d1f;
+  --muted:#6e6e73;
+  --accent:#1f6b3a;
+  --accent-hover:#154a28;
+  --border:#e7e7e7;
+  --shadow:0 12px 30px rgba(0,0,0,0.06);
+  --radius:16px;
+  --max:1100px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.container{max-width:var(--max);margin:auto;padding:0 24px}
+
+header{
+  position:sticky;top:0;
+  background:rgba(246,245,242,0.85);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
+}
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 0;
+}
+nav strong{ font-size:18px; letter-spacing:-0.5px; }
+nav a{
+  text-decoration:none; color:var(--muted); margin-left:24px; font-size:14px; font-weight:500;
+}
+nav a:hover{ color:var(--text); }
+
+.hero{ padding:100px 0 60px; text-align:center; }
+.hero h1{ font-size:52px; font-weight:700; letter-spacing:-1.5px; margin:0; line-height:1.15; }
+.hero p{ font-size:20px; color:var(--muted); margin:16px 0 28px; }
+
+.btn{
+  display:inline-block; padding:12px 28px; border-radius:999px; background:var(--accent);
+  color:#fff; text-decoration:none; border:none; font-weight:500; font-size:15px; cursor:pointer;
+  transition:background 0.2s, transform 0.1s;
+}
+.btn:hover{ background:var(--accent-hover); }
+.btn:active{ transform:scale(0.98); }
+
+section{padding:60px 0}
+h2{font-size:34px;letter-spacing:-0.5px;margin:0 0 8px}
+.sub{color:var(--muted);font-size:16px;margin:0 0 35px}
+
+.grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:24px; box-shadow:var(--shadow); transition:transform 0.2s;
+}
+.card:hover{ transform:translateY(-4px); }
+.card img{ width:100%; height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; }
+.card h3{ margin:0 0 8px 0; font-size:20px; }
+.card p{ margin:0 0 12px 0; color:var(--muted); font-size:14px; }
+.card .price{ font-weight:bold; color:var(--accent); font-size:16px; }
+
+@media(max-width:900px){ .grid{grid-template-columns:1fr} .hero h1{font-size:36px} }
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="container">
+<nav>
+<strong>Food Marketplace</strong>
+<div>
+<a href="#inserate">Aktuelle Angebote</a>
+</div>
+</nav>
+</div>
+</header>
+
+<section class="hero">
+<div class="container">
+<h1>Rette Lebensmittel in deiner Nähe</h1>
+<p>Nachhaltig, frisch und lokal. Finde Angebote oder teile deine eigenen.</p>
+<button class="btn" onclick="loadListings()">Inserate aktualisieren</button>
+</div>
+</section>
+
+<section id="inserate">
+<div class="container">
+<h2>Verfügbare Inserate</h2>
+<p class="sub">Live aus deinem Render-Backend geladen</p>
+
+<div class="grid" id="listingsContainer">
+  <p>Lade Angebote vom Server...</p>
+</div>
+</div>
+</section>
+
+<script>
+// DEINE LIVE RENDER-URL!
+const API_BASE_URL = "https://test-food-2x2z.onrender.com";
+
+// Inserate vom Backend laden
+async function loadListings() {
+  const container = document.getElementById("listingsContainer");
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/listings`);
+    
+    if (!response.ok) {
+      throw new Error("Fehler beim Laden");
+    }
+    
+    const listings = await response.json();
+    container.innerHTML = "";
+
+    if (listings.length === 0) {
+      container.innerHTML = "<p>Aktuell sind keine aktiven Inserate vorhanden.</p>";
+      return;
+    }
+
+    listings.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="${item.imageUrl || 'https://via.placeholder.com/300'}" alt="${item.title}">
+        <h3>${item.title}</h3>
+        <p>${item.description}</p>
+        <div class="price">${item.isFree ? 'Zu verschenken' : item.price + ' €'}</div>
+      `;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    container.innerHTML = "<p>Hinweis: Du musst eingeloggt sein, um Inserate zu sehen, oder der Server schläft gerade kurz.</p>";
+  }
+}
+
+// Beim Start direkt ausführen
+loadListings();
+</script>
+
+</body>
+</html>
