@@ -1,106 +1,29 @@
 /**
- * Food-Marketplace Backend – komplette API in EINER Datei.
+ * Food-Marketplace Backend – komplette API in EINER Datei (Supabase SDK Edition).
  *
- * Benötigte Umgebungsvariablen (z. B. in einer .env-Datei per `dotenv`,
- * oder direkt beim Hosting-Anbieter gesetzt):
- *   DATABASE_URL                postgresql://user:pass@host:5432/db
- *   SUPABASE_URL                https://xxxx.supabase.co
- *   SUPABASE_SERVICE_ROLE_KEY   Service-Role-Key aus Supabase (Settings -> API)
+ * Benötigte Umgebungsvariablen bei Render:
+ *   SUPABASE_URL                https://keaahccmqnmvtcmabvvz.supabase.co
+ *   SUPABASE_SERVICE_ROLE_KEY   Dein Supabase Service-Role Key
  *   PORT                        optional, Standard 4000
- *
- * Start:
- *   npm install
- *   node server.js
- *
- * Die Tabellen werden beim Start automatisch angelegt, falls sie noch
- * nicht existieren – kein separater Migrationsschritt nötig.
  */
 
 const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
 const { createClient } = require("@supabase/supabase-js");
 
 // ============================================================================
-// Setup: DB-Pool & Supabase-Admin-Client
+// Setup: Supabase-Admin-Client (nutzt HTTPS Port 443)
 // ============================================================================
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-// ============================================================================
-// Datenbank-Struktur (User, Listings, Offers, Chats, Messages)
-// Wird beim Start automatisch angelegt – idempotent dank IF NOT EXISTS.
-// ============================================================================
-
-const SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS users (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  supabase_id  TEXT UNIQUE NOT NULL,
-  email        TEXT UNIQUE NOT NULL,
-  name         TEXT NOT NULL,
-  avatar_url   TEXT,
-  phone        TEXT,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS listings (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  seller_id       UUID NOT NULL REFERENCES users(id),
-  title           TEXT NOT NULL,
-  description     TEXT NOT NULL,
-  image_url       TEXT NOT NULL,
-  pickup_address  TEXT NOT NULL,
-  pickup_lat      DOUBLE PRECISION NOT NULL,
-  pickup_lng      DOUBLE PRECISION NOT NULL,
-  expiry_date     TIMESTAMPTZ NOT NULL,
-  price           NUMERIC(10,2),                  -- NULL = "Zu verschenken"
-  is_free         BOOLEAN NOT NULL DEFAULT false,
-  status          TEXT NOT NULL DEFAULT 'ACTIVE',  -- ACTIVE | RESERVED | SOLD | EXPIRED | CANCELLED
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS offers (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  listing_id  UUID NOT NULL REFERENCES listings(id),
-  buyer_id    UUID NOT NULL REFERENCES users(id),
-  amount      NUMERIC(10,2),
-  message     TEXT,
-  status      TEXT NOT NULL DEFAULT 'PENDING',     -- PENDING | ACCEPTED | REJECTED | CANCELLED
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS chats (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  offer_id    UUID UNIQUE NOT NULL REFERENCES offers(id),
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS messages (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  chat_id     UUID NOT NULL REFERENCES chats(id),
-  sender_id   UUID NOT NULL REFERENCES users(id),
-  content     TEXT NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  read_at     TIMESTAMPTZ
-);
-
-CREATE INDEX IF NOT EXISTS idx_listings_status_expiry ON listings(status, expiry_date);
-CREATE INDEX IF NOT EXISTS idx_offers_listing_status ON offers(listing_id, status);
-`;
-
-async function initDb() {
-  await pool.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";'); // für gen_random_uuid()
-  await pool.query(SCHEMA_SQL);
-  console.log("✅ Datenbankschema geprüft/angelegt.");
+if (!supabaseUrl || !supabaseKey) {
+  console.error("❌ FEHLER: SUPABASE_URL oder SUPABASE_SERVICE_ROLE_KEY fehlt!");
 }
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 // ============================================================================
 // Auth-Middleware: prüft Supabase-Access-Token, mapped auf internen User
@@ -116,20 +39,25 @@ async function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Token ungültig oder abgelaufen." });
   }
 
-  // Bei Erstanmeldung automatisch internen User-Datensatz anlegen
-  const { rows } = await pool.query(
-    `INSERT INTO users (supabase_id, email, name)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (supabase_id) DO UPDATE SET email = EXCLUDED.email
-     RETURNING id`,
-    [
-      data.user.id,
-      data.user.email ?? "",
-      data.user.user_metadata?.name ?? data.user.email ?? "Unbekannt",
-    ]
-  );
+  // Bei Erstanmeldung automatisch internen User-Datensatz anlegen / aktualisieren
+  const { data: user, error: dbErr } = await supabaseAdmin
+    .from("users")
+    .upsert(
+      {
+        supabase_id: data.user.id,
+        email: data.user.email ?? "",
+        name: data.user.user_metadata?.name ?? data.user.email ?? "Unbekannt",
+      },
+      { onConflict: "supabase_id" }
+    )
+    .select("id")
+    .single();
 
-  req.userId = rows[0].id;
+  if (dbErr) {
+    return res.status(500).json({ error: "Benutzer konnte nicht synchronisiert werden." });
+  }
+
+  req.userId = user.id;
   next();
 }
 
@@ -169,8 +97,8 @@ function mapListing(row) {
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    ...(row.seller_name
-      ? { seller: { name: row.seller_name, avatarUrl: row.seller_avatar_url } }
+    ...(row.users
+      ? { seller: { name: row.users.name, avatarUrl: row.users.avatar_url } }
       : {}),
   };
 }
@@ -189,18 +117,18 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 // Aktive Inserate listen
 app.get("/api/listings", requireAuth, async (_req, res) => {
-  const { rows } = await pool.query(
-    `SELECT l.*, u.name AS seller_name, u.avatar_url AS seller_avatar_url
-     FROM listings l
-     JOIN users u ON u.id = l.seller_id
-     WHERE l.status = 'ACTIVE' AND l.expiry_date > now()
-     ORDER BY l.created_at DESC`
-  );
-  res.json(rows.map(mapListing));
+  const { data, error } = await supabaseAdmin
+    .from("listings")
+    .select("*, users!seller_id(name, avatar_url)")
+    .eq("status", "ACTIVE")
+    .gt("expiry_date", new Date().toISOString())
+    .order("created_at", { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data.map(mapListing));
 });
 
-// Schritt 1 des Foto-Uploads: signierte Upload-URL.
-// Das Foto geht direkt vom Client zu Supabase Storage, nicht über diese API.
+// Schritt 1 des Foto-Uploads: signierte Upload-URL
 app.get("/api/listings/upload-url", requireAuth, async (req, res) => {
   const ext = req.query.ext || "jpg";
   const path = `${req.userId}/${crypto.randomUUID()}.${ext}`;
@@ -216,8 +144,8 @@ app.get("/api/listings/upload-url", requireAuth, async (req, res) => {
   const { data: publicUrlData } = supabaseAdmin.storage.from("listing-images").getPublicUrl(path);
 
   res.json({
-    uploadUrl: data.signedUrl, // Frontend macht hierhin ein PUT mit den Bilddaten
-    publicUrl: publicUrlData.publicUrl, // anschließend an POST /api/listings übergeben
+    uploadUrl: data.signedUrl,
+    publicUrl: publicUrlData.publicUrl,
   });
 });
 
@@ -229,26 +157,25 @@ app.post("/api/listings", requireAuth, async (req, res) => {
   const { title, description, imageUrl, pickupAddress, pickupLat, pickupLng, expiryDate, price } =
     req.body;
 
-  const { rows } = await pool.query(
-    `INSERT INTO listings
-       (seller_id, title, description, image_url, pickup_address, pickup_lat, pickup_lng, expiry_date, price, is_free)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     RETURNING *`,
-    [
-      req.userId,
+  const { data, error } = await supabaseAdmin
+    .from("listings")
+    .insert({
+      seller_id: req.userId,
       title,
       description,
-      imageUrl,
-      pickupAddress,
-      pickupLat,
-      pickupLng,
-      expiryDate,
+      image_url: imageUrl,
+      pickup_address: pickupAddress,
+      pickup_lat: pickupLat,
+      pickup_lng: pickupLng,
+      expiry_date: expiryDate,
       price,
-      price === null,
-    ]
-  );
+      is_free: price === null,
+    })
+    .select()
+    .single();
 
-  res.status(201).json(mapListing(rows[0]));
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(mapListing(data));
 });
 
 // --- Angebote ------------------------------------------------------------------
@@ -261,8 +188,12 @@ app.post("/api/offers", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "amount muss eine positive Zahl oder null sein." });
   }
 
-  const { rows: listingRows } = await pool.query("SELECT * FROM listings WHERE id = $1", [listingId]);
-  const listing = listingRows[0];
+  const { data: listing } = await supabaseAdmin
+    .from("listings")
+    .select("*")
+    .eq("id", listingId)
+    .single();
+
   if (!listing || listing.status !== "ACTIVE") {
     return res.status(404).json({ error: "Inserat nicht verfügbar." });
   }
@@ -270,87 +201,87 @@ app.post("/api/offers", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "Eigene Inserate können nicht beboten werden." });
   }
 
-  const { rows } = await pool.query(
-    `INSERT INTO offers (listing_id, buyer_id, amount, message) VALUES ($1,$2,$3,$4) RETURNING *`,
-    [listingId, req.userId, amount ?? null, message ?? null]
-  );
+  const { data, error } = await supabaseAdmin
+    .from("offers")
+    .insert({
+      listing_id: listingId,
+      buyer_id: req.userId,
+      amount: amount ?? null,
+      message: message ?? null,
+    })
+    .select()
+    .single();
 
-  res.status(201).json(rows[0]);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
 });
 
-// Kernfunktion 3: Angebot annehmen – läuft als DB-Transaktion mit Zeilensperre
-// (FOR UPDATE), damit nie zwei Käufer:innen gleichzeitig denselben Artikel
-// "gewinnen" können. Lehnt automatisch alle anderen offenen Angebote ab und
-// legt den Chat für die Abhol-Absprache an (Kernfunktion 4).
+// Kernfunktion 3: Angebot annehmen
 app.patch("/api/offers/:offerId/accept", requireAuth, async (req, res) => {
   const { offerId } = req.params;
-  const client = await pool.connect();
 
-  try {
-    await client.query("BEGIN");
+  const { data: offer } = await supabaseAdmin
+    .from("offers")
+    .select("*, listings!inner(seller_id, status)")
+    .eq("id", offerId)
+    .single();
 
-    const { rows: offerRows } = await client.query(
-      `SELECT o.*, l.seller_id, l.status AS listing_status
-       FROM offers o JOIN listings l ON l.id = o.listing_id
-       WHERE o.id = $1 FOR UPDATE`,
-      [offerId]
-    );
-    const offer = offerRows[0];
-
-    if (!offer) throw { status: 404, message: "Angebot nicht gefunden." };
-    if (offer.seller_id !== req.userId) {
-      throw { status: 403, message: "Nur die Verkäufer:in darf dieses Angebot annehmen." };
-    }
-    if (offer.status !== "PENDING") {
-      throw { status: 409, message: "Angebot wurde bereits bearbeitet." };
-    }
-    if (offer.listing_status !== "ACTIVE") {
-      throw { status: 409, message: "Inserat ist nicht mehr aktiv." };
-    }
-
-    await client.query(
-      "UPDATE offers SET status = 'ACCEPTED', updated_at = now() WHERE id = $1",
-      [offerId]
-    );
-    await client.query(
-      `UPDATE offers SET status = 'REJECTED', updated_at = now()
-       WHERE listing_id = $1 AND id != $2 AND status = 'PENDING'`,
-      [offer.listing_id, offerId]
-    );
-    await client.query(
-      "UPDATE listings SET status = 'RESERVED', updated_at = now() WHERE id = $1",
-      [offer.listing_id]
-    );
-
-    const { rows: chatRows } = await client.query(
-      "INSERT INTO chats (offer_id) VALUES ($1) RETURNING id",
-      [offerId]
-    );
-
-    await client.query("COMMIT");
-    res.json({ message: "Angebot angenommen.", chatId: chatRows[0].id });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    res.status(err.status || 500).json({ error: err.message || "Interner Fehler." });
-  } finally {
-    client.release();
+  if (!offer) return res.status(404).json({ error: "Angebot nicht gefunden." });
+  if (offer.listings.seller_id !== req.userId) {
+    return res.status(403).json({ error: "Nur die Verkäufer:in darf dieses Angebot annehmen." });
   }
+  if (offer.status !== "PENDING") {
+    return res.status(409).json({ error: "Angebot wurde bereits bearbeitet." });
+  }
+  if (offer.listings.status !== "ACTIVE") {
+    return res.status(409).json({ error: "Inserat ist nicht mehr aktiv." });
+  }
+
+  // 1. Dieses Angebot akzeptieren
+  await supabaseAdmin.from("offers").update({ status: "ACCEPTED", updated_at: new Date() }).eq("id", offerId);
+
+  // 2. Andere offene Angebote ablehnen
+  await supabaseAdmin
+    .from("offers")
+    .update({ status: "REJECTED", updated_at: new Date() })
+    .eq("listing_id", offer.listing_id)
+    .neq("id", offerId)
+    .eq("status", "PENDING");
+
+  // 3. Inserat als RESERVED markieren
+  await supabaseAdmin
+    .from("listings")
+    .update({ status: "RESERVED", updated_at: new Date() })
+    .eq("id", offer.listing_id);
+
+  // 4. Chat erstellen
+  const { data: chat, error: chatErr } = await supabaseAdmin
+    .from("chats")
+    .insert({ offer_id: offerId })
+    .select("id")
+    .single();
+
+  if (chatErr) return res.status(500).json({ error: chatErr.message });
+
+  res.json({ message: "Angebot angenommen.", chatId: chat.id });
 });
 
 // Angebot ablehnen
 app.patch("/api/offers/:offerId/reject", requireAuth, async (req, res) => {
   const { offerId } = req.params;
-  const { rows } = await pool.query(
-    `SELECT o.*, l.seller_id FROM offers o JOIN listings l ON l.id = o.listing_id WHERE o.id = $1`,
-    [offerId]
-  );
-  const offer = rows[0];
+
+  const { data: offer } = await supabaseAdmin
+    .from("offers")
+    .select("*, listings!inner(seller_id)")
+    .eq("id", offerId)
+    .single();
+
   if (!offer) return res.status(404).json({ error: "Angebot nicht gefunden." });
-  if (offer.seller_id !== req.userId) {
+  if (offer.listings.seller_id !== req.userId) {
     return res.status(403).json({ error: "Nur die Verkäufer:in darf dieses Angebot ablehnen." });
   }
 
-  await pool.query("UPDATE offers SET status = 'REJECTED', updated_at = now() WHERE id = $1", [offerId]);
+  await supabaseAdmin.from("offers").update({ status: "REJECTED", updated_at: new Date() }).eq("id", offerId);
   res.json({ message: "Angebot abgelehnt." });
 });
 
@@ -360,9 +291,6 @@ app.patch("/api/offers/:offerId/reject", requireAuth, async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 
-initDb()
-  .then(() => app.listen(PORT, () => console.log(`🚀 API läuft auf Port ${PORT}`)))
-  .catch((err) => {
-    console.error("❌ Datenbank-Init fehlgeschlagen:", err);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 API läuft auf Port ${PORT} (Verbindung über Supabase API)`);
+});
