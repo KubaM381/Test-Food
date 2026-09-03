@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Food Marketplace</title>
-
+<title>Holzmanufaktur Premium</title>
 <style>
 :root{
   --bg:#f6f5f2;
@@ -14,150 +13,935 @@
   --accent:#1f6b3a;
   --accent-hover:#154a28;
   --border:#e7e7e7;
-  --shadow:0 12px 30px rgba(0,0,0,0.06);
+  --shadow:0 8px 24px rgba(0,0,0,0.06);
   --radius:16px;
   --max:1100px;
+  --danger:#c0392b;
 }
-
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+  background:var(--bg);color:var(--text);
+  line-height:1.6;-webkit-font-smoothing:antialiased;
 }
+.hidden{display:none!important;}
+.container{max-width:var(--max);margin:auto;padding:0 20px;}
 
-.container{max-width:var(--max);margin:auto;padding:0 24px}
-
+/* ── HEADER ── */
 header{
   position:sticky;top:0;
-  background:rgba(246,245,242,0.85);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  z-index:1000;
+  background:rgba(246,245,242,0.94);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);z-index:1000;
 }
-nav{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 0;
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;}
+nav strong{font-size:18px;letter-spacing:-0.5px;}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-links a{
+  text-decoration:none;color:var(--muted);
+  padding:8px 12px;font-size:14px;font-weight:500;
+  border-radius:8px;transition:color 0.2s,background 0.2s;
 }
-nav strong{ font-size:18px; letter-spacing:-0.5px; }
-nav a{
-  text-decoration:none; color:var(--muted); margin-left:24px; font-size:14px; font-weight:500;
+.nav-links a:hover{color:var(--text);background:#eee;}
+.cart-btn{
+  position:relative;display:flex;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;
+  padding:10px 14px;border-radius:10px;
+  font-size:14px;font-weight:700;color:var(--text);
+  transition:background 0.2s;margin-left:4px;
 }
-nav a:hover{ color:var(--text); }
+.cart-btn:hover{background:var(--border);}
+.cart-btn svg{width:22px;height:22px;}
+.cart-badge{
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:800;
+  border-radius:50%;width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(0);
+  transition:opacity 0.2s,transform 0.2s;
+  flex-shrink:0;
+}
+.cart-badge.visible{opacity:1;transform:scale(1);}
 
-.hero{ padding:100px 0 60px; text-align:center; }
-.hero h1{ font-size:52px; font-weight:700; letter-spacing:-1.5px; margin:0; line-height:1.15; }
-.hero p{ font-size:20px; color:var(--muted); margin:16px 0 28px; }
+/* ── HERO ── */
+.hero{padding:100px 0 70px;text-align:center;}
+.hero h1{font-size:54px;font-weight:800;letter-spacing:-2px;margin:0;line-height:1.1;}
+.hero p{font-size:19px;color:var(--muted);margin:14px 0 28px;}
 
+/* ── BUTTONS ── */
 .btn{
-  display:inline-block; padding:12px 28px; border-radius:999px; background:var(--accent);
-  color:#fff; text-decoration:none; border:none; font-weight:500; font-size:15px; cursor:pointer;
-  transition:background 0.2s, transform 0.1s;
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 28px;border-radius:999px;
+  background:var(--accent);color:#fff;
+  text-decoration:none;border:none;
+  font-weight:600;font-size:15px;cursor:pointer;
+  transition:background 0.2s,transform 0.1s;
+  min-height:48px;gap:8px;
 }
-.btn:hover{ background:var(--accent-hover); }
-.btn:active{ transform:scale(0.98); }
+.btn:hover{background:var(--accent-hover);}
+.btn:active{transform:scale(0.97);}
+.btn-outline{background:transparent;color:var(--accent);border:2px solid var(--accent);}
+.btn-outline:hover{background:var(--accent);color:#fff;}
 
-section{padding:60px 0}
-h2{font-size:34px;letter-spacing:-0.5px;margin:0 0 8px}
-.sub{color:var(--muted);font-size:16px;margin:0 0 35px}
+/* ── SECTIONS ── */
+section{padding:72px 0;}
+h2{font-size:32px;letter-spacing:-0.5px;margin:0 0 8px;font-weight:800;}
+.sub{color:var(--muted);font-size:16px;margin:0 0 32px;}
 
-.grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
 
+/* ── SERVICE CARDS ── */
 .card{
-  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-  padding:24px; box-shadow:var(--shadow); transition:transform 0.2s;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);
+  cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;
 }
-.card:hover{ transform:translateY(-4px); }
-.card img{ width:100%; height:180px; object-fit:cover; border-radius:12px; margin-bottom:15px; }
-.card h3{ margin:0 0 8px 0; font-size:20px; }
-.card p{ margin:0 0 12px 0; color:var(--muted); font-size:14px; }
-.card .price{ font-weight:bold; color:var(--accent); font-size:16px; }
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(0,0,0,0.1);}
+.card h3{margin:0 0 8px;font-size:19px;}
+.card p{margin:0;color:var(--muted);font-size:14px;}
 
-@media(max-width:900px){ .grid{grid-template-columns:1fr} .hero h1{font-size:36px} }
+/* ── PRODUCT CARDS ── */
+.product-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(0,0,0,0.1);}
+.product-img{
+  width:100%;height:170px;
+  display:flex;align-items:center;justify-content:center;font-size:56px;
+  background:linear-gradient(135deg,#f0ece4,#e8e0d0);
+  border-bottom:1px solid var(--border);
+}
+.product-img.test-bg{background:linear-gradient(135deg,#eaf5ea,#c8e6c9);}
+.product-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.product-body h3{margin:0 0 6px;font-size:17px;font-weight:700;}
+.product-body .product-desc{margin:0 0 14px;color:var(--muted);font-size:13px;flex:1;line-height:1.5;}
+.product-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.price{font-size:20px;font-weight:800;color:var(--accent);}
+.add-to-cart-btn{
+  padding:11px 16px;border-radius:10px;
+  background:var(--accent);color:#fff;border:none;
+  font-weight:700;font-size:13px;cursor:pointer;
+  transition:background 0.2s,transform 0.1s;
+  white-space:nowrap;min-height:44px;
+}
+.add-to-cart-btn:hover{background:var(--accent-hover);}
+.add-to-cart-btn:active{transform:scale(0.95);}
+.add-to-cart-btn.added{background:#2980b9;}
+
+/* ── TOGGLE ── */
+.toggle-container{
+  display:flex;background:#eee;padding:4px;
+  border-radius:10px;max-width:300px;margin-bottom:28px;
+}
+.toggle-container label{
+  flex:1;text-align:center;cursor:pointer;
+  font-weight:500;font-size:14px;border-radius:8px;
+}
+.toggle-container input{display:none;}
+.toggle-container input:checked + span{
+  display:block;background:var(--card);color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  padding:10px 0;border-radius:8px;font-weight:700;
+}
+.toggle-container span{padding:10px 0;display:block;color:var(--muted);}
+
+/* ── CONTACT FORM ── */
+.contact-form-wrap{
+  max-width:580px;background:var(--card);
+  padding:36px;border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.form-group{margin-bottom:18px;}
+.form-row{display:flex;gap:14px;margin-bottom:18px;}
+.form-row > div{margin-bottom:0;flex:1;}
+.flex-3{flex:3!important;}.flex-1{flex:1!important;}
+input[type="text"],input[type="email"],input[type="tel"],textarea{
+  width:100%;padding:13px 14px;margin-top:7px;
+  border-radius:10px;border:1.5px solid var(--border);
+  font-family:inherit;font-size:15px;
+  background:#fafafa;transition:border-color 0.2s,background 0.2s;
+  -webkit-appearance:none;
+}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+label{font-size:14px;font-weight:600;color:var(--text);}
+.req{color:#b00020;margin-left:3px;}
+.required-note{font-size:12px;color:var(--muted);margin-bottom:14px;display:block;}
+
+/* ═══════════════════════════════════
+   MODAL SYSTEM – Bottom Sheet Mobile
+═══════════════════════════════════ */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.55);
+  display:none;justify-content:center;align-items:flex-end;
+  z-index:2000;
+}
+.modal.open{display:flex;}
+.modal-box{
+  background:#fff;width:100%;
+  max-height:92vh;max-height:92dvh;
+  border-radius:24px 24px 0 0;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.18);
+  animation:slideUp 0.32s cubic-bezier(0.25,1,0.5,1);
+}
+@media(min-width:620px){
+  .modal{align-items:center;padding:20px;}
+  .modal-box{
+    border-radius:20px;max-width:500px;
+    animation:fadeUp 0.22s ease;
+    box-shadow:0 20px 60px rgba(0,0,0,0.22);
+  }
+  .modal-box.wide{max-width:660px;}
+}
+@keyframes slideUp{from{transform:translateY(48px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:none;scale:1}}
+
+/* Modal sections */
+.m-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.m-head h3{margin:0;font-size:19px;font-weight:800;}
+.m-close{
+  width:34px;height:34px;border-radius:50%;
+  background:#f0f0f0;border:none;cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s;flex-shrink:0;
+}
+.m-close:hover{background:var(--border);}
+.m-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.m-foot{
+  padding:14px 22px 22px;
+  border-top:1px solid var(--border);
+  background:#fff;flex-shrink:0;
+}
+.m-pad{padding:22px;}
+
+/* ── CART ITEMS ── */
+.cart-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 22px;border-bottom:1px solid var(--border);
+}
+.cart-item:last-child{border-bottom:none;}
+.ci-icon{
+  font-size:26px;width:44px;height:44px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:#f5f5f7;border-radius:10px;
+}
+.ci-info{flex:1;min-width:0;}
+.ci-info strong{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ci-info span{color:var(--muted);font-size:12px;}
+.ci-price{font-weight:800;color:var(--accent);font-size:15px;white-space:nowrap;min-width:58px;text-align:right;}
+.qty-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.qty-btn{
+  width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);
+  background:#f5f5f7;cursor:pointer;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;flex-shrink:0;
+}
+.qty-btn:hover{background:#e5e5ea;}
+.qty-n{font-size:15px;font-weight:700;min-width:22px;text-align:center;}
+.rm-btn{
+  background:none;border:none;cursor:pointer;color:#ccc;
+  font-size:16px;padding:6px;transition:color 0.2s;flex-shrink:0;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px;
+}
+.rm-btn:hover{color:var(--danger);background:#fff0f0;}
+.cart-total-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 22px;background:#f8f7f5;
+  font-size:17px;font-weight:800;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.cart-empty{
+  text-align:center;padding:50px 22px;color:var(--muted);
+}
+.cart-empty .ce-icon{font-size:52px;display:block;margin-bottom:12px;}
+
+/* ── CHECKOUT ── */
+.co-wrap{padding:22px;}
+.step-bar{display:flex;align-items:center;gap:8px;margin-bottom:22px;}
+.step-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;}
+.step-item.active{color:var(--accent);}
+.step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--border);color:var(--muted);
+  font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;
+}
+.step-item.active .step-num{background:var(--accent);color:#fff;}
+.step-sep{flex:1;height:1px;background:var(--border);}
+.order-summary{
+  background:#f9f8f6;border:1px solid var(--border);
+  border-radius:12px;padding:16px;margin-bottom:22px;
+}
+.order-summary h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);font-weight:800;}
+.os-item{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;}
+.os-total{
+  display:flex;justify-content:space-between;
+  font-size:16px;font-weight:800;
+  border-top:1px solid var(--border);padding-top:10px;margin-top:8px;
+}
+.co-divider{
+  font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:0.8px;color:var(--muted);margin:22px 0 12px;
+}
+.fg{margin-bottom:14px;}
+.fg2{display:grid;gap:10px;margin-bottom:14px;}
+.fg2.col2{grid-template-columns:1fr 1fr;}
+.fg2.col31{grid-template-columns:3fr 1fr;}
+.fg2.col12{grid-template-columns:1fr 2fr;}
+.co-label{font-size:13px;font-weight:700;color:var(--text);display:block;margin-bottom:5px;}
+.co-input{
+  width:100%;padding:12px 14px;
+  border-radius:10px;border:1.5px solid var(--border);
+  font-family:inherit;font-size:15px;
+  background:#fafafa;transition:border-color 0.2s,background 0.2s;
+  -webkit-appearance:none;
+}
+.co-input:focus{outline:none;border-color:var(--accent);background:#fff;}
+.co-input-err{border-color:#e53e3e!important;background:#fff8f8!important;}
+
+/* ── AGB ── */
+.agb-wrap{
+  border:1.5px solid var(--border);border-radius:12px;
+  overflow:hidden;margin-top:20px;background:#fafaf8;
+}
+.agb-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;cursor:pointer;font-size:14px;font-weight:700;
+  user-select:none;
+}
+.agb-hd:hover{background:#f0efe8;}
+.agb-hd svg{width:18px;height:18px;transition:transform 0.25s;flex-shrink:0;color:var(--muted);}
+.agb-hd.open svg{transform:rotate(180deg);}
+.agb-body{
+  display:none;
+  max-height:160px;overflow-y:auto;
+  padding:12px 16px;
+  border-top:1px solid var(--border);
+  font-size:12px;line-height:1.7;color:var(--muted);
+  -webkit-overflow-scrolling:touch;
+}
+.agb-body h6{margin:10px 0 3px;font-size:12px;color:var(--text);font-weight:700;}
+.agb-body p{margin:0 0 6px;}
+.agb-body.open{display:block;}
+.agb-check-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:13px 16px;border-top:1px solid var(--border);
+  cursor:pointer;
+}
+.agb-check-row input{
+  width:18px;height:18px;flex-shrink:0;
+  accent-color:var(--accent);margin-top:2px;cursor:pointer;
+}
+.agb-check-row span{font-size:14px;font-weight:500;}
+.agb-err-msg{
+  font-size:12px;color:#b00020;font-weight:600;
+  padding:0 16px 12px;display:none;
+}
+
+/* ── PAYPAL BUTTON ── */
+.btn-paypal{
+  width:100%;padding:16px 20px;
+  background:#0070BA;color:#fff;border:none;
+  border-radius:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:16px;font-weight:800;
+  transition:background 0.2s,transform 0.1s;
+  min-height:54px;
+}
+.btn-paypal:hover{background:#005ea6;}
+.btn-paypal:active{transform:scale(0.97);}
+.btn-paypal-icon{font-size:20px;}
+
+/* ── SUCCESS ── */
+.success-inner{text-align:center;padding:32px 22px;}
+.success-icon{font-size:62px;display:block;margin-bottom:14px;}
+.success-inner h3{margin:0 0 8px;font-size:24px;font-weight:800;}
+.success-inner p{color:var(--muted);font-size:15px;margin:0 0 6px;}
+.order-num-box{
+  display:inline-block;background:#f0f7f2;
+  border:1.5px solid #b2d8be;border-radius:10px;
+  padding:10px 22px;font-size:18px;font-weight:800;
+  color:var(--accent);margin:10px 0 18px;letter-spacing:1px;
+}
+.paypal-note{
+  background:#e8f4ff;border:1.5px solid #b3d4f0;
+  border-radius:10px;padding:14px 16px;
+  font-size:13px;color:#0070BA;font-weight:600;
+  text-align:left;line-height:1.5;
+}
+
+/* ── FOOTER ── */
+footer{
+  padding:48px 20px;text-align:center;
+  color:var(--muted);font-size:14px;
+  border-top:1px solid var(--border);background:#fff;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .grid{grid-template-columns:1fr;}
+  .hero h1{font-size:36px;}
+  .fg2.col2,.fg2.col31,.fg2.col12{grid-template-columns:1fr;}
+}
+@media(max-width:500px){
+  .hero{padding:72px 0 52px;}
+  .hero h1{font-size:30px;letter-spacing:-1px;}
+  .hero p{font-size:16px;}
+  nav strong{font-size:16px;}
+  .nav-links a{display:none;}
+  .contact-form-wrap{padding:22px;}
+  .form-row{flex-direction:column;}
+}
 </style>
 </head>
-
 <body>
 
 <header>
 <div class="container">
 <nav>
-<strong>Food Marketplace</strong>
-<div>
-<a href="#inserate">Aktuelle Angebote</a>
-</div>
+  <strong>🪵 Holzmanufaktur</strong>
+  <div class="nav-links">
+    <a href="#leistungen">Leistungen</a>
+    <a href="#produkte">Produkte</a>
+    <a href="#kontakt">Kontakt</a>
+    <button class="cart-btn" onclick="openCartModal()" aria-label="Warenkorb öffnen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
 </nav>
 </div>
 </header>
 
+<!-- HERO -->
 <section class="hero">
 <div class="container">
-<h1>Rette Lebensmittel in deiner Nähe</h1>
-<p>Nachhaltig, frisch und lokal. Finde Angebote oder teile deine eigenen.</p>
-<button class="btn" onclick="loadListings()">Inserate aktualisieren</button>
+  <h1>Holz trifft<br>modernes Design</h1>
+  <p>Handgefertigte Premium-Produkte aus nachhaltiger Produktion.</p>
+  <button class="btn" onclick="scrollToSection('produkte')" style="font-size:16px;padding:15px 32px;">Produkte entdecken &rarr;</button>
 </div>
 </section>
 
-<section id="inserate">
+<!-- LEISTUNGEN -->
+<section id="leistungen">
 <div class="container">
-<h2>Verfügbare Inserate</h2>
-<p class="sub">Live aus deinem Render-Backend geladen</p>
-
-<div class="grid" id="listingsContainer">
-  <p>Lade Angebote vom Server...</p>
-</div>
+  <h2>Leistungen</h2>
+  <p class="sub">Klicken Sie auf eine Karte für mehr Informationen</p>
+  <div class="grid">
+    <div class="card" onclick="openInfoModal('Individuelle Anfertigung','Wir fertigen maßgeschneiderte Möbel und Holzprodukte nach Ihrem Wunsch. Jedes Stück ist ein Unikat aus hochwertigem Massivholz – von der Planung bis zur Auslieferung.')">
+      <h3>🔨 Individuelle Anfertigung</h3><p>Maßgeschneiderte Holzarbeiten nach Ihren Wünschen &rarr;</p>
+    </div>
+    <div class="card" onclick="openInfoModal('Restauration','Alte Möbel und Holzobjekte werden fachgerecht restauriert, stabilisiert und optisch aufgewertet. Wir bewahren den Charakter und geben dem Stück neues Leben.')">
+      <h3>🔧 Restauration</h3><p>Professionelle Reparatur & Aufarbeitung &rarr;</p>
+    </div>
+    <div class="card" onclick="openInfoModal('Workshops','Praxisnahe Holzkurse für Anfänger und Fortgeschrittene. Sie lernen echtes Handwerk mit professionellen Werkzeugen in kleinen Gruppen.')">
+      <h3>📐 Workshops</h3><p>Lernen & Handwerk in kleinen Gruppen &rarr;</p>
+    </div>
+  </div>
 </div>
 </section>
+
+<!-- PRODUKTE -->
+<section id="produkte" style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+<div class="container">
+  <h2>Produkte</h2>
+  <p class="sub">Handgefertigte Unikate – sicher per PayPal bezahlen</p>
+  <div class="grid" id="productGrid"></div>
+</div>
+</section>
+
+<!-- KONTAKT -->
+<section id="kontakt">
+<div class="container">
+  <h2>Kontaktanfrage</h2>
+  <p class="sub">Unverbindliches Angebot anfragen</p>
+
+  <div class="toggle-container">
+    <label>
+      <input type="radio" name="customerType" value="private" checked onchange="toggleFormType('private')">
+      <span>Privatperson</span>
+    </label>
+    <label>
+      <input type="radio" name="customerType" value="company" onchange="toggleFormType('company')">
+      <span>Firma</span>
+    </label>
+  </div>
+
+  <div class="contact-form-wrap">
+    <form id="form">
+      <div id="privateFields">
+        <div class="form-group"><label for="first">Vorname <span class="req">*</span></label><input type="text" id="first" name="firstName" required></div>
+        <div class="form-group"><label for="last">Nachname <span class="req">*</span></label><input type="text" id="last" name="lastName" required></div>
+        <div class="form-group"><label for="phone">Telefonnummer <span class="req">*</span></label><input type="tel" id="phone" name="phone" required></div>
+        <div class="form-group"><label for="email">E-Mail</label><input type="email" id="email" name="email"></div>
+      </div>
+      <div id="companyFields" class="hidden">
+        <div class="form-group"><label for="companyName">Firmenname <span class="req">*</span></label><input type="text" id="companyName" name="companyName"></div>
+        <div class="form-row">
+          <div class="form-group flex-3"><label for="companyStreet">Straße <span class="req">*</span></label><input type="text" id="companyStreet" name="companyStreet"></div>
+          <div class="form-group flex-1"><label for="companyHouse">Nr. <span class="req">*</span></label><input type="text" id="companyHouse" name="companyHouse"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1"><label for="companyZip">PLZ <span class="req">*</span></label><input type="text" id="companyZip" name="companyZip"></div>
+          <div class="form-group flex-3"><label for="companyCity">Ort <span class="req">*</span></label><input type="text" id="companyCity" name="companyCity"></div>
+        </div>
+        <div class="form-group"><label for="companyPhone">Telefon <span class="req">*</span></label><input type="tel" id="companyPhone" name="companyPhone"></div>
+        <div class="form-group"><label for="companyEmail">E-Mail <span class="req">*</span></label><input type="email" id="companyEmail" name="companyEmail"></div>
+      </div>
+      <div class="form-group">
+        <label for="message">Ihre Nachricht <span class="req">*</span></label>
+        <textarea id="message" name="message" rows="5" required placeholder="Beschreiben Sie hier Ihr Vorhaben..."></textarea>
+      </div>
+      <span class="required-note">* Pflichtfelder</span>
+      <button class="btn" type="submit" style="width:100%;margin-top:8px;border-radius:12px;">Nachricht senden</button>
+    </form>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p style="margin:0 0 6px;font-weight:800;font-size:16px;color:var(--text);">Holzmanufaktur Premium</p>
+  <p style="margin:0;">© 2026 – Handgefertigte Holzprodukte aus nachhaltiger Produktion<br>Alle Preise inkl. 19% MwSt.</p>
+</footer>
+
+<!-- ── INFO MODAL ── -->
+<div class="modal" id="infoModal">
+  <div class="modal-box">
+    <div class="m-head">
+      <h3 id="mTitle">Info</h3>
+      <button class="m-close" onclick="closeModal('infoModal')">✕</button>
+    </div>
+    <div class="m-body m-pad">
+      <p id="mText" style="color:var(--muted);margin:0;font-size:15px;line-height:1.7;"></p>
+    </div>
+    <div class="m-foot">
+      <button class="btn" onclick="closeModal('infoModal')" style="width:100%;border-radius:12px;">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CART MODAL ── -->
+<div class="modal" id="cartModal">
+  <div class="modal-box wide">
+    <div class="m-head">
+      <h3 id="cartTitle">🛒 Warenkorb</h3>
+      <button class="m-close" onclick="closeModal('cartModal')">✕</button>
+    </div>
+    <div class="m-body" id="cartBody"></div>
+    <div class="m-foot" id="cartFoot"></div>
+  </div>
+</div>
+
+<!-- ── CHECKOUT MODAL ── -->
+<div class="modal" id="checkoutModal">
+  <div class="modal-box wide">
+    <div class="m-head">
+      <h3>🔒 Bestellung abschließen</h3>
+      <button class="m-close" onclick="closeModal('checkoutModal')">✕</button>
+    </div>
+    <div class="m-body" id="checkoutBody"></div>
+    <div class="m-foot" id="checkoutFoot"></div>
+  </div>
+</div>
+
+<!-- ── SUCCESS MODAL ── -->
+<div class="modal" id="successModal">
+  <div class="modal-box">
+    <div class="m-body">
+      <div class="success-inner">
+        <span class="success-icon">✅</span>
+        <h3>Bestellung eingegangen!</h3>
+        <p>Ihre Bestellung wurde erfolgreich aufgegeben.</p>
+        <div class="order-num-box" id="orderNumber">–</div>
+        <div class="paypal-note">
+          💳 <strong>Bitte schließen Sie die PayPal-Zahlung im neuen Tab ab</strong>, damit Ihre Bestellung bearbeitet werden kann. Die Bestellnummer für Rückfragen notieren.
+        </div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn" onclick="closeModal('successModal')" style="width:100%;border-radius:12px;">Zurück zur Website</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// DEINE LIVE RENDER-URL!
-const API_BASE_URL = "https://test-food-2x2z.onrender.com";
+/* ══════════════════════════════════════════
+   PRODUKTE
+══════════════════════════════════════════ */
+const PRODUCTS = [
+  {
+    id:'P000',name:'🧪 Testprodukt',
+    desc:'Nur zum Testen des Kaufvorgangs. Kein echtes Produkt – bitte nur für Testzwecke bestellen.',
+    price:0.01,icon:'🧪',material:'Demo · Testzweck',isTest:true,
+  },
+  {
+    id:'P001',name:'Design Schneidebrett',
+    desc:'Massives Eichenholz, geölt, antibakteriell. Perfekt für Küche und Präsentation.',
+    price:89,icon:'🪵',material:'Eiche · Handgefertigt',
+  },
+  {
+    id:'P002',name:'Holzschale Premium',
+    desc:'Einzigartige Maserung – gedrechselt aus nachhaltigem Holz. Jedes Stück ein Unikat.',
+    price:129,icon:'🫙',material:'Handgedrechselt',
+  },
+  {
+    id:'P003',name:'Modulares Regal',
+    desc:'Flexibles Regalsystem aus Massivholz. Erweiterbar, stabil, modern.',
+    price:349,icon:'🗄️',material:'Systemdesign',
+  },
+];
 
-// Inserate vom Backend laden
-async function loadListings() {
-  const container = document.getElementById("listingsContainer");
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/listings`);
-    
-    if (!response.ok) {
-      throw new Error("Fehler beim Laden");
-    }
-    
-    const listings = await response.json();
-    container.innerHTML = "";
+/* ══════════════════════════════════════════
+   WARENKORB
+══════════════════════════════════════════ */
+let cart=[];
+function getItem(id){return cart.find(i=>i.productId===id);}
 
-    if (listings.length === 0) {
-      container.innerHTML = "<p>Aktuell sind keine aktiven Inserate vorhanden.</p>";
-      return;
-    }
-
-    listings.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <img src="${item.imageUrl || 'https://via.placeholder.com/300'}" alt="${item.title}">
-        <h3>${item.title}</h3>
-        <p>${item.description}</p>
-        <div class="price">${item.isFree ? 'Zu verschenken' : item.price + ' €'}</div>
-      `;
-      container.appendChild(card);
-    });
-
-  } catch (err) {
-    container.innerHTML = "<p>Hinweis: Du musst eingeloggt sein, um Inserate zu sehen, oder der Server schläft gerade kurz.</p>";
+function addToCart(productId){
+  const p=PRODUCTS.find(x=>x.id===productId);
+  if(!p)return;
+  const ex=getItem(productId);
+  if(ex){ex.qty++;}else{cart.push({productId,name:p.name,price:p.price,icon:p.icon,qty:1});}
+  updateBadge();
+  const btn=document.getElementById('add-'+productId);
+  if(btn){
+    btn.textContent='✓ Im Warenkorb';btn.classList.add('added');
+    setTimeout(()=>{btn.textContent='In den Warenkorb';btn.classList.remove('added');},1500);
   }
 }
 
-// Beim Start direkt ausführen
-loadListings();
-</script>
+function changeQty(pid,d){
+  const it=getItem(pid);if(!it)return;
+  it.qty+=d;
+  if(it.qty<=0)cart=cart.filter(i=>i.productId!==pid);
+  updateBadge();renderCart();
+}
+function removeItem(pid){cart=cart.filter(i=>i.productId!==pid);updateBadge();renderCart();}
+function total(){return cart.reduce((s,i)=>s+i.price*i.qty,0);}
+function count(){return cart.reduce((s,i)=>s+i.qty,0);}
+function fmt(n){return n.toFixed(2).replace('.',',');}
 
+function updateBadge(){
+  const c=count();
+  const b=document.getElementById('cartBadge');
+  b.textContent=c;b.classList.toggle('visible',c>0);
+}
+
+/* ══════════════════════════════════════════
+   PRODUKT GRID
+══════════════════════════════════════════ */
+function renderProducts(){
+  document.getElementById('productGrid').innerHTML=PRODUCTS.map(p=>`
+    <div class="product-card">
+      <div class="product-img${p.isTest?' test-bg':''}">${p.icon}</div>
+      <div class="product-body">
+        <h3>${p.name}</h3>
+        <p class="product-desc">${p.desc}</p>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 12px;">${p.material}</p>
+        <div class="product-meta">
+          <span class="price" style="${p.isTest?'color:#2e7d32;':''}">${fmt(p.price)} €</span>
+          <button class="add-to-cart-btn" id="add-${p.id}" onclick="addToCart('${p.id}')">In den Warenkorb</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ══════════════════════════════════════════
+   WARENKORB MODAL
+══════════════════════════════════════════ */
+function openCartModal(){renderCart();openModal('cartModal');}
+
+function renderCart(){
+  const body=document.getElementById('cartBody');
+  const foot=document.getElementById('cartFoot');
+  const title=document.getElementById('cartTitle');
+  const c=count();
+  title.textContent=c>0?`🛒 Warenkorb (${c})` : '🛒 Warenkorb';
+
+  if(cart.length===0){
+    body.innerHTML=`<div class="cart-empty">
+      <span class="ce-icon">🛒</span>
+      <p style="margin:0 0 6px;font-size:16px;font-weight:700;">Warenkorb ist leer</p>
+      <p style="margin:0;font-size:14px;">Entdecken Sie unsere Produkte weiter oben.</p>
+    </div>`;
+    foot.innerHTML=`<button class="btn btn-outline" onclick="closeModal('cartModal')" style="width:100%;border-radius:12px;">Weiter einkaufen</button>`;
+    return;
+  }
+
+  body.innerHTML=cart.map(it=>`
+    <div class="cart-item">
+      <div class="ci-icon">${it.icon}</div>
+      <div class="ci-info">
+        <strong>${it.name}</strong>
+        <span>${fmt(it.price)} € / Stück</span>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('${it.productId}',-1)">−</button>
+        <span class="qty-n">${it.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${it.productId}',1)">+</button>
+      </div>
+      <div class="ci-price">${fmt(it.price*it.qty)} €</div>
+      <button class="rm-btn" onclick="removeItem('${it.productId}')" title="Entfernen">✕</button>
+    </div>
+  `).join('')+`
+  <div class="cart-total-bar">
+    <span>Gesamt inkl. MwSt.</span>
+    <span style="color:var(--accent);">${fmt(total())} €</span>
+  </div>`;
+
+  foot.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn" onclick="startCheckout()" style="width:100%;border-radius:12px;font-size:16px;">Zur Kasse →</button>
+      <button class="btn btn-outline" onclick="closeModal('cartModal')" style="width:100%;border-radius:12px;">Weiter einkaufen</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin:10px 0 0;text-align:center;">🔒 Sicherer Checkout via PayPal</p>`;
+}
+
+/* ══════════════════════════════════════════
+   CHECKOUT
+══════════════════════════════════════════ */
+function startCheckout(){closeModal('cartModal');renderCheckout();openModal('checkoutModal');}
+
+function toggleAGB(){
+  const body=document.getElementById('agbBody');
+  const hd=document.getElementById('agbHd');
+  body.classList.toggle('open');
+  hd.classList.toggle('open');
+}
+
+function renderCheckout(){
+  const body=document.getElementById('checkoutBody');
+  const foot=document.getElementById('checkoutFoot');
+
+  body.innerHTML=`<div class="co-wrap">
+    <div class="step-bar">
+      <div class="step-item active"><span class="step-num">1</span>Adresse</div>
+      <div class="step-sep"></div>
+      <div class="step-item active"><span class="step-num">2</span>AGB</div>
+      <div class="step-sep"></div>
+      <div class="step-item"><span class="step-num">3</span>PayPal</div>
+    </div>
+
+    <div class="order-summary">
+      <h4>Ihre Bestellung</h4>
+      ${cart.map(i=>`<div class="os-item"><span>${i.name} × ${i.qty}</span><span>${fmt(i.price*i.qty)} €</span></div>`).join('')}
+      <div class="os-total"><span>Gesamtbetrag</span><span style="color:var(--accent);">${fmt(total())} €</span></div>
+    </div>
+
+    <div class="co-divider">Lieferadresse</div>
+    
+    <div class="fg2 col2">
+      <div class="fg"><label class="co-label">Vorname <span class="req">*</span></label><input class="co-input" type="text" id="co-first" placeholder="Max" autocomplete="given-name"></div>
+      <div class="fg"><label class="co-label">Nachname <span class="req">*</span></label><input class="co-input" type="text" id="co-last" placeholder="Mustermann" autocomplete="family-name"></div>
+    </div>
+    <div class="fg"><label class="co-label">E-Mail <span class="req">*</span></label><input class="co-input" type="email" id="co-email" placeholder="max@muster.de" autocomplete="email"></div>
+    <div class="fg"><label class="co-label">Telefon <span class="req">*</span></label><input class="co-input" type="tel" id="co-phone" placeholder="+49 123 456789" autocomplete="tel"></div>
+    <div class="fg2 col31">
+      <div class="fg"><label class="co-label">Straße <span class="req">*</span></label><input class="co-input" type="text" id="co-street" placeholder="Musterstraße" autocomplete="address-line1"></div>
+      <div class="fg"><label class="co-label">Nr. <span class="req">*</span></label><input class="co-input" type="text" id="co-hnr" placeholder="1a"></div>
+    </div>
+    <div class="fg2 col12">
+      <div class="fg"><label class="co-label">PLZ <span class="req">*</span></label><input class="co-input" type="text" id="co-plz" placeholder="12345" autocomplete="postal-code"></div>
+      <div class="fg"><label class="co-label">Ort <span class="req">*</span></label><input class="co-input" type="text" id="co-city" placeholder="Berlin" autocomplete="address-level2"></div>
+    </div>
+    <div class="fg"><label class="co-label">Anmerkung (optional)</label><textarea class="co-input" id="co-note" rows="2" placeholder="Lieferwünsche, Hinweise..."></textarea></div>
+
+    <div class="agb-wrap">
+      <div class="agb-hd" id="agbHd" onclick="toggleAGB()">
+        <span>📄 Allgemeine Geschäftsbedingungen lesen</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="agb-body" id="agbBody">
+        <h6>§1 Geltungsbereich</h6>
+        <p>Diese AGB gelten für alle Bestellungen, die über die Website der Holzmanufaktur aufgegeben werden.</p>
+        <h6>§2 Vertragsschluss</h6>
+        <p>Nach Eingang der Bestellung erhalten Sie eine Bestätigungsmail. Der Kaufvertrag kommt erst nach vollständigem Zahlungseingang zustande.</p>
+        <h6>§3 Preise & Zahlung</h6>
+        <p>Alle Preise verstehen sich inkl. gesetzlicher MwSt. Die Zahlung erfolgt sicher und vorab per PayPal an das Konto kubamyszka381@gmail.com. Bestellungen werden erst nach Zahlungseingang bearbeitet.</p>
+        <h6>§4 Lieferung</h6>
+        <p>Handgefertigte Artikel werden nach Zahlungseingang gefertigt und versendet. Lieferzeit ca. 2–4 Wochen. Versandkosten werden separat berechnet und mitgeteilt.</p>
+        <h6>§5 Widerrufsrecht</h6>
+        <p>Bei individuellen Sonderanfertigungen ist das gesetzliche Widerrufsrecht ausgeschlossen. Bei Standardprodukten gilt das Widerrufsrecht von 14 Tagen ab Erhalt der Ware.</p>
+        <h6>§6 Gewährleistung</h6>
+        <p>Es gelten die gesetzlichen Gewährleistungsrechte. Natürliche Holzmerkmale wie Äste und Maserung sind kein Mangel, sondern Merkmal handgefertigter Produkte.</p>
+        <h6>§7 Datenschutz</h6>
+        <p>Ihre Daten werden ausschließlich zur Bestellabwicklung verarbeitet und nicht an Dritte weitergegeben.</p>
+        <h6>§8 Gerichtsstand</h6>
+        <p>Es gilt ausschließlich deutsches Recht. Gerichtsstand ist der Sitz der Holzmanufaktur.</p>
+      </div>
+      <label class="agb-check-row">
+        <input type="checkbox" id="agbCheck">
+        <span>Ich habe die AGB gelesen und akzeptiere diese. <strong class="req">*</strong></span>
+      </label>
+      <p class="agb-err-msg" id="agbErr">Bitte akzeptieren Sie die AGB, um fortzufahren.</p>
+    </div>
+
+    <p style="font-size:11px;color:var(--muted);margin:14px 0 4px;text-align:center;">🔒 Sichere Zahlung ausschließlich über PayPal</p>
+  </div>`;
+
+  foot.innerHTML=`
+    <button class="btn-paypal" onclick="submitOrder()">
+      <span class="btn-paypal-icon">💳</span>
+      Jetzt mit PayPal zahlen &nbsp;·&nbsp; ${fmt(total())} €
+    </button>
+    <button class="btn btn-outline" onclick="closeModal('checkoutModal');openCartModal();" style="width:100%;border-radius:12px;margin-top:10px;font-size:14px;">← Zurück zum Warenkorb</button>`;
+}
+
+/* ══════════════════════════════════════════
+   BESTELLUNG ABSCHICKEN
+══════════════════════════════════════════ */
+function submitOrder(){
+  const required=[
+    {id:'co-first',name:'Vorname'},
+    {id:'co-last',name:'Nachname'},
+    {id:'co-email',name:'E-Mail'},
+    {id:'co-phone',name:'Telefon'},
+    {id:'co-street',name:'Straße'},
+    {id:'co-hnr',name:'Hausnummer'},
+    {id:'co-plz',name:'PLZ'},
+    {id:'co-city',name:'Ort'},
+  ];
+  for(const f of required){
+    const el=document.getElementById(f.id);
+    if(!el||!el.value.trim()){
+      el&&el.classList.add('co-input-err');
+      el&&el.focus();
+      alert(`Bitte füllen Sie das Feld "${f.name}" aus.`);
+      return;
+    }
+    el.classList.remove('co-input-err');
+  }
+
+  const agbCheck=document.getElementById('agbCheck');
+  const agbErr=document.getElementById('agbErr');
+  if(!agbCheck.checked){
+    agbErr.style.display='block';
+    agbCheck.closest('.agb-check-row').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  agbErr.style.display='none';
+
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const orderNum='ORD-'+letters.charAt(Math.floor(Math.random()*26))+Math.floor(100000+Math.random()*900000);
+
+  const orderData={
+    id:orderNum,type:'order',
+    status:'In Bearbeitung',notes:[],
+    date:new Date().toLocaleString('de-DE'),
+    customer:{
+      firstName:document.getElementById('co-first').value.trim(),
+      lastName:document.getElementById('co-last').value.trim(),
+      email:document.getElementById('co-email').value.trim(),
+      phone:document.getElementById('co-phone').value.trim(),
+      address:{
+        street:document.getElementById('co-street').value.trim(),
+        houseNumber:document.getElementById('co-hnr').value.trim(),
+        zip:document.getElementById('co-plz').value.trim(),
+        city:document.getElementById('co-city').value.trim(),
+      }
+    },
+    items:cart.map(i=>({productId:i.productId,name:i.name,qty:i.qty,pricePerUnit:i.price,total:i.price*i.qty})),
+    totalAmount:total(),
+    paymentMethod:'PayPal',
+    note:document.getElementById('co-note').value,
+  };
+
+  let existing=JSON.parse(localStorage.getItem('holz_crm_data')||'[]');
+  existing.push(orderData);
+  localStorage.setItem('holz_crm_data',JSON.stringify(existing));
+
+  // PayPal Zahlung öffnen
+  const paypalEmail='kubamyszka381@gmail.com';
+  const amount=total().toFixed(2);
+  const desc=encodeURIComponent('Holzmanufaktur Bestellung '+orderNum);
+  const paypalUrl=`https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(paypalEmail)}&item_name=${desc}&amount=${amount}&currency_code=EUR&no_shipping=1`;
+  window.open(paypalUrl,'_blank');
+
+  cart=[];updateBadge();
+  closeModal('checkoutModal');
+  document.getElementById('orderNumber').textContent=orderNum;
+  openModal('successModal');
+}
+
+/* ══════════════════════════════════════════
+   MODAL HELFER
+══════════════════════════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openInfoModal(t,txt){
+  document.getElementById('mTitle').innerText=t;
+  document.getElementById('mText').innerText=txt;
+  openModal('infoModal');
+}
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});
+});
+
+/* ══════════════════════════════════════════
+   KONTAKTFORMULAR → CRM
+══════════════════════════════════════════ */
+function toggleFormType(type){
+  const pf=document.getElementById('privateFields');
+  const cf=document.getElementById('companyFields');
+  if(type==='company'){
+    pf.classList.add('hidden');cf.classList.remove('hidden');
+    pf.querySelectorAll('input').forEach(i=>i.required=false);
+    cf.querySelectorAll('input').forEach(i=>i.required=true);
+  }else{
+    pf.classList.remove('hidden');cf.classList.add('hidden');
+    ['first','last','phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.required=true;});
+    cf.querySelectorAll('input').forEach(i=>i.required=false);
+  }
+}
+
+document.getElementById('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  const type=document.querySelector('input[name="customerType"]:checked').value;
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const vNr=type==='company'
+    ?(letters.charAt(Math.floor(Math.random()*26))+Math.floor(100000+Math.random()*900000))
+    :Math.floor(1000000+Math.random()*9000000).toString();
+
+  const t={id:vNr,type:'contact_'+type,status:'In Bearbeitung',notes:[],date:new Date().toLocaleString('de-DE'),message:document.getElementById('message').value};
+  if(type==='company'){
+    t.companyName=document.getElementById('companyName').value;
+    t.companyStreet=document.getElementById('companyStreet').value;
+    t.companyHouse=document.getElementById('companyHouse').value;
+    t.companyZip=document.getElementById('companyZip').value;
+    t.companyCity=document.getElementById('companyCity').value;
+    t.companyPhone=document.getElementById('companyPhone').value;
+    t.companyEmail=document.getElementById('companyEmail').value;
+  }else{
+    t.firstName=document.getElementById('first').value;
+    t.lastName=document.getElementById('last').value;
+    t.phone=document.getElementById('phone').value;
+    t.email=document.getElementById('email').value;
+  }
+  let ex=JSON.parse(localStorage.getItem('holz_crm_data')||'[]');
+  ex.push(t);localStorage.setItem('holz_crm_data',JSON.stringify(ex));
+  alert(`Vielen Dank! Ihre Anfrage wurde übermittelt.\nVorgangsnummer: ${vNr}`);
+  this.reset();
+});
+
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+/* INIT */
+renderProducts();updateBadge();
+</script>
 </body>
 </html>
