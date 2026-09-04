@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holzmanufaktur – Management</title>
+<style>
+:root{--bg:#F7F4F0;--card:#fff;--text:#1C1410;--muted:#8A7E74;--accent:#9B6B3A;--border:#E8E0D6;--danger:#C0392B;--success:#27AE60;--header-bg:#1C1410}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.hidden{display:none!important}
+
+/* ─── LOGIN ─── */
+#login-screen{position:fixed;inset:0;background:var(--header-bg);display:flex;justify-content:center;align-items:center;z-index:9999}
+.login-box{background:var(--card);padding:48px 44px;border-radius:18px;width:100%;max-width:380px;text-align:center}
+.login-logo{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.login-box h2{font-size:22px;font-weight:700;margin-bottom:28px}
+.login-box input{width:100%;padding:13px 16px;margin-bottom:12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:var(--accent)}
+.login-box .btn-login{width:100%;padding:14px;background:var(--text);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:4px}
+.login-box .btn-login:hover{background:var(--accent)}
+.error-banner{background:rgba(192,57,43,.1);color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;text-align:left}
+
+/* ─── APP SHELL ─── */
+#app-screen{display:none;min-height:100vh}
+header{background:var(--header-bg);padding:0 32px;height:60px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header-brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+header h1{font-size:16px;font-weight:700;color:#fff}
+.header-actions{display:flex;align-items:center;gap:12px}
+.header-user{font-size:13px;color:rgba(255,255,255,.5);font-weight:500}
+.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-logout:hover{background:rgba(192,57,43,.7);border-color:transparent}
+
+/* NEW ─── Session warning bar (below header) */
+#session-warning-bar{background:rgba(192,57,43,.1);border-bottom:2px solid rgba(192,57,43,.3);padding:9px 32px;display:none;justify-content:space-between;align-items:center}
+#session-warning-bar.visible{display:flex}
+#session-warning-bar span{font-size:13px;font-weight:600;color:var(--danger)}
+
+/* NEW ─── Unsaved changes banner */
+#unsaved-banner{background:rgba(155,107,58,.1);border-left:3px solid var(--accent);padding:10px 22px;margin-bottom:16px;border-radius:0 8px 8px 0;display:none;font-size:13px;font-weight:600;color:var(--accent);align-items:center;gap:10px;justify-content:space-between}
+#unsaved-banner.visible{display:flex}
+
+/* ─── LAYOUT ─── */
+.container{max-width:1140px;margin:0 auto;padding:24px 24px 48px}
+.admin-tabs{display:flex;gap:4px;background:rgba(28,20,16,.07);padding:4px;border-radius:12px;margin-bottom:28px;flex-wrap:wrap}
+.admin-tab-btn{flex:1;min-width:120px;padding:10px 14px;background:transparent;border:none;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--muted);transition:all .18s;white-space:nowrap}
+.admin-tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.04)}
+.admin-tab-btn:hover:not(.active){color:var(--text)}
+
+/* ─── STATS ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);padding:22px 20px;border-radius:12px;border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);border-radius:3px 0 0 3px}
+.stat-value{font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:6px}
+.stat-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+
+/* ─── CARDS & TABLES ─── */
+.panel-card{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.panel-card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.panel-card-header h3{font-size:15px;font-weight:700}
+.panel-card-header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.table-responsive{width:100%;overflow-x:auto}
+table.data-table{width:100%;border-collapse:collapse;min-width:580px}
+table.data-table th{padding:11px 16px;background:var(--bg);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);text-align:left}
+table.data-table td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border)}
+table.data-table tr:last-child td{border-bottom:none}
+table.data-table tr:hover td{background:#FAF8F5}
+
+/* NEW ─── Search bar row */
+.search-bar-row{display:flex;gap:10px;padding:12px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;background:#FDFCFA}
+.search-bar-row .form-control{flex:1;min-width:160px;padding:8px 12px;font-size:13px}
+.search-bar-row select.form-control{flex:0 0 auto;min-width:130px}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn-dark{background:var(--text);color:#fff}.btn-dark:hover{background:#3A3A3A}
+.btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:#7A4E28}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{opacity:.88}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{opacity:.88}
+.btn-ghost{background:rgba(28,20,16,.07);color:var(--text)}.btn-ghost:hover{background:rgba(28,20,16,.13)}
+.btn-warning{background:#E67E22;color:#fff}.btn-warning:hover{background:#CA6F1E}
+
+/* ─── FORMS ─── */
+.form-control{padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:border-color .2s;background:#fff;color:var(--text)}
+.form-control:focus{border-color:var(--accent)}
+.role-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:rgba(155,107,58,.12);color:var(--accent)}
+.role-badge.disabled{background:rgba(192,57,43,.1);color:var(--danger)}
+.create-user-form{display:flex;gap:10px;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.create-user-form .form-control{flex:1;min-width:130px}
+
+/* ─── MODALS ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,20,16,.55);backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center;z-index:1000;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-content{background:var(--card);padding:28px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.22)}
+.modal-content h2{font-size:18px;font-weight:700;margin-bottom:14px}
+.modal-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;display:block}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* NEW ─── Session timeout modal */
+#sessionTimeoutModal .modal-content{text-align:center;max-width:360px}
+.countdown-display{font-size:44px;font-weight:900;color:var(--danger);letter-spacing:-.04em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.countdown-label{font-size:13px;color:var(--muted);margin-bottom:4px}
+
+/* NEW ─── Invoice creator modal */
+#invoiceCreatorModal .modal-content{max-width:720px;max-height:92vh;overflow-y:auto;padding:0}
+.inv-modal-header{padding:22px 28px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:10}
+.inv-modal-header h2{font-size:19px;font-weight:800;margin:0}
+.inv-modal-body{padding:22px 28px}
+.inv-section{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.inv-section:last-child{border-bottom:none;margin-bottom:0}
+.inv-section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.inv-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inv-grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.inv-grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.inv-grid-5{display:grid;grid-template-columns:3fr 1fr 1fr;gap:10px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.form-group .form-control{padding:9px 12px;font-size:13px}
+.form-group.span-2{grid-column:span 2}
+
+/* NEW ─── Line items table */
+.line-items-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+table.line-items-tbl{width:100%;border-collapse:collapse;min-width:560px}
+table.line-items-tbl th{padding:9px 10px;background:var(--bg);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left}
+table.line-items-tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+table.line-items-tbl tr:last-child td{border-bottom:none}
+table.line-items-tbl td input,table.line-items-tbl td select{width:100%;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;outline:none;background:#fff;color:var(--text)}
+table.line-items-tbl td input:focus,table.line-items-tbl td select:focus{border-color:var(--accent)}
+.rm-item-btn{background:rgba(192,57,43,.1);border:none;color:var(--danger);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.rm-item-btn:hover{background:var(--danger);color:#fff}
+.line-total-cell{text-align:right;font-size:12px;font-weight:700;padding-right:10px!important;white-space:nowrap}
+
+/* NEW ─── Invoice totals block */
+.inv-totals{margin-top:14px;background:var(--bg);border-radius:10px;padding:14px 18px;border:1px solid var(--border)}
+.inv-totals-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted)}
+.inv-totals-row strong{color:var(--text)}
+.inv-totals-row.grand{font-size:16px;font-weight:800;color:var(--text);border-top:1.5px solid var(--border);margin-top:8px;padding-top:10px}
+.inv-modal-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--card)}
+
+/* ─── PRINT ─── */
+#invoice-print-area{display:none}
+@media print{
+  body>*:not(#invoice-print-area){display:none!important}
+  #invoice-print-area{display:block!important;font-family:Arial,sans-serif;color:#000;margin:0}
+}
+@media(max-width:600px){
+  .inv-grid-2,.inv-grid-3,.inv-grid-4,.inv-grid-5{grid-template-columns:1fr}
+  .form-group.span-2{grid-column:auto}
+  header{padding:0 16px}
+  .container{padding:16px 12px 48px}
+  #session-warning-bar{padding:9px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Holzmanufaktur</div>
+    <h2>Management Panel</h2>
+    <div id="login-error-banner" class="error-banner"></div>
+    <input type="text" id="login-user" placeholder="Benutzername" autocomplete="username">
+    <input type="password" id="login-pass" placeholder="Passwort" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn-login" onclick="login()">Anmelden</button>
+  </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="app-screen">
+  <header>
+    <div class="header-brand">
+      <div class="brand-mark">🪵</div>
+      <h1>Management Panel</h1>
+    </div>
+    <div class="header-actions">
+      <span class="header-user" id="user-greeting"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Session warning bar -->
+  <div id="session-warning-bar">
+    <span>⚠️ Sitzung läuft in <strong id="session-bar-countdown">3:00</strong> Minuten ab.</span>
+    <button class="btn btn-warning" style="padding:5px 14px;font-size:12px;" onclick="extendSession()">Sitzung verlängern</button>
+  </div>
+
+  <div class="container">
+    <!-- Unsaved changes banner -->
+    <div id="unsaved-banner">
+      <span>⚠️ Du hast ungespeicherte Änderungen im Formular.</span>
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="discardUnsaved()">Verwerfen</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" id="at-stats" onclick="switchTab('stats')">📊 Performance</button>
+      <button class="admin-tab-btn" id="at-sales" onclick="switchTab('sales')">💰 Umsatz</button>
+      <button class="admin-tab-btn" id="at-invoices" onclick="switchTab('invoices')">📄 Rechnungen</button>
+      <button class="admin-tab-btn" id="at-staff" onclick="switchTab('staff')">👥 Mitarbeiter</button>
+      <button class="admin-tab-btn" id="at-disabled-staff" onclick="switchTab('disabled-staff')">🚫 Archiv</button>
+    </div>
+
+    <!-- ── Performance ── -->
+    <div id="panel-stats" class="admin-panel">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="s-open">0 €</div><div class="stat-label">Offenes Volumen</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-aov">0 €</div><div class="stat-label">Ø Bestellwert</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-conv">0 %</div><div class="stat-label">Erfolgsquote</div></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-header">
+          <h3>🔥 Beliebteste Produkte</h3>
+          <button class="btn btn-success" onclick="exportAllExcel()">⬇️ Gesamtexport</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead id="product-head"></thead>
+            <tbody id="product-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Umsatz ── -->
+    <div id="panel-sales" class="admin-panel hidden">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="s-day" style="color:var(--success);">0 €</div><div class="stat-label">Tagesumsatz</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-month" style="color:var(--success);">0 €</div><div class="stat-label">Monatsumsatz</div></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-header">
+          <h3>Umsatz nach Mitarbeiter</h3>
+          <button class="btn btn-success" onclick="exportRevenueExcel()">⬇️ Umsatz Excel-Export</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Mitarbeiter</th><th>Aufträge</th><th>Umsatz</th></tr></thead>
+            <tbody id="staff-sales-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Rechnungen ── -->
+    <div id="panel-invoices" class="admin-panel hidden">
+      <div class="panel-card">
+        <div class="panel-card-header">
+          <h3>Rechnungsarchiv</h3>
+          <div class="panel-card-header-actions">
+            <button class="btn btn-accent" onclick="openInvoiceCreator()">➕ Neue Rechnung</button>
+          </div>
+        </div>
+        <!-- Search bar for invoices -->
+        <div class="search-bar-row">
+          <input type="text" id="inv-search" class="form-control" placeholder="🔍  Suche nach ID oder Kundenname …" oninput="filterInvoices()">
+          <select id="inv-status-filter" class="form-control" onchange="filterInvoices()">
+            <option value="">Alle Status</option>
+            <option value="erledigt">Erledigt</option>
+            <option value="offen">Offen</option>
+            <option value="abgesagt">Abgesagt</option>
+          </select>
+          <input type="date" id="inv-date-from" class="form-control" oninput="filterInvoices()" title="Von Datum">
+          <input type="date" id="inv-date-to" class="form-control" oninput="filterInvoices()" title="Bis Datum">
+          <button class="btn btn-ghost" onclick="clearInvoiceFilter()">✕ Reset</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Kunde</th><th>Datum</th><th>Betrag</th><th>Status</th><th>Aktion</th></tr></thead>
+            <tbody id="invoice-archive-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mitarbeiter ── -->
+    <div id="panel-staff" class="admin-panel hidden">
+      <div class="panel-card" style="margin-bottom:20px;">
+        <div class="panel-card-header"><h3>Neuen Account anlegen</h3></div>
+        <div id="user-error-banner" class="error-banner" style="margin:12px 22px 0;"></div>
+        <div class="create-user-form">
+          <input type="text" id="new-u-name" class="form-control" placeholder="Benutzername" oninput="trackUnsaved()">
+          <input type="password" id="new-u-pass" class="form-control" placeholder="Passwort" oninput="trackUnsaved()">
+          <select id="new-u-role" class="form-control">
+            <option value="sachbearbeiter">Sachbearbeiter</option>
+            <option value="moderator" id="opt-mod">Moderator</option>
+            <option value="admin" id="opt-admin">Admin</option>
+          </select>
+          <button class="btn btn-dark" onclick="addUser()">Erstellen</button>
+        </div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-header"><h3>Aktive Mitarbeiter</h3></div>
+        <!-- Staff search -->
+        <div class="search-bar-row">
+          <input type="text" id="staff-search" class="form-control" placeholder="🔍  Benutzername suchen …" oninput="filterStaff()">
+          <select id="staff-role-filter" class="form-control" onchange="filterStaff()">
+            <option value="">Alle Rollen</option>
+            <option value="admin">Admin</option>
+            <option value="moderator">Moderator</option>
+            <option value="sachbearbeiter">Sachbearbeiter</option>
+          </select>
+          <button class="btn btn-ghost" onclick="clearStaffFilter()">✕ Reset</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Benutzername</th><th>Rolle</th><th>Aktionen</th></tr></thead>
+            <tbody id="user-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Archiv (deaktiviert) ── -->
+    <div id="panel-disabled-staff" class="admin-panel hidden">
+      <div class="panel-card">
+        <div class="panel-card-header"><h3>Deaktivierte Konten</h3></div>
+        <!-- Disabled staff search -->
+        <div class="search-bar-row">
+          <input type="text" id="dis-search" class="form-control" placeholder="🔍  Benutzername suchen …" oninput="filterDisabledStaff()">
+          <button class="btn btn-ghost" onclick="document.getElementById('dis-search').value='';filterDisabledStaff()">✕ Reset</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Benutzername</th><th>Status</th><th>Aktionen</th></tr></thead>
+            <tbody id="disabled-user-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /container -->
+</div><!-- /app-screen -->
+
+
+<!-- ══════════════════ MODALS ══════════════════ -->
+
+<!-- Confirm action modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-content">
+    <h2 id="confirm-modal-title">Sicherheitsabfrage</h2>
+    <p id="confirm-modal-message" style="font-size:14px;color:var(--muted);margin-bottom:16px;"></p>
+    <div id="confirm-modal-error" class="error-banner"></div>
+    <label class="modal-label">Dein Passwort zur Bestätigung</label>
+    <input type="password" id="confirm-modal-password" class="form-control" style="width:100%;margin-bottom:4px;" onkeydown="if(event.key==='Enter')submitConfirmModal()">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Abbrechen</button>
+      <button class="btn btn-danger" onclick="submitConfirmModal()">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change staff password modal -->
+<div class="modal-overlay" id="staffPasswordModal">
+  <div class="modal-content">
+    <h2>Passwort für <span id="staff-pw-target-name" style="color:var(--accent);"></span></h2>
+    <div id="staff-pw-error" class="error-banner"></div>
+    <label class="modal-label">Dein eigenes Passwort</label>
+    <input type="password" id="staff-pw-confirm" class="form-control" style="width:100%;margin-bottom:14px;">
+    <label class="modal-label">Neues Passwort für Mitarbeiter</label>
+    <input type="password" id="staff-pw-new" class="form-control" style="width:100%;margin-bottom:4px;" onkeydown="if(event.key==='Enter')changeStaffPassword()">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('staffPasswordModal')">Abbrechen</button>
+      <button class="btn btn-accent" onclick="changeStaffPassword()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Session timeout warning modal -->
+<div class="modal-overlay" id="sessionTimeoutModal">
+  <div class="modal-content" style="text-align:center;max-width:360px;">
+    <div style="font-size:32px;margin-bottom:8px;">⏱️</div>
+    <h2 style="margin-bottom:4px;">Sitzung läuft ab</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">Aus Sicherheitsgründen wirst du automatisch abgemeldet.</p>
+    <div class="countdown-display" id="session-countdown">3:00</div>
+    <div class="countdown-label">Minuten verbleibend</div>
+    <div class="modal-footer" style="justify-content:center;margin-top:18px;">
+      <button class="btn btn-accent" style="min-width:160px;" onclick="extendSession()">Angemeldet bleiben</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Invoice Creator Modal ══ -->
+<div class="modal-overlay" id="invoiceCreatorModal">
+  <div class="modal-content" style="max-width:720px;max-height:92vh;overflow-y:auto;padding:0;">
+    <div class="inv-modal-header">
+      <h2>📄 Neue Rechnung erstellen</h2>
+    </div>
+    <div class="inv-modal-body">
+
+      <!-- Section: Absender -->
+      <div class="inv-section">
+        <div class="inv-section-title">🏠 Ihr Unternehmen (Absender)
+          <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;margin-left:auto;" onclick="saveSenderDefaults()">Als Standard speichern</button>
+        </div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Firmenname</label>
+            <input type="text" id="s-company" class="form-control" placeholder="Holzmanufaktur GmbH">
+          </div>
+          <div class="form-group">
+            <label>Inhaber / Ansprechpartner</label>
+            <input type="text" id="s-owner" class="form-control" placeholder="Max Mustermann">
+          </div>
+        </div>
+        <div class="inv-grid-3" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Straße</label>
+            <input type="text" id="s-street" class="form-control" placeholder="Musterstraße">
+          </div>
+          <div class="form-group">
+            <label>Hausnummer</label>
+            <input type="text" id="s-house" class="form-control" placeholder="12">
+          </div>
+          <div class="form-group">
+            <label>PLZ</label>
+            <input type="text" id="s-zip" class="form-control" placeholder="12345">
+          </div>
+        </div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Ort</label>
+            <input type="text" id="s-city" class="form-control" placeholder="Musterstadt">
+          </div>
+          <div class="form-group">
+            <label>E-Mail</label>
+            <input type="email" id="s-email" class="form-control" placeholder="info@holzmanufaktur.de">
+          </div>
+        </div>
+        <div class="inv-grid-2">
+          <div class="form-group">
+            <label>Steuernummer</label>
+            <input type="text" id="s-taxnr" class="form-control" placeholder="123/456/78901">
+          </div>
+          <div class="form-group">
+            <label>USt-IdNr.</label>
+            <input type="text" id="s-ustid" class="form-control" placeholder="DE123456789">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Rechnungsdetails -->
+      <div class="inv-section">
+        <div class="inv-section-title">📋 Rechnungsdetails</div>
+        <div class="inv-grid-3">
+          <div class="form-group">
+            <label>Rechnungsnummer</label>
+            <input type="text" id="inv-number" class="form-control" placeholder="RE-2026-0001">
+          </div>
+          <div class="form-group">
+            <label>Rechnungsdatum</label>
+            <input type="date" id="inv-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Fällig am</label>
+            <input type="date" id="inv-due" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Empfänger -->
+      <div class="inv-section">
+        <div class="inv-section-title">👤 Rechnungsempfänger</div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Firma (optional)</label>
+            <input type="text" id="r-company" class="form-control" placeholder="Muster GmbH">
+          </div>
+          <div class="form-group">
+            <label>Anrede</label>
+            <select id="r-salutation" class="form-control">
+              <option value="">Keine</option>
+              <option value="Herr">Herr</option>
+              <option value="Frau">Frau</option>
+              <option value="Divers">Divers</option>
+            </select>
+          </div>
+        </div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Vorname *</label>
+            <input type="text" id="r-firstname" class="form-control" placeholder="Anna">
+          </div>
+          <div class="form-group">
+            <label>Nachname *</label>
+            <input type="text" id="r-lastname" class="form-control" placeholder="Müller">
+          </div>
+        </div>
+        <div class="inv-grid-3" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Straße *</label>
+            <input type="text" id="r-street" class="form-control" placeholder="Beispielstraße">
+          </div>
+          <div class="form-group">
+            <label>Hausnummer *</label>
+            <input type="text" id="r-house" class="form-control" placeholder="5a">
+          </div>
+          <div class="form-group">
+            <label>PLZ *</label>
+            <input type="text" id="r-zip" class="form-control" placeholder="10115">
+          </div>
+        </div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Ort *</label>
+            <input type="text" id="r-city" class="form-control" placeholder="Berlin">
+          </div>
+          <div class="form-group">
+            <label>Land</label>
+            <input type="text" id="r-country" class="form-control" value="Deutschland">
+          </div>
+        </div>
+        <div class="inv-grid-2">
+          <div class="form-group">
+            <label>Steuer-ID / St-Nr. (Empfänger)</label>
+            <input type="text" id="r-taxid" class="form-control" placeholder="Optional">
+          </div>
+          <div class="form-group">
+            <label>USt-IdNr. (Empfänger)</label>
+            <input type="text" id="r-ustid" class="form-control" placeholder="Optional">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Positionen -->
+      <div class="inv-section">
+        <div class="inv-section-title">📦 Positionen</div>
+        <div class="line-items-wrap">
+          <table class="line-items-tbl">
+            <thead>
+              <tr>
+                <th style="min-width:180px;">Beschreibung</th>
+                <th style="width:65px;">Menge</th>
+                <th style="width:75px;">Einheit</th>
+                <th style="width:100px;">Einzelpreis (€)</th>
+                <th style="width:70px;">MwSt.</th>
+                <th style="width:90px;text-align:right;">Gesamt</th>
+                <th style="width:36px;"></th>
+              </tr>
+            </thead>
+            <tbody id="line-items-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:10px;font-size:13px;" onclick="addLineItem()">＋ Position hinzufügen</button>
+
+        <!-- Totals -->
+        <div class="inv-totals" id="inv-totals-block">
+          <div class="inv-totals-row"><span>Nettobetrag:</span><strong id="inv-net">0,00 €</strong></div>
+          <div class="inv-totals-row"><span>MwSt. gesamt:</span><strong id="inv-tax">0,00 €</strong></div>
+          <div class="inv-totals-row grand"><span>Brutto gesamt:</span><strong id="inv-gross">0,00 €</strong></div>
+        </div>
+      </div>
+
+      <!-- Section: Zahlungsbedingungen -->
+      <div class="inv-section">
+        <div class="inv-section-title">💳 Zahlungsbedingungen &amp; Hinweise</div>
+        <div class="inv-grid-2" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Zahlungsziel (Tage)</label>
+            <input type="number" id="inv-payment-days" class="form-control" value="14" min="0">
+          </div>
+          <div class="form-group">
+            <label>IBAN</label>
+            <input type="text" id="inv-iban" class="form-control" placeholder="DE00 0000 0000 0000 0000 00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Anmerkungen / Freitext</label>
+          <textarea id="inv-notes" class="form-control" rows="3" placeholder="Vielen Dank für Ihren Auftrag. Bei Fragen stehen wir gerne zur Verfügung." style="resize:vertical;"></textarea>
+        </div>
+      </div>
+
+    </div><!-- /inv-modal-body -->
+    <div class="inv-modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('invoiceCreatorModal')">Abbrechen</button>
+      <button class="btn btn-dark" onclick="previewInvoice()">👁 Vorschau &amp; Drucken</button>
+    </div>
+  </div>
+</div>
+
+<div id="invoice-print-area"></div>
+
+<!-- ══════════════════ JAVASCRIPT ══════════════════ -->
+<script>
+/* ─── State ─── */
+let crmData = [], users = [], currentUser = null;
+let pendingConfirmAction = null, staffPwTargetUser = null;
+let hasUnsavedChanges = false;
+
+/* ─── Invoice line items ─── */
+let lineItems = [];
+
+/* ─── Session ─── */
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 min
+const SESSION_WARN_MS    =  3 * 60 * 1000; // warn 3 min before
+let sessionLastActivity  = Date.now();
+let sessionCheckInterval = null;
+let sessionCountdownInterval = null;
+let sessionWarningActive = false;
+
+/* ══════════════ INIT ══════════════ */
+function init() {
+  const su = localStorage.getItem('holz_crm_users');
+  const sd = localStorage.getItem('holz_crm_data');
+  if (su) users   = JSON.parse(su);
+  if (sd) crmData = JSON.parse(sd);
+
+  // Unsaved changes: warn on page unload
+  window.addEventListener('beforeunload', e => {
+    if (currentUser && hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // Session activity tracking
+  ['click','mousemove','keydown','touchstart','scroll'].forEach(ev =>
+    document.addEventListener(ev, onUserActivity, { passive: true })
+  );
+}
+
+/* ══════════════ SESSION MANAGEMENT ══════════════ */
+function onUserActivity() {
+  sessionLastActivity = Date.now();
+  if (sessionWarningActive) {
+    // User is back – cancel the warning
+    sessionWarningActive = false;
+    document.getElementById('sessionTimeoutModal').classList.remove('open');
+    document.getElementById('session-warning-bar').classList.remove('visible');
+    clearInterval(sessionCountdownInterval);
+    sessionCountdownInterval = null;
+  }
+}
+
+function startSessionTimer() {
+  clearInterval(sessionCheckInterval);
+  sessionLastActivity = Date.now();
+  sessionWarningActive = false;
+  sessionCheckInterval = setInterval(checkSession, 5000); // check every 5 s
+}
+
+function stopSessionTimer() {
+  clearInterval(sessionCheckInterval);
+  clearInterval(sessionCountdownInterval);
+  sessionCheckInterval = null;
+  sessionCountdownInterval = null;
+  sessionWarningActive = false;
+}
+
+function checkSession() {
+  if (!currentUser) return;
+  const elapsed   = Date.now() - sessionLastActivity;
+  const remaining = SESSION_TIMEOUT_MS - elapsed;
+
+  if (remaining <= 0) {
+    stopSessionTimer();
+    closeModal('sessionTimeoutModal');
+    logout(true);
+    return;
+  }
+  if (remaining <= SESSION_WARN_MS && !sessionWarningActive) {
+    sessionWarningActive = true;
+    showSessionWarning();
+  }
+}
+
+function showSessionWarning() {
+  updateCountdownDisplay();
+  document.getElementById('sessionTimeoutModal').classList.add('open');
+  document.getElementById('session-warning-bar').classList.add('visible');
+  clearInterval(sessionCountdownInterval);
+  sessionCountdownInterval = setInterval(() => {
+    const rem = SESSION_TIMEOUT_MS - (Date.now() - sessionLastActivity);
+    if (rem <= 0) { clearInterval(sessionCountdownInterval); return; }
+    updateCountdownDisplay(rem);
+  }, 1000);
+}
+
+function updateCountdownDisplay(ms) {
+  if (ms === undefined) ms = SESSION_TIMEOUT_MS - (Date.now() - sessionLastActivity);
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const str = `${m}:${String(s).padStart(2,'0')}`;
+  document.getElementById('session-countdown').textContent = str;
+  document.getElementById('session-bar-countdown').textContent = str;
+}
+
+function extendSession() {
+  onUserActivity();
+  closeModal('sessionTimeoutModal');
+}
+
+/* ══════════════ UNSAVED CHANGES ══════════════ */
+function trackUnsaved() {
+  const nameVal = document.getElementById('new-u-name').value.trim();
+  const passVal = document.getElementById('new-u-pass').value.trim();
+  if (nameVal || passVal) markUnsaved();
+  else clearUnsaved(false);
+}
+
+function markUnsaved() {
+  hasUnsavedChanges = true;
+  document.getElementById('unsaved-banner').classList.add('visible');
+}
+
+function clearUnsaved(resetFields = true) {
+  hasUnsavedChanges = false;
+  document.getElementById('unsaved-banner').classList.remove('visible');
+  if (resetFields) {
+    document.getElementById('new-u-name').value = '';
+    document.getElementById('new-u-pass').value = '';
+  }
+}
+
+function discardUnsaved() {
+  clearUnsaved(true);
+}
+
+/* ══════════════ LOGIN / LOGOUT ══════════════ */
+function login() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error-banner');
+  const user = users.find(u => u.name.toLowerCase() === username.toLowerCase() && u.pass === password);
+  if (!user)             return showError(err, 'Anmeldedaten ungültig.');
+  if (user.deaktiviert)  return showError(err, 'Account ist deaktiviert.');
+  if (user.role === 'sachbearbeiter') return showError(err, 'Zugriff verweigert. Nur für Management.');
+  currentUser = user;
+  err.style.display = 'none';
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-greeting').textContent = `${currentUser.name} · ${currentUser.role}`;
+  startSessionTimer();
+  openAdmin();
+}
+
+function logout(timedOut = false) {
+  stopSessionTimer();
+  currentUser = null;
+  clearUnsaved(false);
+  hasUnsavedChanges = false;
+  document.getElementById('session-warning-bar').classList.remove('visible');
+  document.getElementById('unsaved-banner').classList.remove('visible');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+  if (timedOut) {
+    document.getElementById('login-error-banner').textContent = '⏱ Sitzung abgelaufen. Bitte erneut anmelden.';
+    document.getElementById('login-error-banner').style.display = 'block';
+  }
+}
+
+/* ══════════════ ADMIN SETUP ══════════════ */
+function openAdmin() {
+  const isAdmin = currentUser.role === 'admin';
+  ['at-stats','at-sales','at-invoices'].forEach(id => {
+    document.getElementById(id).style.display = isAdmin ? 'block' : 'none';
+  });
+  document.getElementById('opt-admin').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('opt-mod').style.display   = isAdmin ? 'block' : 'none';
+
+  if (isAdmin) {
+    switchTab('stats', true);
+    buildPerformanceMetrics();
+    buildSalesMetrics();
+    buildInvoiceArchive();
+  } else {
+    document.getElementById('new-u-role').value = 'sachbearbeiter';
+    switchTab('staff', true);
+  }
+  renderStaffList();
+  renderDisabledStaffList();
+}
+
+function switchTab(tabName, force = false) {
+  if (!force && hasUnsavedChanges) {
+    if (!confirm('Du hast ungespeicherte Änderungen im Formular. Trotzdem fortfahren? Die Eingaben gehen verloren.')) {
+      return;
+    }
+    clearUnsaved(true);
+  }
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+  document.getElementById(`at-${tabName}`).classList.add('active');
+}
+
+/* ══════════════ PERFORMANCE METRICS ══════════════ */
+function buildPerformanceMetrics() {
+  let openVolume = 0, finishedCount = 0, cancelledCount = 0, totalRevenue = 0;
+  const productMap = {};
+  crmData.forEach(item => {
+    if (item.type !== 'order') return;
+    if (item.status === 'erledigt') {
+      finishedCount++;
+      totalRevenue += item.totalAmount;
+      (item.items || []).forEach(p => productMap[p.name] = (productMap[p.name] || 0) + p.qty);
+    } else if (item.status === 'abgesagt') {
+      cancelledCount++;
+    } else {
+      openVolume += item.totalAmount;
+    }
+  });
+  const avg = finishedCount > 0 ? totalRevenue / finishedCount : 0;
+  const total = finishedCount + cancelledCount;
+  const conv = total > 0 ? (finishedCount / total * 100).toFixed(1) + ' %' : '0 %';
+  document.getElementById('s-open').textContent = fmt(openVolume);
+  document.getElementById('s-aov').textContent  = fmt(avg);
+  document.getElementById('s-conv').textContent = conv;
+  const sorted = Object.keys(productMap).sort((a, b) => productMap[b] - productMap[a]);
+  document.getElementById('product-head').innerHTML = '<tr><th>Produkt</th><th style="text-align:right;">Menge</th></tr>';
+  document.getElementById('product-body').innerHTML = sorted.length
+    ? sorted.map(k => `<tr><td><strong>${k}</strong></td><td style="text-align:right;">${productMap[k]} Stk.</td></tr>`).join('')
+    : '<tr><td colspan="2" style="color:var(--muted);">Keine Verkäufe vorhanden.</td></tr>';
+}
+
+/* ══════════════ SALES METRICS ══════════════ */
+function buildSalesMetrics() {
+  const today     = new Date().toISOString().split('T')[0];
+  const thisMonth = today.substring(0, 7);
+  let dayRev = 0, monthRev = 0;
+  const staffSales = {};
+  users.forEach(u => staffSales[u.name] = { total: 0, count: 0 });
+  staffSales['System/Unbekannt'] = { total: 0, count: 0 };
+  crmData.forEach(item => {
+    if (item.type !== 'order' || item.status !== 'erledigt') return;
+    const d = (item.closedAt || item.date).split('T')[0];
+    if (d === today)              dayRev   += item.totalAmount;
+    if (d.startsWith(thisMonth))  monthRev += item.totalAmount;
+    const emp = item.closedBy || 'System/Unbekannt';
+    if (!staffSales[emp]) staffSales[emp] = { total: 0, count: 0 };
+    staffSales[emp].total += item.totalAmount;
+    staffSales[emp].count++;
+  });
+  document.getElementById('s-day').textContent   = fmt(dayRev);
+  document.getElementById('s-month').textContent = fmt(monthRev);
+  document.getElementById('staff-sales-body').innerHTML = Object.entries(staffSales)
+    .filter(([n, d]) => !(n === 'System/Unbekannt' && d.count === 0))
+    .map(([n, d]) =>
+      `<tr><td><strong>${n}</strong></td><td>${d.count}× abgeschlossen</td><td style="color:var(--success);font-weight:700;">${fmt(d.total)}</td></tr>`
+    ).join('');
+}
+
+/* ══════════════ INVOICE ARCHIVE ══════════════ */
+function buildInvoiceArchive() {
+  filterInvoices();
+}
+
+function filterInvoices() {
+  const q      = (document.getElementById('inv-search')?.value || '').toLowerCase().trim();
+  const status = document.getElementById('inv-status-filter')?.value || '';
+  const dFrom  = document.getElementById('inv-date-from')?.value || '';
+  const dTo    = document.getElementById('inv-date-to')?.value   || '';
+
+  const orders = crmData.filter(x => x.type === 'order').filter(x => {
+    const name = `${x.customer?.firstName || ''} ${x.customer?.lastName || ''}`.toLowerCase();
+    const id   = (x.id || '').toLowerCase();
+    if (q && !name.includes(q) && !id.includes(q)) return false;
+    if (status && x.status !== status) return false;
+    const d = (x.date || '').split('T')[0];
+    if (dFrom && d < dFrom) return false;
+    if (dTo   && d > dTo)   return false;
+    return true;
+  });
+
+  const statusColor = s =>
+    s === 'erledigt' ? 'var(--success)' : s === 'abgesagt' ? 'var(--danger)' : 'var(--accent)';
+
+  document.getElementById('invoice-archive-body').innerHTML = orders.length
+    ? orders.map(x => `
+        <tr>
+          <td><strong>${x.id}</strong></td>
+          <td>${x.customer?.firstName || ''} ${x.customer?.lastName || ''}</td>
+          <td>${fmtDate(x.date).split(' ')[0]}</td>
+          <td style="font-weight:700;">${fmt(x.totalAmount)}</td>
+          <td><span style="font-size:12px;font-weight:700;color:${statusColor(x.status)};">${x.status || '–'}</span></td>
+          <td><button class="btn btn-dark" onclick="printInvoice('${x.id}')">Drucken</button></td>
+        </tr>`).join('')
+    : '<tr><td colspan="6" style="color:var(--muted);padding:20px 16px;">Keine Einträge gefunden.</td></tr>';
+}
+
+function clearInvoiceFilter() {
+  ['inv-search','inv-status-filter','inv-date-from','inv-date-to'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  filterInvoices();
+}
+
+/* ══════════════ STAFF LIST ══════════════ */
+function renderStaffList() { filterStaff(); }
+function renderDisabledStaffList() { filterDisabledStaff(); }
+
+function filterStaff() {
+  const q    = (document.getElementById('staff-search')?.value || '').toLowerCase().trim();
+  const role = document.getElementById('staff-role-filter')?.value || '';
+
+  const active = users.filter(u => !u.deaktiviert).filter(u => {
+    if (q    && !u.name.toLowerCase().includes(q)) return false;
+    if (role && u.role !== role) return false;
+    return true;
+  });
+
+  document.getElementById('user-table-body').innerHTML = active.map(u => {
+    const canEdit = u.name !== 'admin' && u.name !== currentUser.name
+      && (currentUser.role === 'admin'
+        || (currentUser.role === 'moderator' && u.role === 'sachbearbeiter'));
+    const actions = canEdit
+      ? `<button class="btn btn-accent" onclick="openChangePasswordModal('${u.name}')">🔑 PW</button>
+         <button class="btn btn-danger"  onclick="blockUser('${u.name}')">Blockieren</button>`
+      : '<span style="color:var(--muted);font-size:12px;">–</span>';
+    return `<tr>
+      <td><strong>${u.name}</strong></td>
+      <td><span class="role-badge">${u.role}</span></td>
+      <td><div style="display:flex;gap:6px;">${actions}</div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="3" style="color:var(--muted);">Keine Mitarbeiter gefunden.</td></tr>';
+}
+
+function clearStaffFilter() {
+  document.getElementById('staff-search').value      = '';
+  document.getElementById('staff-role-filter').value = '';
+  filterStaff();
+}
+
+function filterDisabledStaff() {
+  const q = (document.getElementById('dis-search')?.value || '').toLowerCase().trim();
+  const disabled = users.filter(u => u.deaktiviert).filter(u =>
+    !q || u.name.toLowerCase().includes(q)
+  );
+  document.getElementById('disabled-user-table-body').innerHTML = disabled.length
+    ? disabled.map(u => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td><span class="role-badge disabled">deaktiviert</span></td>
+          <td><div style="display:flex;gap:6px;">
+            <button class="btn btn-success" onclick="unblockUser('${u.name}')">Freischalten</button>
+            <button class="btn btn-dark"    onclick="permanentlyDeleteUser('${u.name}')">Löschen</button>
+          </div></td>
+        </tr>`).join('')
+    : '<tr><td colspan="3" style="color:var(--muted);">Keine blockierten Accounts.</td></tr>';
+}
+
+/* ══════════════ USER CRUD ══════════════ */
+function addUser() {
+  const name = document.getElementById('new-u-name').value.trim();
+  const pass = document.getElementById('new-u-pass').value.trim();
+  const role = document.getElementById('new-u-role').value;
+  const err  = document.getElementById('user-error-banner');
+  if (!name || !pass) return showError(err, 'Alle Felder ausfüllen.');
+  if (users.some(u => u.name.toLowerCase() === name.toLowerCase())) return showError(err, 'Benutzername bereits vergeben.');
+  err.style.display = 'none';
+  users.push({ name, pass, role, deaktiviert: false });
+  saveUsers();
+  clearUnsaved(true);
+  renderStaffList();
+}
+
+function blockUser(name) {
+  openConfirmModal('Account blockieren', `Passwort eingeben um "${name}" zu blockieren.`, () => {
+    users.find(u => u.name === name).deaktiviert = true;
+    saveUsers(); renderStaffList(); renderDisabledStaffList();
+  });
+}
+
+function unblockUser(name) {
+  users.find(u => u.name === name).deaktiviert = false;
+  saveUsers(); renderStaffList(); renderDisabledStaffList();
+}
+
+function permanentlyDeleteUser(name) {
+  openConfirmModal('⚠️ Account löschen', `KRITISCH: "${name}" wird unwiderruflich gelöscht.`, () => {
+    users.splice(users.findIndex(u => u.name === name), 1);
+    saveUsers(); renderDisabledStaffList();
+  });
+}
+
+/* ══════════════ CONFIRM MODAL ══════════════ */
+function openConfirmModal(title, message, callback) {
+  document.getElementById('confirm-modal-title').textContent   = title;
+  document.getElementById('confirm-modal-message').textContent = message;
+  document.getElementById('confirm-modal-password').value      = '';
+  document.getElementById('confirm-modal-error').style.display = 'none';
+  pendingConfirmAction = callback;
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function submitConfirmModal() {
+  const password = document.getElementById('confirm-modal-password').value;
+  const errorEl  = document.getElementById('confirm-modal-error');
+  if (password !== currentUser.pass) return showError(errorEl, 'Falsches Passwort!');
+  closeModal('confirmModal');
+  if (pendingConfirmAction) pendingConfirmAction();
+}
+
+/* ══════════════ STAFF PASSWORD MODAL ══════════════ */
+function openChangePasswordModal(name) {
+  staffPwTargetUser = name;
+  document.getElementById('staff-pw-target-name').textContent = name;
+  document.getElementById('staff-pw-confirm').value = '';
+  document.getElementById('staff-pw-new').value     = '';
+  document.getElementById('staff-pw-error').style.display = 'none';
+  document.getElementById('staffPasswordModal').classList.add('open');
+}
+
+function changeStaffPassword() {
+  const currentPw = document.getElementById('staff-pw-confirm').value;
+  const newPw     = document.getElementById('staff-pw-new').value.trim();
+  const errorEl   = document.getElementById('staff-pw-error');
+  if (currentPw !== currentUser.pass) return showError(errorEl, 'Dein eigenes Passwort ist falsch.');
+  if (!newPw) return showError(errorEl, 'Neues Passwort darf nicht leer sein.');
+  users.find(u => u.name === staffPwTargetUser).pass = newPw;
+  saveUsers();
+  closeModal('staffPasswordModal');
+  alert('Passwort erfolgreich geändert.');
+}
+
+/* ══════════════ CLOSE MODAL ══════════════ */
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ══════════════ EXCEL EXPORTS ══════════════ */
+
+// Full export (all CRM data)
+function exportAllExcel() {
+  const rows = [['Vorgangsnummer','Typ','Status','Kunde','Netto (€)','MwSt (€)','Brutto (€)','Abgeschlossen Von']];
+  crmData.forEach(x => {
+    const isOrder = x.type === 'order';
+    const gross = isOrder ? (x.totalAmount || 0) : 0;
+    const net   = gross / 1.19;
+    rows.push([
+      x.id,
+      isOrder ? 'Bestellung' : 'Anfrage',
+      x.status,
+      isOrder ? `${x.customer?.lastName || ''}, ${x.customer?.firstName || ''}` : (x.customerName || ''),
+      net.toFixed(2).replace('.', ','),
+      (gross - net).toFixed(2).replace('.', ','),
+      gross.toFixed(2).replace('.', ','),
+      x.closedBy || '–'
+    ]);
+  });
+  downloadCSV(rows, `Gesamtexport_${isoDate()}.csv`);
+}
+
+// Revenue-only export (dedicated, with extra columns)
+function exportRevenueExcel() {
+  const rows = [[
+    'Rechnungsnummer','Datum','Abschluss-Datum','Mitarbeiter',
+    'Kunde Vorname','Kunde Nachname',
+    'Positionen','Netto (€)','MwSt 19% (€)','Brutto (€)','Status'
+  ]];
+
+  const orders = crmData
+    .filter(x => x.type === 'order')
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+  orders.forEach(x => {
+    const gross = parseFloat(x.totalAmount || 0);
+    const net   = gross / 1.19;
+    const tax   = gross - net;
+    const items = (x.items || []).map(p => `${p.qty}× ${p.name}`).join(' | ');
+    rows.push([
+      x.id,
+      (x.date  || '').split('T')[0],
+      (x.closedAt || x.date || '').split('T')[0],
+      x.closedBy || '–',
+      x.customer?.firstName || '',
+      x.customer?.lastName  || '',
+      items,
+      net.toFixed(2).replace('.', ','),
+      tax.toFixed(2).replace('.', ','),
+      gross.toFixed(2).replace('.', ','),
+      x.status || ''
+    ]);
+  });
+
+  // Summary row
+  const totalGross = orders.reduce((s, x) => s + parseFloat(x.totalAmount || 0), 0);
+  const totalNet   = totalGross / 1.19;
+  rows.push([]);
+  rows.push(['GESAMT','','','','','','',
+    totalNet.toFixed(2).replace('.', ','),
+    (totalGross - totalNet).toFixed(2).replace('.', ','),
+    totalGross.toFixed(2).replace('.', ','),
+    ''
+  ]);
+
+  downloadCSV(rows, `Umsatzauswertung_${isoDate()}.csv`);
+}
+
+function downloadCSV(rows, filename) {
+  const blob = new Blob(
+    ["\uFEFF" + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n')],
+    { type: 'text/csv;charset=utf-8;' }
+  );
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+/* ══════════════ PRINT EXISTING INVOICE ══════════════ */
+function printInvoice(id) {
+  const item = crmData.find(x => x.id === id);
+  if (!item) return;
+  const gross = parseFloat(item.totalAmount || 0);
+  const net   = gross / 1.19;
+  document.getElementById('invoice-print-area').innerHTML = `
+    <div style="max-width:800px;margin:0 auto;font-family:Arial,sans-serif;padding:40px;color:#000;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;">
+        <div>
+          <div style="font-size:28px;font-weight:900;letter-spacing:-.02em;">RECHNUNG</div>
+          <div style="font-size:14px;color:#888;margin-top:4px;">Nr. ${item.id}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#555;">
+          <div style="font-size:18px;font-weight:800;color:#1C1410;">🪵 Holzmanufaktur</div>
+          <div style="margin-top:4px;">Datum: ${fmtDate(item.date).split(' ')[0]}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:6px;">Rechnungsempfänger</div>
+        <div style="font-size:15px;font-weight:700;">${item.customer?.firstName || ''} ${item.customer?.lastName || ''}</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+        <thead>
+          <tr style="border-bottom:2px solid #1C1410;">
+            <th style="padding:8px 0;font-size:12px;text-align:left;font-weight:700;">Pos.</th>
+            <th style="padding:8px 8px;font-size:12px;text-align:left;font-weight:700;">Beschreibung</th>
+            <th style="padding:8px 0;font-size:12px;text-align:center;font-weight:700;">Menge</th>
+            <th style="padding:8px 0;font-size:12px;text-align:right;font-weight:700;">Gesamt</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(item.items || []).map((p, i) => `
+            <tr style="border-bottom:1px solid #eee;">
+              <td style="padding:8px 0;font-size:13px;color:#888;">${i + 1}</td>
+              <td style="padding:8px 8px;font-size:13px;">${p.name}</td>
+              <td style="padding:8px 0;font-size:13px;text-align:center;">${p.qty}</td>
+              <td style="padding:8px 0;font-size:13px;text-align:right;font-weight:600;">${fmt(p.total || 0)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="min-width:260px;background:#f5f5f5;padding:16px 20px;border-radius:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#555;">
+            <span>Nettobetrag:</span><span>${fmt(net)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#555;">
+            <span>MwSt. 19%:</span><span>${fmt(gross - net)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;padding-top:10px;margin-top:8px;border-top:2px solid #1C1410;">
+            <span>Brutto gesamt:</span><span>${fmt(gross)}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  window.print();
+}
+
+/* ══════════════ INVOICE CREATOR ══════════════ */
+function getNextInvoiceNumber() {
+  const y   = new Date().getFullYear();
+  const key = `holz_inv_cnt_${y}`;
+  const n   = (parseInt(localStorage.getItem(key) || '0')) + 1;
+  localStorage.setItem(key, n);
+  return `RE-${y}-${String(n).padStart(4, '0')}`;
+}
+
+function openInvoiceCreator() {
+  // Reset line items
+  lineItems = [{ desc: '', qty: 1, unit: 'Stk.', price: 0, tax: 19 }];
+  renderLineItems();
+
+  // Fill defaults (today + 14 days)
+  const today = isoDate();
+  const due   = new Date(); due.setDate(due.getDate() + 14);
+  document.getElementById('inv-number').value = getNextInvoiceNumber();
+  document.getElementById('inv-date').value   = today;
+  document.getElementById('inv-due').value    = due.toISOString().split('T')[0];
+
+  // Load saved sender defaults
+  const sd = localStorage.getItem('holz_sender_defaults');
+  if (sd) {
+    const d = JSON.parse(sd);
+    ['s-company','s-owner','s-street','s-house','s-zip','s-city','s-email','s-taxnr','s-ustid','inv-iban'].forEach(id => {
+      if (d[id] !== undefined) document.getElementById(id).value = d[id];
+    });
+  }
+
+  document.getElementById('invoiceCreatorModal').classList.add('open');
+}
+
+function saveSenderDefaults() {
+  const d = {};
+  ['s-company','s-owner','s-street','s-house','s-zip','s-city','s-email','s-taxnr','s-ustid','inv-iban'].forEach(id => {
+    d[id] = document.getElementById(id).value;
+  });
+  localStorage.setItem('holz_sender_defaults', JSON.stringify(d));
+  alert('Absenderdaten als Standard gespeichert.');
+}
+
+/* ─── Line items ─── */
+function addLineItem() {
+  lineItems.push({ desc: '', qty: 1, unit: 'Stk.', price: 0, tax: 19 });
+  renderLineItems();
+}
+
+function removeLineItem(i) {
+  if (lineItems.length === 1) return; // keep at least one
+  lineItems.splice(i, 1);
+  renderLineItems();
+  calcInvTotals();
+}
+
+function renderLineItems() {
+  document.getElementById('line-items-body').innerHTML = lineItems.map((item, i) => `
+    <tr>
+      <td><input type="text" value="${escHtml(item.desc)}" placeholder="Leistung / Produkt"
+          oninput="lineItems[${i}].desc=this.value"></td>
+      <td><input type="number" value="${item.qty}" min="0.01" step="0.01" style="width:60px;"
+          oninput="lineItems[${i}].qty=parseFloat(this.value)||0;refreshLineTotal(${i})"></td>
+      <td>
+        <select onchange="lineItems[${i}].unit=this.value" style="width:72px;">
+          ${['Stk.','m²','m','Std.','Psch.','kg'].map(u =>
+            `<option ${item.unit === u ? 'selected' : ''}>${u}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="number" value="${item.price}" min="0" step="0.01" style="width:90px;"
+          oninput="lineItems[${i}].price=parseFloat(this.value)||0;refreshLineTotal(${i})"
+          placeholder="0,00"></td>
+      <td>
+        <select onchange="lineItems[${i}].tax=parseInt(this.value);calcInvTotals()" style="width:65px;">
+          ${[19,7,0].map(t =>
+            `<option value="${t}" ${item.tax === t ? 'selected' : ''}>${t}%</option>`).join('')}
+        </select>
+      </td>
+      <td class="line-total-cell" id="lt-${i}">${fmt(item.qty * item.price)}</td>
+      <td><button class="rm-item-btn" onclick="removeLineItem(${i})" title="Position entfernen">×</button></td>
+    </tr>`).join('');
+  calcInvTotals();
+}
+
+function refreshLineTotal(i) {
+  const cell = document.getElementById(`lt-${i}`);
+  if (cell) cell.textContent = fmt(lineItems[i].qty * lineItems[i].price);
+  calcInvTotals();
+}
+
+function calcInvTotals() {
+  let net = 0, tax = 0;
+  lineItems.forEach(item => {
+    const lineNet = item.qty * item.price;
+    net += lineNet;
+    tax += lineNet * (item.tax / 100);
+  });
+  document.getElementById('inv-net').textContent   = fmt(net);
+  document.getElementById('inv-tax').textContent   = fmt(tax);
+  document.getElementById('inv-gross').textContent = fmt(net + tax);
+}
+
+/* ─── Preview & print created invoice ─── */
+function previewInvoice() {
+  const firstName  = document.getElementById('r-firstname').value.trim();
+  const lastName   = document.getElementById('r-lastname').value.trim();
+  const street     = document.getElementById('r-street').value.trim();
+  const house      = document.getElementById('r-house').value.trim();
+  const zip        = document.getElementById('r-zip').value.trim();
+  const city       = document.getElementById('r-city').value.trim();
+  if (!firstName || !lastName || !street || !zip || !city) {
+    return alert('Bitte alle Pflichtfelder des Empfängers ausfüllen (*).');
+  }
+
+  const sCompany  = document.getElementById('s-company').value.trim();
+  const sOwner    = document.getElementById('s-owner').value.trim();
+  const sStreet   = document.getElementById('s-street').value.trim();
+  const sHouse    = document.getElementById('s-house').value.trim();
+  const sZip      = document.getElementById('s-zip').value.trim();
+  const sCity     = document.getElementById('s-city').value.trim();
+  const sEmail    = document.getElementById('s-email').value.trim();
+  const sTaxnr    = document.getElementById('s-taxnr').value.trim();
+  const sUstid    = document.getElementById('s-ustid').value.trim();
+
+  const invNr     = document.getElementById('inv-number').value.trim();
+  const invDate   = document.getElementById('inv-date').value;
+  const invDue    = document.getElementById('inv-due').value;
+  const payDays   = document.getElementById('inv-payment-days').value;
+  const iban      = document.getElementById('inv-iban').value.trim();
+  const notes     = document.getElementById('inv-notes').value.trim();
+
+  const rSalut    = document.getElementById('r-salutation').value;
+  const rCompany  = document.getElementById('r-company').value.trim();
+  const rCountry  = document.getElementById('r-country').value.trim() || 'Deutschland';
+
+  // Calculate totals
+  let netTotal = 0;
+  const taxGroups = {};
+  lineItems.forEach(item => {
+    const lineNet = item.qty * item.price;
+    netTotal += lineNet;
+    if (!taxGroups[item.tax]) taxGroups[item.tax] = 0;
+    taxGroups[item.tax] += lineNet * (item.tax / 100);
+  });
+  const taxTotal   = Object.values(taxGroups).reduce((a, b) => a + b, 0);
+  const grossTotal = netTotal + taxTotal;
+
+  const taxRows = Object.entries(taxGroups).map(([rate, amt]) =>
+    `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#555;">
+      <span>MwSt. ${rate}%:</span><span>${fmt(amt)}</span>
+    </div>`).join('');
+
+  const itemRows = lineItems.filter(item => item.desc || item.price).map((item, i) => `
+    <tr style="border-bottom:1px solid #eee;">
+      <td style="padding:9px 0;font-size:13px;color:#888;">${i + 1}</td>
+      <td style="padding:9px 8px;font-size:13px;">${escHtml(item.desc)}</td>
+      <td style="padding:9px 0;font-size:13px;text-align:center;">${item.qty} ${item.unit}</td>
+      <td style="padding:9px 0;font-size:13px;text-align:right;">${fmt(item.price)}</td>
+      <td style="padding:9px 0;font-size:13px;text-align:center;color:#888;">${item.tax}%</td>
+      <td style="padding:9px 0;font-size:13px;text-align:right;font-weight:600;">${fmt(item.qty * item.price)}</td>
+    </tr>`).join('');
+
+  const recipientBlock = [
+    rCompany ? `<div style="font-weight:700;">${rCompany}</div>` : '',
+    `<div>${rSalut ? rSalut + ' ' : ''}${firstName} ${lastName}</div>`,
+    `<div>${street} ${house}</div>`,
+    `<div>${zip} ${city}</div>`,
+    rCountry !== 'Deutschland' ? `<div>${rCountry}</div>` : ''
+  ].filter(Boolean).join('');
+
+  const senderBlock = [
+    sCompany,
+    sOwner,
+    sStreet && sHouse ? `${sStreet} ${sHouse}` : sStreet,
+    sZip && sCity ? `${sZip} ${sCity}` : '',
+    sEmail,
+    sTaxnr  ? `Steuernr.: ${sTaxnr}` : '',
+    sUstid  ? `USt-IdNr.: ${sUstid}` : ''
+  ].filter(Boolean).join('<br>');
+
+  document.getElementById('invoice-print-area').innerHTML = `
+<div style="max-width:820px;margin:0 auto;font-family:Arial,sans-serif;padding:48px 40px;color:#111;">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;">
+    <div>
+      <div style="font-size:30px;font-weight:900;letter-spacing:-.03em;">RECHNUNG</div>
+      <div style="font-size:13px;color:#888;margin-top:4px;">Nr. ${invNr}</div>
+    </div>
+    <div style="text-align:right;font-size:12px;color:#555;line-height:1.7;">
+      <div style="font-size:17px;font-weight:800;color:#1C1410;margin-bottom:6px;">🪵 ${sCompany || 'Holzmanufaktur'}</div>
+      ${senderBlock}
+    </div>
+  </div>
+
+  <!-- Dates & Recipient -->
+  <div style="display:flex;gap:40px;margin-bottom:32px;">
+    <div style="flex:1;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:6px;">Rechnungsempfänger</div>
+      <div style="font-size:14px;line-height:1.7;">${recipientBlock}</div>
+    </div>
+    <div style="text-align:right;font-size:13px;line-height:1.9;color:#555;">
+      <div><strong style="color:#111;">Rechnungsdatum:</strong> ${invDate || '–'}</div>
+      <div><strong style="color:#111;">Fällig am:</strong> ${invDue || '–'}</div>
+      ${payDays ? `<div><strong style="color:#111;">Zahlungsziel:</strong> ${payDays} Tage</div>` : ''}
+    </div>
+  </div>
+
+  <!-- Items table -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+    <thead>
+      <tr style="border-bottom:2px solid #111;">
+        <th style="padding:8px 0;font-size:11px;text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Pos.</th>
+        <th style="padding:8px 8px;font-size:11px;text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Beschreibung</th>
+        <th style="padding:8px 0;font-size:11px;text-align:center;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Menge</th>
+        <th style="padding:8px 0;font-size:11px;text-align:right;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Einzelpreis</th>
+        <th style="padding:8px 0;font-size:11px;text-align:center;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">MwSt.</th>
+        <th style="padding:8px 0;font-size:11px;text-align:right;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Gesamt</th>
+      </tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+
+  <!-- Totals -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:28px;">
+    <div style="min-width:280px;background:#f5f5f5;padding:18px 22px;border-radius:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#555;">
+        <span>Nettobetrag:</span><span>${fmt(netTotal)}</span>
+      </div>
+      ${taxRows}
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;padding-top:12px;margin-top:10px;border-top:2px solid #111;">
+        <span>Brutto gesamt:</span><span>${fmt(grossTotal)}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- IBAN / Notes -->
+  ${iban ? `<div style="margin-bottom:16px;font-size:13px;color:#555;border-top:1px solid #ddd;padding-top:16px;">
+    <strong style="color:#111;">Bankverbindung:</strong> IBAN ${iban}
+  </div>` : ''}
+  ${notes ? `<div style="font-size:13px;color:#555;white-space:pre-wrap;">${escHtml(notes)}</div>` : ''}
+
+  <div style="margin-top:40px;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:12px;text-align:center;">
+    ${sCompany || 'Holzmanufaktur'} · ${sStreet} ${sHouse}, ${sZip} ${sCity}
+    ${sTaxnr ? ' · Steuernr.: ' + sTaxnr : ''}${sUstid ? ' · USt-IdNr.: ' + sUstid : ''}
+  </div>
+</div>`;
+  window.print();
+}
+
+/* ══════════════ HELPERS ══════════════ */
+function fmt(n) { return parseFloat(n || 0).toFixed(2).replace('.', ',') + ' €'; }
+
+function fmtDate(iso) {
+  if (!iso) return '–';
+  const d = new Date(iso);
+  return d.toLocaleDateString('de-DE') + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function isoDate() { return new Date().toISOString().split('T')[0]; }
+
+function showError(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+function saveUsers() { localStorage.setItem('holz_crm_users', JSON.stringify(users)); }
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════ BOOTSTRAP ══════════════ */
+init();
+</script>
+</body>
+</html>
