@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
 <style>
-:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078;--err:#c0392b}
+:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078;--err:#c0392b;--blue:#4a7fc7;--blue-d:#35608f}
 *{box-sizing:border-box}
 body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0}
 header{background:#fff;border-bottom:1px solid var(--line)}
@@ -17,8 +17,9 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-.sheet{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.section{padding:22px}
+/* Flaches Design: keine Umrandung/Box, nur die graue Trennlinie zwischen Sections */
+.sheet{background:#fff}
+.section{padding:22px 0}
 .section+.section{border-top:1px solid var(--line)}
 legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -27,10 +28,11 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 input{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
 fieldset{border:none;padding:0;margin:0}
 
+/* Lupe & Vorschlagsliste: relativ zum Input zentriert statt fixem px-Wert -> bleibt auf jedem Screen korrekt */
 .field-rel{position:relative}
-.search-ic{position:absolute;right:12px;top:38px;color:var(--muted);pointer-events:none}
-.suggest{position:absolute;z-index:5;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
-.suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer}
+.search-ic{position:absolute;top:50%;right:12px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.suggest{position:absolute;z-index:5;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
+.suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer;white-space:normal;word-break:break-word;line-height:1.4}
 .suggest div:hover{background:#f5f2ec}
 .toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
 
@@ -42,11 +44,17 @@ fieldset{border:none;padding:0;margin:0}
 .badge{height:20px;display:flex;align-items:center}
 
 .legal-note{font-size:.82rem;color:var(--muted);margin-top:16px;line-height:1.5}
-.legal-note a{color:var(--acc-d);text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font:inherit}
-.legal-text{display:none;margin-top:14px;font-size:.83rem;color:#4a423b;line-height:1.6;max-height:260px;overflow-y:auto;padding:14px;background:#faf8f5;border-radius:8px}
-.legal-text.open{display:block}
-.legal-text h4{margin:14px 0 4px;font-size:.9rem}
-.legal-text h4:first-child{margin-top:0}
+.legal-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--blue);cursor:pointer;text-decoration:underline}
+.legal-link:hover{color:var(--blue-d)}
+
+/* Modal für AGB/Datenschutz – bleibt auf der Seite */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.open{display:flex}
+.modal-box{background:#fff;border-radius:10px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
+.modal-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--muted)}
+.modal-box h4{margin:14px 0 4px;font-size:.9rem}
+.modal-box h4:first-child{margin-top:0}
+.modal-box p{font-size:.85rem;color:#4a423b;line-height:1.6;margin:0 0 4px}
 
 .summary{position:sticky;top:20px}
 .accordion summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:0;list-style:none;display:flex;justify-content:space-between}
@@ -136,23 +144,7 @@ fieldset{border:none;padding:0;margin:0}
     </div>
 
     <div class="section">
-      <p class="legal-note">Mit dem Absenden deiner Bestellung erklärst du dich mit unseren <button type="button" class="legal-note" onclick="toggleLegal('agb')">AGB</button> einverstanden und bestätigst, unsere <button type="button" class="legal-note" onclick="toggleLegal('ds')">Datenschutzerklärung</button> gelesen zu haben.</p>
-      <div class="legal-text" id="legal-agb">
-        <h4>1. Geltungsbereich</h4><p>Diese AGB gelten für alle Bestellungen über den Online-Shop von [Firmenname].</p>
-        <h4>2. Vertragsschluss</h4><p>Mit Klick auf "Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail zustande.</p>
-        <h4>3. Preise & Versand</h4><p>Alle Preise inkl. gesetzlicher MwSt. Ab 50,00 € Bestellwert liefern wir innerhalb Deutschlands versandkostenfrei.</p>
-        <h4>4. Widerrufsrecht</h4><p>Es gilt ein gesetzliches Widerrufsrecht von 14 Tagen gemäß separater Widerrufsbelehrung.</p>
-        <h4>5. Schlussbestimmungen</h4><p>Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Stand: [Datum].</p>
-        <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung rechtlich prüfen lassen.</p>
-      </div>
-      <div class="legal-text" id="legal-ds">
-        <h4>1. Verantwortlicher</h4><p>[Firmenname], [Adresse], [E-Mail]</p>
-        <h4>2. Verarbeitete Daten</h4><p>Name, Anschrift, E-Mail, Telefonnummer (optional) und Zahlungsdaten, soweit für die Bestellabwicklung nötig.</p>
-        <h4>3. Rechtsgrundlage</h4><p>Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie gesetzliche Pflichten gem. lit. c.</p>
-        <h4>4. Zahlungsdienstleister</h4><p>Je nach Auswahl verarbeiten externe Anbieter (PayPal, Klarna u. a.) die Zahlungsdaten in eigener Verantwortung.</p>
-        <h4>5. Ihre Rechte</h4><p>Auskunft, Berichtigung, Löschung, Widerspruch – Kontakt: [E-Mail]. Beschwerderecht bei einer Aufsichtsbehörde.</p>
-        <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
-      </div>
+      <p class="legal-note">Mit dem Absenden deiner Bestellung erklärst du dich mit unseren <button type="button" class="legal-link" onclick="openLegal('agb')">AGB</button> einverstanden und bestätigst, unsere <button type="button" class="legal-link" onclick="openLegal('ds')">Datenschutzerklärung</button> gelesen zu haben.</p>
     </div>
   </div>
 
@@ -172,6 +164,31 @@ fieldset{border:none;padding:0;margin:0}
 </form>
 </main>
 
+<!-- Inhalte für AGB/Datenschutz-Modal -->
+<template id="tpl-agb">
+  <h4>1. Geltungsbereich</h4><p>Diese AGB gelten für alle Bestellungen über den Online-Shop von [Firmenname].</p>
+  <h4>2. Vertragsschluss</h4><p>Mit Klick auf "Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail zustande.</p>
+  <h4>3. Preise & Versand</h4><p>Alle Preise inkl. gesetzlicher MwSt. Ab 50,00 € Bestellwert liefern wir innerhalb Deutschlands versandkostenfrei.</p>
+  <h4>4. Widerrufsrecht</h4><p>Es gilt ein gesetzliches Widerrufsrecht von 14 Tagen gemäß separater Widerrufsbelehrung.</p>
+  <h4>5. Schlussbestimmungen</h4><p>Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Stand: [Datum].</p>
+  <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung rechtlich prüfen lassen.</p>
+</template>
+<template id="tpl-ds">
+  <h4>1. Verantwortlicher</h4><p>[Firmenname], [Adresse], [E-Mail]</p>
+  <h4>2. Verarbeitete Daten</h4><p>Name, Anschrift, E-Mail, Telefonnummer (optional) und Zahlungsdaten, soweit für die Bestellabwicklung nötig.</p>
+  <h4>3. Rechtsgrundlage</h4><p>Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie gesetzliche Pflichten gem. lit. c.</p>
+  <h4>4. Zahlungsdienstleister</h4><p>Je nach Auswahl verarbeiten externe Anbieter (PayPal, Klarna u. a.) die Zahlungsdaten in eigener Verantwortung.</p>
+  <h4>5. Ihre Rechte</h4><p>Auskunft, Berichtigung, Löschung, Widerspruch – Kontakt: [E-Mail]. Beschwerderecht bei einer Aufsichtsbehörde.</p>
+  <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
+</template>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeLegal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLegal()" aria-label="Schließen">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
 <script>
 const KEY='warenkorbItems';
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
@@ -190,10 +207,15 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
-function toggleLegal(which){
-  const el=document.getElementById('legal-'+which);
-  el.classList.toggle('open');
+// AGB / Datenschutz als Modal – öffnet auf derselben Seite, kein Verlassen der Website
+function openLegal(which){
+  document.getElementById('modalContent').innerHTML=document.getElementById('tpl-'+which).innerHTML;
+  document.getElementById('modalBackdrop').classList.add('open');
 }
+function closeLegal(){
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLegal(); });
 
 const billingSection=document.getElementById('billingSection');
 document.getElementById('diffBilling').addEventListener('change', e=>{
