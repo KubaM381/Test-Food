@@ -105,13 +105,11 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 </main>
 
 <script>
-// Supabase einbinden
 const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
-const SUPABASE_KEY = 'Sb_publishable_hrgd2mvl4QpK7X2tvImhcw_9fsVhV4J';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
-const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05}; // Demo-Codes
 let discountPct=0, discountCode='';
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
@@ -127,11 +125,24 @@ function mergeDuplicates(cart){
   return [...map.values()];
 }
 
-function applyDiscount(){
+async function applyDiscount(){
   const val=document.getElementById('discountInput').value.trim().toUpperCase();
   const msg=document.getElementById('discountMsg');
-  if(CODES[val]){ discountPct=CODES[val]; discountCode=val; msg.textContent=`Code "${val}" angewendet (-${CODES[val]*100}%)`; msg.style.color='#3f7d3f'; }
-  else { discountPct=0; discountCode=''; msg.textContent='Ungültiger Code'; msg.style.color='#c0392b'; }
+  
+  // Gutschein live aus Supabase prüfen
+  const { data: dbDisc } = await supabase.from('discounts').select('*').eq('code', val).eq('is_active', true).single();
+  
+  if(dbDisc){
+    discountPct = dbDisc.discount_pct;
+    discountCode = val;
+    msg.textContent=`Code "${val}" angewendet (-${dbDisc.discount_pct*100}%)`;
+    msg.style.color='#3f7d3f';
+  } else {
+    discountPct=0;
+    discountCode='';
+    msg.textContent='Ungültiger Code';
+    msg.style.color='#c0392b';
+  }
   msg.style.display='block';
   render();
 }
@@ -148,11 +159,9 @@ async function render(){
   
   if(!localCart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; pbox.style.display='none'; return; }
   
-  // Sicherer Datenbank-Abgleich (Preise direkt aus Supabase)
   const { data: dbProducts } = await supabase.from('products').select('*');
   
   let cart = localCart.map(localItem => {
-    // Falls das Produkt in der DB existiert, überschreibe den Preis fälschungssicher
     const dbProd = dbProducts ? dbProducts.find(p => p.id === localItem.id || p.name === localItem.name) : null;
     if(dbProd) return { ...localItem, price: dbProd.price, name: dbProd.name, icon: dbProd.icon, id: dbProd.id };
     return localItem;
