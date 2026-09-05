@@ -37,9 +37,13 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .name{font-weight:600;margin:0 0 4px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .item-actions{display:flex;align-items:center;gap:22px;margin-left:auto}
-.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.qty button{width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:1.1rem}
-.qty span{width:32px;text-align:center;font-size:.9rem}
+
+/* Mengenauswahl: etwas stärker abgerundet, Zahl ist ein editierbares Feld zum Antippen/Eintippen */
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.qty button{width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:1.1rem;flex:0 0 auto}
+.qty input{width:34px;height:34px;text-align:center;font-size:.9rem;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);background:#fff;padding:0;-moz-appearance:textfield}
+.qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty input:focus{outline:none;background:#f7f4ef}
 .price{font-weight:700;min-width:70px;text-align:right}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}}
 
@@ -139,7 +143,11 @@ function render(){
         <div class="info"><p class="name">${it.name}</p><p class="unit">${eur(it.price)} / Stk.</p></div>
       </div>
       <div class="item-actions">
-        <div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${it.qty}</span><button onclick="changeQty(${i},1)">+</button></div>
+        <div class="qty">
+          <button onclick="changeQty(${i},-1)">−</button>
+          <input type="number" inputmode="numeric" min="1" value="${it.qty}" onchange="setQty(${i}, this.value)" onclick="this.select()">
+          <button onclick="changeQty(${i},1)">+</button>
+        </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
     </div>`).join('');
@@ -169,6 +177,14 @@ function render(){
   else pmsg.textContent=`Noch ${eur(FREE_SHIP-rawSub)} bis zum gratis Versand`;
 }
 function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,c[i].qty+d); save(c); render(); }
+function setQty(i,val){
+  const c=mergeDuplicates(load());
+  let q=parseInt(val,10);
+  if(isNaN(q)||q<1) q=1;
+  c[i].qty=q;
+  save(c);
+  render();
+}
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
 render();
 </script>
