@@ -16,27 +16,48 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px}
-fieldset{border:none;padding:0;margin:0 0 22px}
-legend{font-weight:700;margin-bottom:12px;padding:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px}
+fieldset{border:none;padding:0;margin:0}
+legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
-input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem}
-input:invalid:not(:placeholder-shown){border-color:var(--err)}
-.pay-opt{display:flex;gap:10px;margin-top:8px}
-.pay-opt label{flex:1;border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;cursor:pointer;color:var(--text);font-size:.9rem}
-.pay-opt input{width:auto;display:none}
-.pay-opt input:checked+span{color:var(--acc-d);font-weight:700}
-.pay-opt label:has(input:checked){border-color:var(--acc)}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
+.field-rel{position:relative}
+.search-ic{position:absolute;right:10px;top:37px;color:var(--muted);pointer-events:none;font-size:.95rem}
+.suggest{position:absolute;z-index:5;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
+.suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer}
+.suggest div:hover{background:#f5f2ec}
+.toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
+
+.pay-opt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.pay-opt label{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.pay-opt input{width:auto;margin:0}
+.pay-opt label:has(input:checked){border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.badge{font-weight:700;font-size:.9rem;letter-spacing:-.02em;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px}
+.b-card{background:#f1ede6;color:#5a4d3d}
+.b-paypal{background:#f0f6ff;color:#003087}
+.b-klarna{background:#ffe0ea;color:#17120f}
+.b-gpay{color:#4285F4}
+.b-apay{color:#000}
+
+.agb-row{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;margin:16px 0;color:var(--muted)}
+.agb-row a{color:var(--acc-d);text-decoration:underline}
+.agb-row input{width:auto;margin-top:3px}
+
 .summary{position:sticky;top:20px}
 .row{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:10px;color:var(--muted)}
 .row.total{color:var(--text);font-weight:700;font-size:1.15rem;border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.free-ship{color:#3f7d3f;font-weight:600}
 .pay-btn{width:100%;background:var(--acc);color:#fff;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:16px}
 .pay-btn:hover{background:var(--acc-d)}
-.pay-btn:disabled{background:#ccc;cursor:not-allowed}
 .trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
 .hint{background:#fff8ec;border:1px solid #f0e0b8;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#6b5c2f;margin-bottom:18px}
-.err-msg{color:var(--err);font-size:.8rem;margin-top:6px;display:none}
+
+.accordion summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:4px 0;list-style:none;display:flex;justify-content:space-between}
+.accordion summary::-webkit-details-marker{display:none}
+.accordion summary::after{content:'▾';transition:transform .2s}
+.accordion[open] summary::after{transform:rotate(180deg)}
+.mini-item{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);padding:6px 0;border-bottom:1px dashed var(--line)}
 </style>
 </head>
 <body>
@@ -47,43 +68,92 @@ input:invalid:not(:placeholder-shown){border-color:var(--err)}
 
 <main class="wrap">
 <h1>Kasse</h1>
-<div class="hint">⚠️ Demo-Formular: Für echte Zahlungen muss dieses Formular an einen Zahlungsanbieter (z. B. Stripe) und einen Server angebunden werden – siehe Hinweise nach dem Code.</div>
+<div class="hint">⚠️ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
-  <div class="card">
-    <fieldset>
-      <legend>Kontakt</legend>
-      <label>E-Mail</label>
-      <input type="email" name="email" required placeholder=" ">
-    </fieldset>
-    <fieldset>
-      <legend>Lieferadresse</legend>
-      <div class="grid2">
-        <div><label>Vorname</label><input name="vorname" required placeholder=" "></div>
-        <div><label>Nachname</label><input name="nachname" required placeholder=" "></div>
+  <div>
+    <div class="card">
+      <fieldset>
+        <legend>Kontakt</legend>
+        <label>E-Mail *</label>
+        <input type="email" name="email" required>
+        <label>Telefonnummer (optional)</label>
+        <input type="tel" name="telefon">
+      </fieldset>
+    </div>
+
+    <div class="card">
+      <fieldset>
+        <legend>Lieferadresse</legend>
+        <div class="grid2">
+          <div><label>Vorname *</label><input name="vorname" required></div>
+          <div><label>Nachname *</label><input name="nachname" required></div>
+        </div>
+        <label>Firma (optional)</label>
+        <input name="firma">
+        <label>Adresse *</label>
+        <div class="field-rel">
+          <input name="strasse" id="strasse" required autocomplete="off" placeholder="Straße & Hausnummer suchen…">
+          <span class="search-ic">🔍</span>
+          <div class="suggest" id="suggest"></div>
+        </div>
+        <label>Adresszusatz (optional)</label>
+        <input name="zusatz" placeholder="z. B. 2. Stock, Wohnung 4">
+        <div class="grid2">
+          <div><label>PLZ *</label><input name="plz" id="plz" required pattern="\d{4,5}"></div>
+          <div><label>Ort *</label><input name="ort" id="ort" required></div>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="diffBilling">
+          <label for="diffBilling" style="margin:0">Abweichende Rechnungsadresse</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="card" id="billingCard" style="display:none">
+      <fieldset>
+        <legend>Rechnungsadresse</legend>
+        <div class="grid2">
+          <div><label>Vorname *</label><input name="b_vorname"></div>
+          <div><label>Nachname *</label><input name="b_nachname"></div>
+        </div>
+        <label>Straße & Hausnummer *</label>
+        <input name="b_strasse">
+        <div class="grid2">
+          <div><label>PLZ *</label><input name="b_plz" pattern="\d{4,5}"></div>
+          <div><label>Ort *</label><input name="b_ort"></div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="card">
+      <fieldset>
+        <legend>Zahlungsart</legend>
+        <div class="pay-opt">
+          <label><input type="radio" name="pay" value="karte" checked><span class="badge b-card">💳 Kreditkarte</span></label>
+          <label><input type="radio" name="pay" value="paypal"><span class="badge b-paypal">Pay<b>Pal</b></span></label>
+          <label><input type="radio" name="pay" value="klarna"><span class="badge b-klarna">Klarna.</span></label>
+          <label><input type="radio" name="pay" value="gpay"><span class="badge b-gpay">G Pay</span></label>
+          <label><input type="radio" name="pay" value="apay"><span class="badge b-apay"> Pay</span></label>
+        </div>
+      </fieldset>
+      <div class="agb-row">
+        <input type="checkbox" id="agb" required>
+        <label for="agb" style="margin:0">Ich akzeptiere die <a href="agb.html" target="_blank">AGB</a> und habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen. *</label>
       </div>
-      <label>Straße & Nr.</label>
-      <input name="strasse" required placeholder=" ">
-      <div class="grid2">
-        <div><label>PLZ</label><input name="plz" required pattern="\d{4,5}" placeholder=" "></div>
-        <div><label>Ort</label><input name="ort" required placeholder=" "></div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>Zahlungsart</legend>
-      <div class="pay-opt">
-        <label><input type="radio" name="pay" value="karte" checked><span>💳 Karte</span></label>
-        <label><input type="radio" name="pay" value="paypal"><span>🅿️ PayPal</span></label>
-        <label><input type="radio" name="pay" value="rechnung"><span>📄 Rechnung</span></label>
-      </div>
-      <p style="font-size:.8rem;color:var(--muted);margin-top:10px">Die eigentliche Karten-/PayPal-Eingabe erfolgt sicher direkt beim Zahlungsanbieter, nicht auf dieser Seite.</p>
-    </fieldset>
+    </div>
   </div>
 
-  <div class="card summary">
-    <div id="sumRows"></div>
-    <button class="pay-btn" type="submit">Jetzt bestellen</button>
-    <div class="trust">🔒 Verbindung wird verschlüsselt übertragen (HTTPS)</div>
+  <div>
+    <div class="card summary">
+      <details class="accordion" style="margin-bottom:14px">
+        <summary>Bestellübersicht anzeigen</summary>
+        <div id="miniList" style="margin-top:10px"></div>
+      </details>
+      <div id="sumRows"></div>
+      <button class="pay-btn" type="submit">Jetzt bestellen</button>
+      <div class="trust">🔒 Verbindung verschlüsselt (HTTPS)</div>
+    </div>
   </div>
 </form>
 </main>
@@ -95,11 +165,50 @@ const cart=JSON.parse(localStorage.getItem(KEY))||[];
 if(!cart.length) location.href='warenkorb.html';
 
 const sub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
-const ship=sub>=50||sub===0?0:4.95;
+const ship=sub>=50?0:4.95;
+
+document.getElementById('miniList').innerHTML=cart.map(it=>
+  `<div class="mini-item"><span>${it.qty||1}× ${it.name}</span><span>${eur(it.price*(it.qty||1))}</span></div>`
+).join('');
+
 document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Artikel (${cart.length})</span><span>${eur(sub)}</span></div>
-  <div class="row"><span>Versand</span><span>${ship===0?'Kostenlos':eur(ship)}</span></div>
+  <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
+
+// Rechnungsadresse ein-/ausblenden
+const billingCard=document.getElementById('billingCard');
+document.getElementById('diffBilling').addEventListener('change', e=>{
+  billingCard.style.display=e.target.checked?'block':'none';
+  billingCard.querySelectorAll('input').forEach(i=>i.required=e.target.checked);
+});
+
+// Demo-Adresssuche (in echt: Backend-Proxy zu einer Adress-API, Key nie im Frontend)
+const demoAdressen=[
+  {label:'Musterstraße 1, 10115 Berlin', strasse:'Musterstraße 1', plz:'10115', ort:'Berlin'},
+  {label:'Bahnhofstraße 5, 80335 München', strasse:'Bahnhofstraße 5', plz:'80335', ort:'München'},
+  {label:'Hauptstraße 22, 50667 Köln', strasse:'Hauptstraße 22', plz:'50667', ort:'Köln'},
+  {label:'Königsallee 3, 40212 Düsseldorf', strasse:'Königsallee 3', plz:'40212', ort:'Düsseldorf'},
+  {label:'Reeperbahn 10, 20359 Hamburg', strasse:'Reeperbahn 10', plz:'20359', ort:'Hamburg'}
+];
+const strasseInput=document.getElementById('strasse'), suggestBox=document.getElementById('suggest');
+strasseInput.addEventListener('input', ()=>{
+  const q=strasseInput.value.trim().toLowerCase();
+  if(q.length<2){ suggestBox.style.display='none'; return; }
+  const hits=demoAdressen.filter(a=>a.label.toLowerCase().includes(q));
+  if(!hits.length){ suggestBox.style.display='none'; return; }
+  suggestBox.innerHTML=hits.map(a=>`<div data-i="${demoAdressen.indexOf(a)}">${a.label}</div>`).join('');
+  suggestBox.style.display='block';
+});
+suggestBox.addEventListener('click', e=>{
+  const i=e.target.dataset.i; if(i===undefined) return;
+  const a=demoAdressen[i];
+  strasseInput.value=a.strasse;
+  document.getElementById('plz').value=a.plz;
+  document.getElementById('ort').value=a.ort;
+  suggestBox.style.display='none';
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('.field-rel')) suggestBox.style.display='none'; });
 
 document.getElementById('checkoutForm').addEventListener('submit', async e=>{
   e.preventDefault();
@@ -109,9 +218,8 @@ document.getElementById('checkoutForm').addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
-  // Demo only: in echt hier fetch('/api/checkout', {method:'POST', body: JSON.stringify(order)})
-  // an deinen eigenen Server, der Preise serverseitig neu berechnet und den
-  // Zahlungsanbieter anspricht. NIE Kartendaten selbst speichern/senden.
+  // Demo only: in echt fetch('/api/checkout', {method:'POST', body: JSON.stringify(order)})
+  // Server berechnet Preise neu & spricht den Zahlungsanbieter an. Nie Kartendaten selbst verarbeiten.
   await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
