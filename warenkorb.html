@@ -1,228 +1,94 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warenkorb - Holzmanufaktur</title>
-    <style>
-        :root {
-            --primary-color: #8b5a2b;
-            --primary-dark: #6b431f;
-            --bg-color: #fcfbfa;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        nav a.back-link {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        nav a.back-link:hover {
-            color: var(--primary-color);
-        }
-
-        .cart-section {
-            margin-top: 40px;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        h1 {
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-top: 0;
-            color: var(--primary-dark);
-        }
-
-        .cart-items {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .item-info h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1rem;
-        }
-
-        .item-price {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .remove-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .remove-btn:hover {
-            background-color: #c82333;
-        }
-
-        .cart-summary {
-            margin-top: 30px;
-            text-align: right;
-            border-top: 2px solid #eee;
-            padding-top: 20px;
-        }
-
-        .total-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .checkout-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1.1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .checkout-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .empty-cart-msg {
-            text-align: center;
-            color: #777;
-            padding: 40px 0;
-            font-size: 1.1rem;
-            font-style: italic;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warenkorb – Holzmanufaktur</title>
+<style>
+:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#ece8e1;--text:#2a2521;--muted:#8a8078}
+*{box-sizing:border-box}
+body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.logo{font-weight:700;color:var(--acc-d);text-decoration:none;font-size:1.2rem}
+.back{color:var(--text);text-decoration:none;font-size:.9rem}
+.back:hover{color:var(--acc)}
+h1{font-size:1.6rem;margin:32px 0 20px}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+@media(max-width:760px){.layout{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px}
+.item{display:grid;grid-template-columns:72px 1fr auto auto;gap:16px;align-items:center;padding:18px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.thumb{width:72px;height:72px;border-radius:8px;background:#f1ede6;display:flex;align-items:center;justify-content:center;font-size:1.6rem}
+.name{font-weight:600;margin:0 0 4px}
+.unit{color:var(--muted);font-size:.85rem;margin:0}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.qty button{width:28px;height:28px;border:none;background:#f5f2ec;cursor:pointer;font-size:1rem}
+.qty span{width:30px;text-align:center;font-size:.9rem}
+.price{font-weight:700;min-width:70px;text-align:right}
+.remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1}
+.remove:hover{color:#c0392b}
+.summary{padding:22px;position:sticky;top:80px}
+.summary h2{font-size:1.1rem;margin:0 0 16px}
+.row{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:10px;color:var(--muted)}
+.row.total{color:var(--text);font-weight:700;font-size:1.15rem;border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.checkout-btn{width:100%;background:var(--acc);color:#fff;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:16px}
+.checkout-btn:hover{background:var(--acc-d)}
+.trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+</style>
 </head>
 <body>
+<header><div class="wrap"><nav>
+<a href="index.html" class="logo">🪵 Holzmanufaktur</a>
+<a href="index.html" class="back">← Weiter einkaufen</a>
+</nav></div></header>
 
-    <header>
-        <div class="container">
-            <nav>
-                <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-                <a href="index.html" class="back-link">← Weiter einkaufen</a>
-            </nav>
-        </div>
-    </header>
+<main class="wrap">
+<h1>Dein Warenkorb</h1>
+<div class="layout">
+  <div class="card" id="list"></div>
+  <div class="card summary" id="summary" style="display:none">
+    <h2>Zusammenfassung</h2>
+    <div class="row"><span>Zwischensumme</span><span id="sub">0,00 €</span></div>
+    <div class="row"><span>Versand</span><span id="ship">0,00 €</span></div>
+    <div class="row total"><span>Gesamt</span><span id="total">0,00 €</span></div>
+    <button class="checkout-btn" onclick="location.href='kasse.html'">Zur Kasse</button>
+    <div class="trust">🔒 Sichere Bezahlung · SSL-verschlüsselt</div>
+  </div>
+</div>
+</main>
 
-    <main class="container">
-        <section class="cart-section">
-            <h1>Dein Warenkorb</h1>
-            
-            <ul class="cart-items" id="cartItemList">
-                <!-- JavaScript füllt das hier -->
-            </ul>
+<script>
+const KEY='warenkorbItems', FREE_SHIP=50, SHIP_COST=4.95;
+const eur=n=>n.toFixed(2).replace('.',',')+' €';
+const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
+const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 
-            <div class="cart-summary" id="cartSummaryContainer" style="display: none;">
-                <div class="total-price">Gesamtsumme: <span id="cartTotal">0,00 €</span></div>
-                <button class="checkout-btn" onclick="zurKasse()">Zur Kasse gehen</button>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        function ladeWarenkorb() {
-            const cartItemList = document.getElementById('cartItemList');
-            const cartSummaryContainer = document.getElementById('cartSummaryContainer');
-            const cartTotal = document.getElementById('cartTotal');
-            
-            let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
-
-            cartItemList.innerHTML = '';
-
-            if (cart.length === 0) {
-                cartItemList.innerHTML = '<li class="empty-cart-msg">Dein Warenkorb ist derzeit leer.</li>';
-                cartSummaryContainer.style.display = 'none';
-                return;
-            }
-
-            cartSummaryContainer.style.display = 'block';
-            let gesamtSumme = 0;
-
-            cart.forEach((item, index) => {
-                gesamtSumme += item.price;
-
-                const li = document.createElement('li');
-                li.className = 'cart-item';
-                li.innerHTML = `
-                    <div class="item-info">
-                        <h3>${item.name}</h3>
-                        <span class="item-price">${item.price.toFixed(2).replace('.', ',')} €</span>
-                    </div>
-                    <button class="remove-btn" onclick="artikelEntfernen(${index})">Entfernen</button>
-                `;
-                cartItemList.appendChild(li);
-            });
-
-            cartTotal.textContent = gesamtSumme.toFixed(2).replace('.', ',') + ' €';
-        }
-
-        function artikelEntfernen(index) {
-            let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
-            cart.splice(index, 1);
-            localStorage.setItem('warenkorbItems', JSON.stringify(cart));
-            ladeWarenkorb();
-        }
-
-        function zurKasse() {
-            alert("Vielen Dank für deine Bestellung! Die Kassenabwicklung wird vorbereitet.");
-            localStorage.removeItem('warenkorbItems');
-            ladeWarenkorb();
-        }
-
-        ladeWarenkorb();
-    </script>
+function render(){
+  const cart=load(), list=document.getElementById('list'), sum=document.getElementById('summary');
+  if(!cart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; return; }
+  sum.style.display='block';
+  list.innerHTML=cart.map((it,i)=>`
+    <div class="item">
+      <div class="thumb">${it.icon||'📦'}</div>
+      <div><p class="name">${it.name}</p><p class="unit">${eur(it.price)} / Stk.</p></div>
+      <div class="qty">
+        <button onclick="changeQty(${i},-1)">−</button><span>${it.qty||1}</span><button onclick="changeQty(${i},1)">+</button>
+      </div>
+      <div class="price">${eur(it.price*(it.qty||1))}</div>
+      <button class="remove" onclick="removeItem(${i})" title="Entfernen">✕</button>
+    </div>`).join('');
+  const sub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
+  const ship=sub>=FREE_SHIP||sub===0?0:SHIP_COST;
+  document.getElementById('sub').textContent=eur(sub);
+  document.getElementById('ship').textContent=ship===0?'Kostenlos':eur(ship);
+  document.getElementById('total').textContent=eur(sub+ship);
+}
+function changeQty(i,d){ const c=load(); c[i].qty=Math.max(1,(c[i].qty||1)+d); save(c); render(); }
+function removeItem(i){ const c=load(); c.splice(i,1); save(c); render(); }
+render();
+</script>
 </body>
 </html>
