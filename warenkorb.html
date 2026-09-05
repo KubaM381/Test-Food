@@ -18,21 +18,31 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 .card{background:#fff;border:1px solid var(--line);border-radius:10px}
-.item{display:grid;grid-template-columns:72px 1fr auto auto;gap:16px;align-items:center;padding:18px;border-bottom:1px solid var(--line)}
+
+.progress-box{padding:18px 22px;border-bottom:1px solid var(--line)}
+.progress-msg{font-size:.9rem;margin:0 0 10px;font-weight:600}
+.progress-track{position:relative;height:8px;background:#f1ede6;border-radius:99px}
+.progress-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s ease}
+.progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
+.progress-mark.reached{border-color:var(--acc);background:var(--acc)}
+
+.item{display:grid;grid-template-columns:36px 64px 1fr auto auto;gap:14px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:none}
-.thumb{width:72px;height:72px;border-radius:8px;background:#f1ede6;display:flex;align-items:center;justify-content:center;font-size:1.6rem}
+.remove{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#f7f5f1;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.remove:hover{background:#fcebea;border-color:#e3a7a1;color:#c0392b}
+.thumb{width:64px;height:64px;border-radius:8px;background:#f1ede6;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
 .name{font-weight:600;margin:0 0 4px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .qty button{width:28px;height:28px;border:none;background:#f5f2ec;cursor:pointer;font-size:1rem}
 .qty span{width:30px;text-align:center;font-size:.9rem}
 .price{font-weight:700;min-width:70px;text-align:right}
-.remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1}
-.remove:hover{color:#c0392b}
+
 .summary{padding:22px;position:sticky;top:80px}
 .summary h2{font-size:1.1rem;margin:0 0 16px}
 .row{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:10px;color:var(--muted)}
 .row.total{color:var(--text);font-weight:700;font-size:1.15rem;border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.free-ship{color:#3f7d3f;font-weight:600}
 .checkout-btn{width:100%;background:var(--acc);color:#fff;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:16px}
 .checkout-btn:hover{background:var(--acc-d)}
 .trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
@@ -48,7 +58,17 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 <main class="wrap">
 <h1>Dein Warenkorb</h1>
 <div class="layout">
-  <div class="card" id="list"></div>
+  <div class="card" id="cardBox">
+    <div class="progress-box" id="progressBox" style="display:none">
+      <p class="progress-msg" id="progressMsg"></p>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-mark" id="markShip" style="left:50%">🚚</div>
+        <div class="progress-mark" id="markGift" style="left:100%">🎁</div>
+      </div>
+    </div>
+    <div id="list"></div>
+  </div>
   <div class="card summary" id="summary" style="display:none">
     <h2>Zusammenfassung</h2>
     <div class="row"><span>Zwischensumme</span><span id="sub">0,00 €</span></div>
@@ -61,33 +81,56 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 </main>
 
 <script>
-const KEY='warenkorbItems', FREE_SHIP=50, SHIP_COST=4.95;
+const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
 const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 
+// gleiche Artikel (nach Name) zusammenfassen statt mehrfach anzuzeigen
+function mergeDuplicates(cart){
+  const map=new Map();
+  cart.forEach(it=>{
+    if(map.has(it.name)) map.get(it.name).qty += (it.qty||1);
+    else map.set(it.name,{...it, qty:it.qty||1});
+  });
+  return [...map.values()];
+}
+
 function render(){
-  const cart=load(), list=document.getElementById('list'), sum=document.getElementById('summary');
-  if(!cart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; return; }
-  sum.style.display='block';
+  let cart=mergeDuplicates(load());
+  save(cart); // normalisiert speichern
+  const list=document.getElementById('list'), sum=document.getElementById('summary'), pbox=document.getElementById('progressBox');
+  if(!cart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; pbox.style.display='none'; return; }
+  sum.style.display='block'; pbox.style.display='block';
+
   list.innerHTML=cart.map((it,i)=>`
     <div class="item">
+      <button class="remove" onclick="removeItem(${i})" title="Entfernen">✕</button>
       <div class="thumb">${it.icon||'📦'}</div>
       <div><p class="name">${it.name}</p><p class="unit">${eur(it.price)} / Stk.</p></div>
-      <div class="qty">
-        <button onclick="changeQty(${i},-1)">−</button><span>${it.qty||1}</span><button onclick="changeQty(${i},1)">+</button>
-      </div>
-      <div class="price">${eur(it.price*(it.qty||1))}</div>
-      <button class="remove" onclick="removeItem(${i})" title="Entfernen">✕</button>
+      <div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${it.qty}</span><button onclick="changeQty(${i},1)">+</button></div>
+      <div class="price">${eur(it.price*it.qty)}</div>
     </div>`).join('');
-  const sub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
-  const ship=sub>=FREE_SHIP||sub===0?0:SHIP_COST;
+
+  const sub=cart.reduce((s,it)=>s+it.price*it.qty,0);
+  const ship=sub>=FREE_SHIP?0:SHIP_COST;
   document.getElementById('sub').textContent=eur(sub);
-  document.getElementById('ship').textContent=ship===0?'Kostenlos':eur(ship);
+  const shipEl=document.getElementById('ship');
+  shipEl.textContent=ship===0?'Kostenlos':eur(ship);
+  shipEl.className=ship===0?'free-ship':'';
   document.getElementById('total').textContent=eur(sub+ship);
+
+  const pct=Math.min(100, sub/GIFT_AT*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('markShip').classList.toggle('reached', sub>=FREE_SHIP);
+  document.getElementById('markGift').classList.toggle('reached', sub>=GIFT_AT);
+  const msg=document.getElementById('progressMsg');
+  if(sub>=GIFT_AT) msg.textContent='🎉 Du hast eine Überraschung freigeschaltet + gratis Versand!';
+  else if(sub>=FREE_SHIP) msg.textContent=`✓ Gratis Versand freigeschaltet – noch ${eur(GIFT_AT-sub)} bis zur Überraschung`;
+  else msg.textContent=`Noch ${eur(FREE_SHIP-sub)} bis zum gratis Versand`;
 }
-function changeQty(i,d){ const c=load(); c[i].qty=Math.max(1,(c[i].qty||1)+d); save(c); render(); }
-function removeItem(i){ const c=load(); c.splice(i,1); save(c); render(); }
+function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,c[i].qty+d); save(c); render(); }
+function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
 render();
 </script>
 </body>
