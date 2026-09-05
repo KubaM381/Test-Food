@@ -24,7 +24,6 @@ legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 @media(max-width:480px){.grid2{grid-template-columns:1fr}}
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 input{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
-/* Checkboxen/Radios sollen NICHT die generische Input-Breite/Padding erben (verursachte den Versatz) */
 input[type=checkbox],input[type=radio]{width:auto;height:auto;padding:0;border-radius:0;background:none}
 fieldset{border:none;padding:0;margin:0}
 
@@ -38,10 +37,9 @@ fieldset{border:none;padding:0;margin:0}
 .toggle-row input[type=checkbox]{width:16px;height:16px;flex:0 0 auto;accent-color:var(--acc);border:1px solid var(--line);border-radius:4px}
 .toggle-row label{display:inline-block;margin:0}
 
-/* Zahlungsart als auswählbare, abgerundete Kästchen statt sichtbarem Radio-Button */
-.pay-opt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-@media(max-width:480px){.pay-opt{grid-template-columns:1fr}}
-.pay-opt label{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--text);transition:border-color .15s,background-color .15s}
+/* Zahlungsart: kompakte, nebeneinander liegende Auswahl-Kästchen statt breiter 2er-Spalten */
+.pay-opt{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.pay-opt label{flex:0 0 auto;position:relative;border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;font-size:.88rem;color:var(--text);transition:border-color .15s,background-color .15s}
 .pay-opt input{position:absolute;opacity:0;pointer-events:none}
 .pay-opt label:has(input:checked){border-color:var(--acc);background:#f7f0e8;color:var(--acc-d)}
 
@@ -49,14 +47,18 @@ fieldset{border:none;padding:0;margin:0}
 .legal-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--blue);cursor:pointer;text-decoration:underline}
 .legal-link:hover{color:var(--blue-d)}
 
+/* Modal: Kopfzeile mit Schließen-Button bleibt beim Scrollen im Modal-Inhalt sichtbar */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
 .modal-backdrop.open{display:flex}
-.modal-box{background:#fff;border-radius:10px;max-width:540px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
-.modal-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--muted)}
-.modal-box h3{margin:0 0 14px;font-size:1.1rem}
-.modal-box h4{margin:16px 0 4px;font-size:.9rem}
-.modal-box h4:first-of-type{margin-top:0}
-.modal-box p{font-size:.85rem;color:#4a423b;line-height:1.65;margin:0 0 4px}
+.modal-box{background:#fff;border-radius:10px;max-width:540px;width:100%;max-height:80vh;overflow-y:auto;padding:0;position:relative}
+.modal-header{position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);z-index:2}
+.modal-header strong{font-size:1.05rem}
+.modal-close{flex:0 0 auto;background:#f1ede6;border:none;width:30px;height:30px;border-radius:50%;font-size:1.1rem;line-height:1;cursor:pointer;color:var(--muted)}
+.modal-close:hover{background:#e5e1da;color:var(--text)}
+.modal-content{padding:20px}
+.modal-content h4{margin:16px 0 4px;font-size:.9rem}
+.modal-content h4:first-of-type{margin-top:0}
+.modal-content p{font-size:.85rem;color:#4a423b;line-height:1.65;margin:0 0 4px}
 
 .summary{position:sticky;top:20px}
 @media(min-width:761px){.summary{border-left:1px solid var(--line);padding-left:32px}}
@@ -84,7 +86,7 @@ fieldset{border:none;padding:0;margin:0}
 
 <main class="wrap">
 <h1>Kasse</h1>
-<div class="hint">⚠️ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
+<div class="hint">⚠ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
   <div>
@@ -165,7 +167,6 @@ fieldset{border:none;padding:0;margin:0}
 </main>
 
 <template id="tpl-agb">
-  <h3>Allgemeine Geschäftsbedingungen</h3>
   <h4>§1 Geltungsbereich</h4>
   <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen, die Verbraucher und Unternehmer über den Online-Shop der Holzmanufaktur [Firmenname] abschließen.</p>
   <h4>§2 Vertragspartner und Vertragsschluss</h4>
@@ -182,10 +183,9 @@ fieldset{border:none;padding:0;margin:0}
   <p>Es gelten die gesetzlichen Gewährleistungsrechte.</p>
   <h4>§8 Schlussbestimmungen</h4>
   <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Zwingende Verbraucherschutzvorschriften am gewöhnlichen Aufenthaltsort des Kunden bleiben unberührt.</p>
-  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠️ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung von einem Anwalt prüfen lassen.</p>
+  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung von einem Anwalt prüfen lassen.</p>
 </template>
 <template id="tpl-ds">
-  <h3>Datenschutzerklärung</h3>
   <h4>1. Verantwortlicher</h4>
   <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur [Firmenname], [Adresse], E-Mail: [E-Mail-Adresse].</p>
   <h4>2. Erhebung und Verarbeitung Ihrer Daten</h4>
@@ -200,13 +200,16 @@ fieldset{border:none;padding:0;margin:0}
   <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie ein Widerspruchsrecht. Kontakt hierfür: [E-Mail-Adresse]. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.</p>
   <h4>7. Sicherheit</h4>
   <p>Ihre Daten werden während der Übertragung durch eine SSL-Verschlüsselung geschützt.</p>
-  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠️ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
+  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
 </template>
 
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeLegal()">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeLegal()" aria-label="Schließen">✕</button>
-    <div id="modalContent"></div>
+    <div class="modal-header">
+      <strong id="modalTitle"></strong>
+      <button class="modal-close" onclick="closeLegal()" aria-label="Schließen">✕</button>
+    </div>
+    <div id="modalContent" class="modal-content"></div>
   </div>
 </div>
 
@@ -228,12 +231,18 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
+// Modal: Kopfzeile mit Schließen-Button bleibt sichtbar, egal wie weit im Inhalt gescrollt wird.
+// Zusätzlich wird das Scrollen der Hintergrundseite gesperrt, solange das Modal offen ist.
+const legalTitles={agb:'Allgemeine Geschäftsbedingungen', ds:'Datenschutzerklärung'};
 function openLegal(which){
+  document.getElementById('modalTitle').textContent=legalTitles[which];
   document.getElementById('modalContent').innerHTML=document.getElementById('tpl-'+which).innerHTML;
   document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 function closeLegal(){
   document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow='';
 }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLegal(); });
 
