@@ -14,13 +14,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 .logo{font-weight:700;color:var(--acc-d);text-decoration:none;font-size:1.2rem}
 .back{color:var(--text);text-decoration:none;font-size:.9rem}
 h1{font-size:1.6rem;margin:32px 0 20px}
-.layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;padding-bottom:60px}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-/* Flaches Design: keine Umrandung/Box, nur die graue Trennlinie zwischen Sections */
-.sheet{background:#fff}
-.section{padding:22px 0}
-.section+.section{border-top:1px solid var(--line)}
+/* Gleiches flaches Design wie im Warenkorb: kein Kartenhintergrund, nur graue Trennlinien */
+.section{padding:20px 0;border-bottom:1px solid var(--line)}
+.section:last-child{border-bottom:none}
 legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:480px){.grid2{grid-template-columns:1fr}}
@@ -28,7 +27,6 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 input{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
 fieldset{border:none;padding:0;margin:0}
 
-/* Lupe & Vorschlagsliste: relativ zum Input zentriert statt fixem px-Wert -> bleibt auf jedem Screen korrekt */
 .field-rel{position:relative}
 .search-ic{position:absolute;top:50%;right:12px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
 .suggest{position:absolute;z-index:5;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
@@ -47,7 +45,6 @@ fieldset{border:none;padding:0;margin:0}
 .legal-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--blue);cursor:pointer;text-decoration:underline}
 .legal-link:hover{color:var(--blue-d)}
 
-/* Modal für AGB/Datenschutz – bleibt auf der Seite */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
 .modal-backdrop.open{display:flex}
 .modal-box{background:#fff;border-radius:10px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
@@ -57,6 +54,9 @@ fieldset{border:none;padding:0;margin:0}
 .modal-box p{font-size:.85rem;color:#4a423b;line-height:1.6;margin:0 0 4px}
 
 .summary{position:sticky;top:20px}
+@media(min-width:761px){.summary{border-left:1px solid var(--line);padding-left:32px}}
+@media(max-width:760px){.summary{border-top:1px solid var(--line);padding-top:24px;margin-top:8px}}
+.summary .accordion{padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px}
 .accordion summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:0;list-style:none;display:flex;justify-content:space-between}
 .accordion summary::-webkit-details-marker{display:none}
 .accordion summary::after{content:'▾';transition:transform .2s}
@@ -82,7 +82,7 @@ fieldset{border:none;padding:0;margin:0}
 <div class="hint">⚠️ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
-  <div class="sheet">
+  <div>
     <div class="section">
       <p class="legend">Kontakt</p>
       <label>E-Mail *</label>
@@ -148,23 +148,18 @@ fieldset{border:none;padding:0;margin:0}
     </div>
   </div>
 
-  <div class="sheet summary">
-    <div class="section">
-      <details class="accordion">
-        <summary>Bestellübersicht anzeigen</summary>
-        <div id="miniList" style="margin-top:12px"></div>
-      </details>
-    </div>
-    <div class="section">
-      <div id="sumRows"></div>
-      <button class="pay-btn" type="submit">Jetzt bestellen</button>
-      <div class="trust">🔒 Verbindung verschlüsselt (HTTPS)</div>
-    </div>
+  <div class="summary">
+    <details class="accordion">
+      <summary>Bestellübersicht anzeigen</summary>
+      <div id="miniList" style="margin-top:12px"></div>
+    </details>
+    <div id="sumRows"></div>
+    <button class="pay-btn" type="submit">Jetzt bestellen</button>
+    <div class="trust">🔒 Verbindung verschlüsselt (HTTPS)</div>
   </div>
 </form>
 </main>
 
-<!-- Inhalte für AGB/Datenschutz-Modal -->
 <template id="tpl-agb">
   <h4>1. Geltungsbereich</h4><p>Diese AGB gelten für alle Bestellungen über den Online-Shop von [Firmenname].</p>
   <h4>2. Vertragsschluss</h4><p>Mit Klick auf "Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail zustande.</p>
@@ -207,7 +202,6 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
-// AGB / Datenschutz als Modal – öffnet auf derselben Seite, kein Verlassen der Website
 function openLegal(which){
   document.getElementById('modalContent').innerHTML=document.getElementById('tpl-'+which).innerHTML;
   document.getElementById('modalBackdrop').classList.add('open');
@@ -223,7 +217,6 @@ document.getElementById('diffBilling').addEventListener('change', e=>{
   billingSection.querySelectorAll('input').forEach(i=>i.required=e.target.checked);
 });
 
-// Demo-Adresssuche (in echt: Backend-Proxy zu Adress-API, Key nie im Frontend)
 const demoAdressen=[
   {label:'Musterstraße 1, 10115 Berlin', strasse:'Musterstraße 1', plz:'10115', ort:'Berlin'},
   {label:'Bahnhofstraße 5, 80335 München', strasse:'Bahnhofstraße 5', plz:'80335', ort:'München'},
@@ -258,8 +251,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
-  // Demo only: in echt fetch('/api/checkout', {method:'POST', body: JSON.stringify(order)})
-  // Server berechnet Preise neu & spricht den Zahlungsanbieter an. Nie Kartendaten selbst verarbeiten.
   await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
