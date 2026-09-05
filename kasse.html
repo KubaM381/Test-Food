@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078;--err:#c0392b;--blue:#4a7fc7;--blue-d:#35608f}
 *{box-sizing:border-box}
@@ -39,6 +37,7 @@ fieldset{border:none;padding:0;margin:0}
 .toggle-row input[type=checkbox]{width:16px;height:16px;flex:0 0 auto;accent-color:var(--acc);border:1px solid var(--line);border-radius:4px}
 .toggle-row label{display:inline-block;margin:0}
 
+/* Zahlungsart: kompakte, nebeneinander liegende Auswahl-Kästchen statt breiter 2er-Spalten */
 .pay-opt{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .pay-opt label{flex:0 0 auto;position:relative;border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;font-size:.88rem;color:var(--text);transition:border-color .15s,background-color .15s}
 .pay-opt input{position:absolute;opacity:0;pointer-events:none}
@@ -48,6 +47,7 @@ fieldset{border:none;padding:0;margin:0}
 .legal-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--blue);cursor:pointer;text-decoration:underline}
 .legal-link:hover{color:var(--blue-d)}
 
+/* Modal: Kopfzeile mit Schließen-Button bleibt beim Scrollen im Modal-Inhalt sichtbar */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
 .modal-backdrop.open{display:flex}
 .modal-box{background:#fff;border-radius:10px;max-width:540px;width:100%;max-height:80vh;overflow-y:auto;padding:0;position:relative}
@@ -86,7 +86,7 @@ fieldset{border:none;padding:0;margin:0}
 
 <main class="wrap">
 <h1>Kasse</h1>
-<div class="hint">🔒 Sichere Checkout-Umgebung. Deine Daten werden sicher an unser CRM übermittelt.</div>
+<div class="hint">⚠ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
   <div>
@@ -157,7 +157,7 @@ fieldset{border:none;padding:0;margin:0}
   <div class="summary">
     <details class="accordion">
       <summary>Bestellübersicht anzeigen</summary>
-      <div id="miniList" style="margin-top:12px">Lade...</div>
+      <div id="miniList" style="margin-top:12px"></div>
     </details>
     <div id="sumRows"></div>
     <button class="pay-btn" type="submit">Jetzt bestellen</button>
@@ -199,7 +199,7 @@ fieldset{border:none;padding:0;margin:0}
   <h4>6. Ihre Rechte</h4>
   <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie ein Widerspruchsrecht. Kontakt hierfür: [E-Mail-Adresse]. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.</p>
   <h4>7. Sicherheit</h4>
-  <p>Ihre Daten werden während der Übertragung durch eine SSL-Verschlüsselung geschützt.</p>
+  <p>Hierbei werden Ihre Daten durch eine SSL-Verschlüsselung geschützt.</p>
   <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
 </template>
 
@@ -214,42 +214,22 @@ fieldset{border:none;padding:0;margin:0}
 </div>
 
 <script>
-const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const KEY='warenkorbItems';
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
-let verifiedCart = [];
-let verifiedTotals = { sub: 0, ship: 0, total: 0 };
+const cart=JSON.parse(localStorage.getItem(KEY))||[];
+if(!cart.length) location.href='warenkorb.html';
 
-async function initCheckout() {
-  const rawCart = JSON.parse(localStorage.getItem(KEY))||[];
-  if(!rawCart.length) { location.href='warenkorb.html'; return; }
+const sub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
+const ship=sub>=50?0:4.95;
 
-  const { data: dbProducts } = await supabase.from('products').select('*');
+document.getElementById('miniList').innerHTML=cart.map(it=>
+  `<div class="mini-item"><span>${it.qty||1}× ${it.name}</span><span>${eur(it.price*(it.qty||1))}</span></div>`
+).join('');
 
-  verifiedCart = rawCart.map(cartItem => {
-    const dbProd = dbProducts ? dbProducts.find(p => p.id === cartItem.id || p.name === cartItem.name) : null;
-    if(dbProd) {
-        return { id: dbProd.id, name: dbProd.name, price: dbProd.price, qty: cartItem.qty || 1 };
-    }
-    return { name: cartItem.name, price: cartItem.price, qty: cartItem.qty || 1 };
-  });
-
-  const sub = verifiedCart.reduce((s,it)=>s+it.price*(it.qty||1),0);
-  const ship = sub>=50?0:4.95;
-  verifiedTotals = { sub, ship, total: sub+ship };
-
-  document.getElementById('miniList').innerHTML=verifiedCart.map(it=>
-    `<div class="mini-item"><span>${it.qty||1}× ${it.name}</span><span>${eur(it.price*(it.qty||1))}</span></div>`
-  ).join('');
-
-  document.getElementById('sumRows').innerHTML=`
-    <div class="row"><span>Artikel (${verifiedCart.length})</span><span>${eur(sub)}</span></div>
-    <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
-    <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
-}
+document.getElementById('sumRows').innerHTML=`
+  <div class="row"><span>Artikel (${cart.length})</span><span>${eur(sub)}</span></div>
+  <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
+  <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
 const legalTitles={agb:'Allgemeine Geschäftsbedingungen', ds:'Datenschutzerklärung'};
 function openLegal(which){
@@ -304,39 +284,12 @@ document.getElementById('checkoutForm').addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
-  const formData = new FormData(form);
-  
-  const orderData = {
-    vorname: formData.get('vorname'),
-    nachname: formData.get('nachname'),
-    strasse: formData.get('strasse'),
-    plz: formData.get('plz'),
-    ort: formData.get('ort'),
-    email: formData.get('email'),
-    telefon: formData.get('telefon') || '',
-    zahlungsart: formData.get('pay'),
-    items: verifiedCart, 
-    zwischensumme: verifiedTotals.sub,
-    versand: verifiedTotals.ship,
-    gesamtbetrag: verifiedTotals.total,
-    status: 'Neu'
-  };
-
-  const { error } = await supabase.from('orders').insert([orderData]);
-
-  if(error) {
-    alert('Fehler beim Übermitteln der Bestellung: ' + error.message);
-    btn.disabled=false; 
-    btn.textContent='Jetzt bestellen';
-    return;
-  }
+  await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
-  alert('Danke für deine Bestellung! Sie wurde erfolgreich an dein CRM übermittelt.');
+  alert('Danke für deine Bestellung! (Demo – es wurde nichts echt bezahlt)');
   location.href='index.html';
 });
-
-initCheckout();
 </script>
 </body>
 </html>
