@@ -64,7 +64,6 @@
             color: var(--primary-color);
         }
 
-        /* Warenkorb-Button im Header */
         .cart-btn {
             background: none;
             border: 2px solid var(--primary-color);
@@ -97,7 +96,6 @@
             border-radius: 50%;
         }
 
-        /* Hero Bereich */
         .hero {
             text-align: center;
             padding: 60px 20px;
@@ -117,7 +115,6 @@
             margin-bottom: 20px;
         }
 
-        /* Produkt-Grid */
         .products-section {
             padding: 20px 0 60px 0;
         }
@@ -214,7 +211,6 @@
                 <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
                 <div class="nav-links">
                     <a href="#produkte">Produkte</a>
-                    <!-- Verweist jetzt fehlerfrei auf warenkorb.html -->
                     <button class="cart-btn" onclick="window.location.href='warenkorb.html'">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -238,48 +234,8 @@
 
     <main class="container products-section" id="produkte">
         <h2>Unsere Produkte</h2>
-        <div class="product-grid">
-            
-            <!-- Produkt 1 -->
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="product-content">
-                    <h3>Massivholz Esstisch "Eiche"</h3>
-                    <p>Geölter Eichentisch mit charakteristischer Baumkante. Ein echter Hingucker für jedes Esszimmer.</p>
-                    <div class="product-footer">
-                        <span class="price">450,00 €</span>
-                        <button class="add-to-cart-btn" onclick="warenkorbHinzufuegen('Massivholz Esstisch Eiche', 450.00)">Hinzufügen</button>
-                    </div>
-                </div>
+        <div class="product-grid" id="productGrid">
             </div>
-
-            <!-- Produkt 2 -->
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="product-content">
-                    <h3>Wandregal "Nussbaum"</h3>
-                    <p>Minimalistisches schwebendes Regal aus edlem Nussbaumholz, inklusive verdeckter Halterung.</p>
-                    <div class="product-footer">
-                        <span class="price">89,00 €</span>
-                        <button class="add-to-cart-btn" onclick="warenkorbHinzufuegen('Wandregal Nussbaum', 89.00)">Hinzufügen</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Produkt 3 -->
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="product-content">
-                    <h3>Schneidebrett "Ahorn & Nuss"</h3>
-                    <p>Handverlesenes, langlebiges Hirnholz-Schneidebrett mit integrierter Saftrille.</p>
-                    <div class="product-footer">
-                        <span class="price">49,99 €</span>
-                        <button class="add-to-cart-btn" onclick="warenkorbHinzufuegen('Schneidebrett Ahorn & Nuss', 49.99)">Hinzufügen</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
     </main>
 
     <footer>
@@ -287,6 +243,37 @@
     </footer>
 
     <script>
+        // Produkt-Datenbank
+        const produkte = [
+            { id: 1, name: 'Massivholz Esstisch "Eiche"', price: 450.00, img: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80', desc: 'Geölter Eichentisch mit charakteristischer Baumkante. Ein echter Hingucker für jedes Esszimmer.' },
+            { id: 2, name: 'Wandregal "Nussbaum"', price: 89.00, img: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=600&q=80', desc: 'Minimalistisches schwebendes Regal aus edlem Nussbaumholz, inklusive verdeckter Halterung.' },
+            { id: 3, name: 'Schneidebrett "Ahorn & Nuss"', price: 49.99, img: 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=600&q=80', desc: 'Handverlesenes, langlebiges Hirnholz-Schneidebrett mit integrierter Saftrille.' }
+        ];
+
+        // Gutschein-Konfiguration
+        const gutscheine = {
+            "LIMIT50": { maxUses: 50, currentUses: 49, discount: 10, type: 'fixed' },
+            "MIN50": { minOrderValue: 50.00, discount: 15, type: 'percent' },
+            "MAX100": { maxOrderValue: 100.00, discount: 5, type: 'fixed' }
+        };
+
+        function rendereProdukte() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = produkte.map(p => `
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('${p.img}')"></div>
+                    <div class="product-content">
+                        <h3>${p.name}</h3>
+                        <p>${p.desc}</p>
+                        <div class="product-footer">
+                            <span class="price">${p.price.toFixed(2).replace('.', ',')} €</span>
+                            <button class="add-to-cart-btn" onclick="warenkorbHinzufuegen('${p.name}', ${p.price})">Hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function warenkorbHinzufuegen(name, preis) {
             let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
             cart.push({ name: name, price: preis });
@@ -301,6 +288,18 @@
             document.getElementById('cartCount').textContent = cart.length;
         }
 
+        // Gutschein-Validierung für die Verwendung im Warenkorb
+        function einloesenGutschein(code, summe) {
+            const g = gutscheine[code.toUpperCase()];
+            if (!g) return { success: false, msg: "Ungültiger Code." };
+            if (g.maxUses && g.currentUses >= g.maxUses) return { success: false, msg: "Code bereits verbraucht." };
+            if (g.minOrderValue && summe < g.minOrderValue) return { success: false, msg: `Erst ab ${g.minOrderValue} €.` };
+            if (g.maxOrderValue && summe > g.maxOrderValue) return { success: false, msg: `Nur bis ${g.maxOrderValue} € gültig.` };
+            
+            return { success: true, discount: g.discount, type: g.type };
+        }
+
+        rendereProdukte();
         aktualisiereZaehler();
     </script>
 </body>
