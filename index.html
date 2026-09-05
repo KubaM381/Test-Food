@@ -58,45 +58,54 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 <div id="toast" class="toast">✓ Zum Warenkorb hinzugefügt</div>
 
 <script>
-// Supabase Konfiguration mit echtem Anon-Key
 const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const KEY = 'warenkorbItems';
-const eur = n => n.toFixed(2).replace('.', ',') + ' €';
+const eur = n => (typeof n === 'number' ? n : parseFloat(n) || 0).toFixed(2).replace('.', ',') + ' €';
 
 async function loadProducts() {
   const grid = document.getElementById('grid');
+  
   const { data, error } = await supabase.from('products').select('*');
-  
+
   if (error) {
-    grid.innerHTML = `<div class="loading" style="color:#c0392b">Fehler beim Laden der Produkte: ${error.message}</div>`;
-    return;
-  }
-  
-  if (!data || data.length === 0) {
-    grid.innerHTML = '<div class="loading">Keine Produkte in der Datenbank gefunden.</div>';
+    console.log('Supabase Fehler:', error);
+    grid.innerHTML = `<div class="loading" style="color:#c0392b">Fehler beim Laden: ${error.message}</div>`;
     return;
   }
 
-  grid.innerHTML = data.map(p => `
-    <div class="card">
-      <div class="thumb">${p.icon || '📦'}</div>
-      <div class="info">
-        <h2 class="name">${p.name}</h2>
-        <div class="price">${eur(p.price)}</div>
-        <button class="btn" onclick="addToCart('${p.id}', '${p.name}', ${p.price}, '${p.icon || '📦'}')">
-          In den Warenkorb
-        </button>
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<div class="loading" style="color:#c0392b">Keine Produkte in der Tabelle "products" gefunden.</div>';
+    return;
+  }
+
+  grid.innerHTML = data.map(p => {
+    // Hier fangen wir ab, falls Spalten auf Deutsch oder Englisch heissen
+    const id = p.id;
+    const name = p.name || p.titel || 'Produkt';
+    const price = p.price !== undefined ? p.price : (p.preis !== undefined ? p.preis : 0);
+    const icon = p.icon || p.emoji || '📦';
+
+    return `
+      <div class="card">
+        <div class="thumb">${icon}</div>
+        <div class="info">
+          <h2 class="name">${name}</h2>
+          <div class="price">${eur(price)}</div>
+          <button class="btn" onclick="addToCart('${id}', '${name.replace(/'/g, "\\'")}', ${price}, '${icon}')">
+            In den Warenkorb
+          </button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function addToCart(id, name, price, icon) {
   let cart = JSON.parse(localStorage.getItem(KEY)) || [];
-  let existingItem = cart.find(item => item.id === id || item.name === name);
+  let existingItem = cart.find(item => item.id === id);
   
   if (existingItem) {
     existingItem.qty = (existingItem.qty || 1) + 1;
@@ -125,7 +134,6 @@ function showToast() {
   }, 2500);
 }
 
-// Initialisierung beim Seitenstart
 updateCartBadge();
 loadProducts();
 </script>
