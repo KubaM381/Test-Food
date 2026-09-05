@@ -161,9 +161,8 @@
         <section class="cart-section">
             <h1>Dein Warenkorb</h1>
             
-            <!-- Dynamische Liste der Warenkorb-Artikel -->
             <ul class="cart-items" id="cartItemList">
-                <!-- Wird per JavaScript befüllt -->
+                <!-- JavaScript füllt das hier -->
             </ul>
 
             <div class="cart-summary" id="cartSummaryContainer" style="display: none;">
@@ -174,7 +173,6 @@
     </main>
 
     <script>
-        // Warenkorb beim Laden der Seite anzeigen
         function ladeWarenkorb() {
             const cartItemList = document.getElementById('cartItemList');
             const cartSummaryContainer = document.getElementById('cartSummaryContainer');
@@ -211,7 +209,6 @@
             cartTotal.textContent = gesamtSumme.toFixed(2).replace('.', ',') + ' €';
         }
 
-        // Einzelnen Artikel löschen
         function artikelEntfernen(index) {
             let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
             cart.splice(index, 1);
@@ -219,14 +216,12 @@
             ladeWarenkorb();
         }
 
-        // Kassen-Funktion
         function zurKasse() {
             alert("Vielen Dank für deine Bestellung! Die Kassenabwicklung wird vorbereitet.");
-            localStorage.removeItem('warenkorbItems'); // Warenkorb leeren nach Bestellung
+            localStorage.removeItem('warenkorbItems');
             ladeWarenkorb();
         }
 
-        // Beim Laden ausführen
         ladeWarenkorb();
     </script>
 </body>
