@@ -1,306 +1,143 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holzmanufaktur - Handgefertigte Möbel & Unikate</title>
-    <style>
-        :root {
-            --primary-color: #8b5a2b;
-            --primary-dark: #6b431f;
-            --bg-color: #fcfbfa;
-            --text-color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop – Holzmanufaktur</title>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078}
+*{box-sizing:border-box}
+body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.logo{font-weight:700;color:var(--acc-d);text-decoration:none;font-size:1.2rem}
+.cart-link{color:var(--text);text-decoration:none;font-size:.95rem; font-weight:600; display:flex; gap:6px; align-items:center}
+.cart-link:hover{color:var(--acc)}
+.badge{background:var(--acc);color:#fff;border-radius:12px;padding:2px 8px;font-size:.75rem;min-width:24px;text-align:center}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
+h1{font-size:1.6rem;margin:32px 0 20px}
 
-        header {
-            background-color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;padding-bottom:60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s, box-shadow .2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.thumb{background:#f1ede6;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem}
+.info{padding:20px;display:flex;flex-direction:column;flex:1}
+.name{font-weight:600;margin:0 0 8px;font-size:1.1rem}
+.price{font-weight:700;color:var(--text);font-size:1.2rem;margin-bottom:20px}
+.btn{margin-top:auto;width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:12px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn:active{background:#f7f0e8}
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-
-        .cart-btn {
-            background: none;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .cart-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .cart-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .cart-count {
-            background-color: #dc3545;
-            color: white;
-            font-size: 0.8rem;
-            padding: 2px 6px;
-            border-radius: 50%;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?auto=format&fit=crop&w=1200&q=80') center/cover;
-            color: white;
-            border-radius: 0 0 12px 12px;
-            margin-bottom: 40px;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        .products-section {
-            padding: 20px 0 60px 0;
-        }
-
-        .products-section h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2rem;
-            color: var(--primary-dark);
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-img {
-            height: 200px;
-            background-color: #e0e0e0;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .product-content {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .product-content h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.2rem;
-        }
-
-        .product-content p {
-            color: #666;
-            font-size: 0.95rem;
-            flex-grow: 1;
-            margin-bottom: 20px;
-        }
-
-        .product-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .price {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .add-to-cart-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .add-to-cart-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            background-color: #333;
-            color: white;
-            margin-top: 40px;
-        }
-    </style>
+/* Benachrichtigung beim Hinzufügen */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#3f7d3f;color:#fff;padding:14px 28px;border-radius:8px;font-weight:600;font-size:.95rem;opacity:0;transition:all .3s ease;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
 </head>
 <body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
+      <a href="warenkorb.html" class="cart-link">
+        Warenkorb <span class="badge" id="cartCount">0</span>
+      </a>
+    </nav>
+  </div>
+</header>
 
-    <header>
-        <div class="container">
-            <nav>
-                <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-                <div class="nav-links">
-                    <a href="#produkte">Produkte</a>
-                    <button class="cart-btn" onclick="window.location.href='warenkorb.html'">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                        <span>Warenkorb</span>
-                        <span class="cart-count" id="cartCount">0</span>
-                    </button>
-                </div>
-            </nav>
-        </div>
-    </header>
+<main class="wrap">
+  <h1>Unsere Produkte</h1>
+  <div id="grid" class="grid">
+    <div style="color:var(--muted); grid-column: 1 / -1;">Produkte werden geladen...</div>
+  </div>
+</main>
 
-    <div class="hero">
-        <div class="container">
-            <h1>Handgefertigte Meisterwerke aus Holz</h1>
-            <p>Nachhaltig, individuell und mit Liebe in unserer Manufaktur gefertigt.</p>
-        </div>
+<div id="toast" class="toast">✓ Zum Warenkorb hinzugefügt</div>
+
+<script>
+// Supabase einbinden
+const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
+const SUPABASE_KEY = 'Sb_publishable_hrgd2mvl4QpK7X2tvImhcw_9fsVhV4J';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const KEY = 'warenkorbItems';
+const eur = n => n.toFixed(2).replace('.', ',') + ' €';
+
+// Produkte aus der Datenbank laden
+async function loadProducts() {
+  const { data, error } = await supabase.from('products').select('*');
+  const grid = document.getElementById('grid');
+  
+  if (error) {
+    grid.innerHTML = '<div style="color:#c0392b">Fehler beim Laden der Produkte.</div>';
+    console.error(error);
+    return;
+  }
+  
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<div style="color:var(--muted)">Noch keine Produkte vorhanden. Füge welche im Supabase Table Editor hinzu!</div>';
+    return;
+  }
+
+  // HTML für jedes Produkt generieren
+  grid.innerHTML = data.map(p => `
+    <div class="card">
+      <div class="thumb">${p.icon || '📦'}</div>
+      <div class="info">
+        <h2 class="name">${p.name}</h2>
+        <div class="price">${eur(p.price)}</div>
+        <button class="btn" onclick="addToCart('${p.id}', '${p.name}', ${p.price}, '${p.icon}')">
+          In den Warenkorb
+        </button>
+      </div>
     </div>
+  `).join('');
+  
+  updateCartBadge();
+}
 
-    <main class="container products-section" id="produkte">
-        <h2>Unsere Produkte</h2>
-        <div class="product-grid" id="productGrid">
-            </div>
-    </main>
+// In den Warenkorb legen
+function addToCart(id, name, price, icon) {
+  let cart = JSON.parse(localStorage.getItem(KEY)) || [];
+  
+  // Prüfen ob das Produkt schon im Warenkorb ist
+  let existingItem = cart.find(item => item.id === id);
+  if (existingItem) {
+    existingItem.qty = (existingItem.qty || 1) + 1;
+  } else {
+    cart.push({ id, name, price, icon, qty: 1 });
+  }
+  
+  // Im LocalStorage speichern
+  localStorage.setItem(KEY, JSON.stringify(cart));
+  
+  updateCartBadge();
+  showToast();
+}
 
-    <footer>
-        <p>&copy; 2026 Holzmanufaktur. Alle Rechte vorbehalten.</p>
-    </footer>
+// Zähler oben rechts im Menü aktualisieren
+function updateCartBadge() {
+  let cart = JSON.parse(localStorage.getItem(KEY)) || [];
+  let totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+  document.getElementById('cartCount').textContent = totalItems;
+}
 
-    <script>
-        // Produkt-Datenbank
-        const produkte = [
-            { id: 1, name: 'Massivholz Esstisch "Eiche"', price: 450.00, img: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80', desc: 'Geölter Eichentisch mit charakteristischer Baumkante. Ein echter Hingucker für jedes Esszimmer.' },
-            { id: 2, name: 'Wandregal "Nussbaum"', price: 89.00, img: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=600&q=80', desc: 'Minimalistisches schwebendes Regal aus edlem Nussbaumholz, inklusive verdeckter Halterung.' },
-            { id: 3, name: 'Schneidebrett "Ahorn & Nuss"', price: 49.99, img: 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=600&q=80', desc: 'Handverlesenes, langlebiges Hirnholz-Schneidebrett mit integrierter Saftrille.' }
-        ];
+// Kleine Animation (Benachrichtigung), wenn etwas hinzugefügt wurde
+let toastTimeout;
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
 
-        // Gutschein-Konfiguration
-        const gutscheine = {
-            "LIMIT50": { maxUses: 50, currentUses: 49, discount: 10, type: 'fixed' },
-            "MIN50": { minOrderValue: 50.00, discount: 15, type: 'percent' },
-            "MAX100": { maxOrderValue: 100.00, discount: 5, type: 'fixed' }
-        };
-
-        function rendereProdukte() {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = produkte.map(p => `
-                <div class="product-card">
-                    <div class="product-img" style="background-image: url('${p.img}')"></div>
-                    <div class="product-content">
-                        <h3>${p.name}</h3>
-                        <p>${p.desc}</p>
-                        <div class="product-footer">
-                            <span class="price">${p.price.toFixed(2).replace('.', ',')} €</span>
-                            <button class="add-to-cart-btn" onclick="warenkorbHinzufuegen('${p.name}', ${p.price})">Hinzufügen</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function warenkorbHinzufuegen(name, preis) {
-            let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
-            cart.push({ name: name, price: preis });
-            localStorage.setItem('warenkorbItems', JSON.stringify(cart));
-            
-            aktualisiereZaehler();
-            alert(`"${name}" wurde zum Warenkorb hinzugefügt!`);
-        }
-
-        function aktualisiereZaehler() {
-            let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
-            document.getElementById('cartCount').textContent = cart.length;
-        }
-
-        // Gutschein-Validierung für die Verwendung im Warenkorb
-        function einloesenGutschein(code, summe) {
-            const g = gutscheine[code.toUpperCase()];
-            if (!g) return { success: false, msg: "Ungültiger Code." };
-            if (g.maxUses && g.currentUses >= g.maxUses) return { success: false, msg: "Code bereits verbraucht." };
-            if (g.minOrderValue && summe < g.minOrderValue) return { success: false, msg: `Erst ab ${g.minOrderValue} €.` };
-            if (g.maxOrderValue && summe > g.maxOrderValue) return { success: false, msg: `Nur bis ${g.maxOrderValue} € gültig.` };
-            
-            return { success: true, discount: g.discount, type: g.type };
-        }
-
-        rendereProdukte();
-        aktualisiereZaehler();
-    </script>
+// Beim Start der Seite direkt die Produkte laden
+loadProducts();
+</script>
 </body>
 </html>
