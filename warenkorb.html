@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warenkorb – Holzmanufaktur</title>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078}
 *{box-sizing:border-box}
@@ -38,7 +40,6 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .item-actions{display:flex;align-items:center;gap:22px;margin-left:auto}
 
-/* Mengenauswahl: dezente +/- Buttons in derselben Farbe wie die Zahl, keine Trennlinie, Feld wächst mit der Ziffernzahl */
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .qty button{width:30px;height:34px;border:none;background:#fff;cursor:pointer;font-size:.95rem;color:var(--muted);flex:0 0 auto}
 .qty button:hover{color:var(--text)}
@@ -104,8 +105,13 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 </main>
 
 <script>
+// Supabase einbinden
+const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
+const SUPABASE_KEY = 'Sb_publishable_hrgd2mvl4QpK7X2tvImhcw_9fsVhV4J';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
-const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05}; // Demo-Codes; in echt serverseitig prüfen
+const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05}; // Demo-Codes
 let discountPct=0, discountCode='';
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
@@ -114,8 +120,9 @@ const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 function mergeDuplicates(cart){
   const map=new Map();
   cart.forEach(it=>{
-    if(map.has(it.name)) map.get(it.name).qty += (it.qty||1);
-    else map.set(it.name,{...it, qty:it.qty||1});
+    const matchKey = it.id || it.name;
+    if(map.has(matchKey)) map.get(matchKey).qty += (it.qty||1);
+    else map.set(matchKey,{...it, qty:it.qty||1});
   });
   return [...map.values()];
 }
@@ -134,11 +141,23 @@ function sizeQty(el){
   el.style.width=Math.max(2, len+0.8)+'ch';
 }
 
-function render(){
-  let cart=mergeDuplicates(load());
-  save(cart);
+async function render(){
+  let localCart=mergeDuplicates(load());
+  save(localCart);
   const list=document.getElementById('list'), sum=document.getElementById('summary'), pbox=document.getElementById('progressBox');
-  if(!cart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; pbox.style.display='none'; return; }
+  
+  if(!localCart.length){ list.innerHTML='<div class="empty">Dein Warenkorb ist leer.</div>'; sum.style.display='none'; pbox.style.display='none'; return; }
+  
+  // Sicherer Datenbank-Abgleich (Preise direkt aus Supabase)
+  const { data: dbProducts } = await supabase.from('products').select('*');
+  
+  let cart = localCart.map(localItem => {
+    // Falls das Produkt in der DB existiert, überschreibe den Preis fälschungssicher
+    const dbProd = dbProducts ? dbProducts.find(p => p.id === localItem.id || p.name === localItem.name) : null;
+    if(dbProd) return { ...localItem, price: dbProd.price, name: dbProd.name, icon: dbProd.icon, id: dbProd.id };
+    return localItem;
+  });
+
   sum.style.display='block'; pbox.style.display='block';
 
   list.innerHTML=cart.map((it,i)=>`
@@ -184,6 +203,7 @@ function render(){
   else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Gratis Versand freigeschaltet – noch ${eur(GIFT_AT-rawSub)} bis zur Überraschung`;
   else pmsg.textContent=`Noch ${eur(FREE_SHIP-rawSub)} bis zum gratis Versand`;
 }
+
 function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,c[i].qty+d); save(c); render(); }
 function setQty(i,val){
   const c=mergeDuplicates(load());
@@ -194,6 +214,7 @@ function setQty(i,val){
   render();
 }
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
+
 render();
 </script>
 </body>
