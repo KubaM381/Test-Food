@@ -21,15 +21,19 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 h1{font-size:1.6rem;margin:32px 0 20px}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;padding-bottom:60px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
 .thumb{background:#f1ede6;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem}
 .info{padding:20px;display:flex;flex-direction:column;flex:1}
 .name{font-weight:600;margin:0 0 8px;font-size:1.1rem}
 .price{font-weight:700;color:var(--text);font-size:1.2rem;margin-bottom:20px}
-.btn{margin-top:auto;width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:12px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer}
+.btn{margin-top:auto;width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:12px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--acc);color:var(--acc);background:#fcfbfa}
+.btn:active{background:#f7f0e8}
 
 .loading{grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted);font-size:1.05rem}
-.error-box{grid-column:1/-1;background:#fadbd8;color:#78281f;padding:20px;border-radius:8px;border:1px solid #f5b7b1;font-family:monospace;white-space:pre-wrap;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#3f7d3f;color:#fff;padding:14px 28px;border-radius:8px;font-weight:600;font-size:.95rem;opacity:0;transition:all .3s ease;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
 </head>
 <body>
@@ -47,57 +51,107 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 <main class="wrap">
   <h1>Unsere Produkte</h1>
   <div id="grid" class="grid">
-    <div class="loading" id="statusMsg">Verbindung zu Supabase wird aufgebaut…</div>
+    <div class="loading">Produkte werden geladen…</div>
   </div>
 </main>
+
+<div id="toast" class="toast">✓ Zum Warenkorb hinzugefügt</div>
 
 <script>
 const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
+const KEY = 'warenkorbItems';
+const eur = n => (parseFloat(n) || 0).toFixed(2).replace('.', ',') + ' €';
 
-async function testConnection() {
+async function loadProducts() {
   const grid = document.getElementById('grid');
+  
   try {
-    if (!window.supabase) {
-      throw new Error("Das Supabase-SDK konnte nicht geladen werden (Internet oder CDN blockiert?).");
-    }
-    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    document.getElementById('statusMsg').textContent = 'Frage Tabelle "products" ab…';
-    
     const { data, error } = await supabase.from('products').select('*');
 
-    if (error) {
-      throw new Error(JSON.stringify(error, null, 2));
-    }
+    if (error) throw error;
 
     if (!data || data.length === 0) {
-      grid.innerHTML = '<div class="loading">Die Verbindung steht, aber die Tabelle "products" liefert 0 Datensätze zurück.</div>';
+      grid.innerHTML = '<div class="loading">Keine Produkte gefunden.</div>';
       return;
     }
 
-    // Wenn Daten da sind, direkt rendern
-    const eur = n => (parseFloat(n) || 0).toFixed(2).replace('.', ',') + ' €';
-    
+    // HTML für Produkte generieren
     grid.innerHTML = data.map(p => `
       <div class="card">
         <div class="thumb">${p.icon || '📦'}</div>
         <div class="info">
           <h2 class="name">${p.name || 'Produkt'}</h2>
           <div class="price">${eur(p.price)}</div>
-          <button class="btn">In den Warenkorb</button>
+          <button class="btn add-btn" 
+            data-id="${p.id}" 
+            data-name="${escapeHtml(p.name)}" 
+            data-price="${p.price || 0}" 
+            data-icon="${p.icon || '📦'}">
+            In den Warenkorb
+          </button>
         </div>
       </div>
     `).join('');
 
+    // Event-Listener sauber an alle Buttons hängen
+    document.querySelectorAll('.add-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const dataset = e.currentTarget.dataset;
+        addToCart({
+          id: dataset.id,
+          name: dataset.name,
+          price: parseFloat(dataset.price),
+          icon: dataset.icon
+        });
+      });
+    });
+
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<div class="error-box"><strong>Fehler aufgetreten:</strong>\n${err.message || err}</div>`;
+    grid.innerHTML = `<div class="loading" style="color:#c0392b">Fehler beim Laden der Produkte.</div>`;
   }
 }
 
-testConnection();
+function escapeHtml(str) {
+  return (str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function addToCart(product) {
+  let cart = JSON.parse(localStorage.getItem(KEY)) || [];
+  let existingItem = cart.find(item => item.id === product.id);
+  
+  if (existingItem) {
+    existingItem.qty = (existingItem.qty || 1) + 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  
+  localStorage.setItem(KEY, JSON.stringify(cart));
+  updateCartBadge();
+  showToast();
+}
+
+function updateCartBadge() {
+  let cart = JSON.parse(localStorage.getItem(KEY)) || [];
+  let totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+  document.getElementById('cartCount').textContent = totalItems;
+}
+
+let toastTimeout;
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+// Initialer Badge-Aufruf beim Laden der Seite
+updateCartBadge();
+loadProducts();
 </script>
 </body>
 </html>
