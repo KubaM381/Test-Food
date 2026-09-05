@@ -38,10 +38,11 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .item-actions{display:flex;align-items:center;gap:22px;margin-left:auto}
 
-/* Mengenauswahl: etwas stärker abgerundet, Zahl ist ein editierbares Feld zum Antippen/Eintippen */
+/* Mengenauswahl: dezente +/- Buttons in derselben Farbe wie die Zahl, keine Trennlinie, Feld wächst mit der Ziffernzahl */
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.qty button{width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:1.1rem;flex:0 0 auto}
-.qty input{width:34px;height:34px;text-align:center;font-size:.9rem;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);background:#fff;padding:0;-moz-appearance:textfield}
+.qty button{width:30px;height:34px;border:none;background:#fff;cursor:pointer;font-size:.95rem;color:var(--muted);flex:0 0 auto}
+.qty button:hover{color:var(--text)}
+.qty input{height:34px;width:2.5ch;min-width:2.5ch;text-align:center;font-size:.9rem;border:none;background:#fff;padding:0;color:var(--text);-moz-appearance:textfield}
 .qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .qty input:focus{outline:none;background:#f7f4ef}
 .price{font-weight:700;min-width:70px;text-align:right}
@@ -128,6 +129,11 @@ function applyDiscount(){
   render();
 }
 
+function sizeQty(el){
+  const len=String(el.value).length;
+  el.style.width=Math.max(2, len+0.8)+'ch';
+}
+
 function render(){
   let cart=mergeDuplicates(load());
   save(cart);
@@ -145,12 +151,14 @@ function render(){
       <div class="item-actions">
         <div class="qty">
           <button onclick="changeQty(${i},-1)">−</button>
-          <input type="number" inputmode="numeric" min="1" value="${it.qty}" onchange="setQty(${i}, this.value)" onclick="this.select()">
+          <input type="number" inputmode="numeric" min="1" value="${it.qty}" oninput="sizeQty(this)" onchange="setQty(${i}, this.value)" onclick="this.select()">
           <button onclick="changeQty(${i},1)">+</button>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
     </div>`).join('');
+
+  list.querySelectorAll('.qty input').forEach(sizeQty);
 
   const rawSub=cart.reduce((s,it)=>s+it.price*it.qty,0);
   const discountAmount=rawSub*discountPct;
