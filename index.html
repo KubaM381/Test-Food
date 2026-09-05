@@ -214,8 +214,8 @@
                 <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
                 <div class="nav-links">
                     <a href="#produkte">Produkte</a>
-                    <!-- Verweist nun sauber auf warenkrob.html -->
-                    <button class="cart-btn" onclick="window.location.href='warenkrob.html'">
+                    <!-- Verweist jetzt fehlerfrei auf warenkorb.html -->
+                    <button class="cart-btn" onclick="window.location.href='warenkorb.html'">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -287,7 +287,6 @@
     </footer>
 
     <script>
-        // Artikel zum lokalen Speicher hinzufügen
         function warenkorbHinzufuegen(name, preis) {
             let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
             cart.push({ name: name, price: preis });
@@ -297,13 +296,11 @@
             alert(`"${name}" wurde zum Warenkorb hinzugefügt!`);
         }
 
-        // Header-Zähler beim Laden aktualisieren
         function aktualisiereZaehler() {
             let cart = JSON.parse(localStorage.getItem('warenkorbItems')) || [];
             document.getElementById('cartCount').textContent = cart.length;
         }
 
-        // Beim Start der Seite ausführen
         aktualisiereZaehler();
     </script>
 </body>
