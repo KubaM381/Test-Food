@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
 <style>
-:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#ece8e1;--text:#2a2521;--muted:#8a8078;--err:#c0392b}
+:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078;--err:#c0392b}
 *{box-sizing:border-box}
 body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0}
 header{background:#fff;border-bottom:1px solid var(--line)}
@@ -14,37 +14,46 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 .logo{font-weight:700;color:var(--acc-d);text-decoration:none;font-size:1.2rem}
 .back{color:var(--text);text-decoration:none;font-size:.9rem}
 h1{font-size:1.6rem;margin:32px 0 20px}
-.layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px}
-fieldset{border:none;padding:0;margin:0}
-legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
+
+.sheet{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.section{padding:22px}
+.section+.section{border-top:1px solid var(--line)}
+legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}}
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
-input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
+fieldset{border:none;padding:0;margin:0}
+
 .field-rel{position:relative}
-.search-ic{position:absolute;right:10px;top:37px;color:var(--muted);pointer-events:none;font-size:.95rem}
+.search-ic{position:absolute;right:12px;top:38px;color:var(--muted);pointer-events:none}
 .suggest{position:absolute;z-index:5;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
 .suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer}
 .suggest div:hover{background:#f5f2ec}
 .toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
 
 .pay-opt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+@media(max-width:480px){.pay-opt{grid-template-columns:1fr}}
 .pay-opt label{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer}
 .pay-opt input{width:auto;margin:0}
 .pay-opt label:has(input:checked){border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
-.badge{font-weight:700;font-size:.9rem;letter-spacing:-.02em;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px}
-.b-card{background:#f1ede6;color:#5a4d3d}
-.b-paypal{background:#f0f6ff;color:#003087}
-.b-klarna{background:#ffe0ea;color:#17120f}
-.b-gpay{color:#4285F4}
-.b-apay{color:#000}
+.badge{height:20px;display:flex;align-items:center}
 
-.agb-row{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;margin:16px 0;color:var(--muted)}
-.agb-row a{color:var(--acc-d);text-decoration:underline}
-.agb-row input{width:auto;margin-top:3px}
+.legal-note{font-size:.82rem;color:var(--muted);margin-top:16px;line-height:1.5}
+.legal-note a{color:var(--acc-d);text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font:inherit}
+.legal-text{display:none;margin-top:14px;font-size:.83rem;color:#4a423b;line-height:1.6;max-height:260px;overflow-y:auto;padding:14px;background:#faf8f5;border-radius:8px}
+.legal-text.open{display:block}
+.legal-text h4{margin:14px 0 4px;font-size:.9rem}
+.legal-text h4:first-child{margin-top:0}
 
 .summary{position:sticky;top:20px}
+.accordion summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:0;list-style:none;display:flex;justify-content:space-between}
+.accordion summary::-webkit-details-marker{display:none}
+.accordion summary::after{content:'▾';transition:transform .2s}
+.accordion[open] summary::after{transform:rotate(180deg)}
+.mini-item{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);padding:6px 0;border-bottom:1px dashed var(--line)}
 .row{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:10px;color:var(--muted)}
 .row.total{color:var(--text);font-weight:700;font-size:1.15rem;border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
 .free-ship{color:#3f7d3f;font-weight:600}
@@ -52,12 +61,6 @@ input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:
 .pay-btn:hover{background:var(--acc-d)}
 .trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
 .hint{background:#fff8ec;border:1px solid #f0e0b8;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#6b5c2f;margin-bottom:18px}
-
-.accordion summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:4px 0;list-style:none;display:flex;justify-content:space-between}
-.accordion summary::-webkit-details-marker{display:none}
-.accordion summary::after{content:'▾';transition:transform .2s}
-.accordion[open] summary::after{transform:rotate(180deg)}
-.mini-item{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);padding:6px 0;border-bottom:1px dashed var(--line)}
 </style>
 </head>
 <body>
@@ -71,85 +74,96 @@ input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:
 <div class="hint">⚠️ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
-  <div>
-    <div class="card">
-      <fieldset>
-        <legend>Kontakt</legend>
-        <label>E-Mail *</label>
-        <input type="email" name="email" required>
-        <label>Telefonnummer (optional)</label>
-        <input type="tel" name="telefon">
-      </fieldset>
+  <div class="sheet">
+    <div class="section">
+      <p class="legend">Kontakt</p>
+      <label>E-Mail *</label>
+      <input type="email" name="email" required>
+      <label>Telefonnummer (optional)</label>
+      <input type="tel" name="telefon">
     </div>
 
-    <div class="card">
-      <fieldset>
-        <legend>Lieferadresse</legend>
-        <div class="grid2">
-          <div><label>Vorname *</label><input name="vorname" required></div>
-          <div><label>Nachname *</label><input name="nachname" required></div>
-        </div>
-        <label>Firma (optional)</label>
-        <input name="firma">
-        <label>Adresse *</label>
-        <div class="field-rel">
-          <input name="strasse" id="strasse" required autocomplete="off" placeholder="Straße & Hausnummer suchen…">
-          <span class="search-ic">🔍</span>
-          <div class="suggest" id="suggest"></div>
-        </div>
-        <label>Adresszusatz (optional)</label>
-        <input name="zusatz" placeholder="z. B. 2. Stock, Wohnung 4">
-        <div class="grid2">
-          <div><label>PLZ *</label><input name="plz" id="plz" required pattern="\d{4,5}"></div>
-          <div><label>Ort *</label><input name="ort" id="ort" required></div>
-        </div>
-        <div class="toggle-row">
-          <input type="checkbox" id="diffBilling">
-          <label for="diffBilling" style="margin:0">Abweichende Rechnungsadresse</label>
-        </div>
-      </fieldset>
+    <div class="section">
+      <p class="legend">Lieferadresse</p>
+      <div class="grid2">
+        <div><label>Vorname *</label><input name="vorname" required></div>
+        <div><label>Nachname *</label><input name="nachname" required></div>
+      </div>
+      <label>Firma (optional)</label>
+      <input name="firma">
+      <label>Adresse *</label>
+      <div class="field-rel">
+        <input name="strasse" id="strasse" required autocomplete="off" placeholder="Straße & Hausnummer suchen…" style="padding-right:38px">
+        <svg class="search-ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        <div class="suggest" id="suggest"></div>
+      </div>
+      <label>Adresszusatz (optional)</label>
+      <input name="zusatz" placeholder="z. B. 2. Stock, Wohnung 4">
+      <div class="grid2">
+        <div><label>PLZ *</label><input name="plz" id="plz" required pattern="\d{4,5}"></div>
+        <div><label>Ort *</label><input name="ort" id="ort" required></div>
+      </div>
+      <div class="toggle-row">
+        <input type="checkbox" id="diffBilling">
+        <label for="diffBilling" style="margin:0">Abweichende Rechnungsadresse</label>
+      </div>
     </div>
 
-    <div class="card" id="billingCard" style="display:none">
-      <fieldset>
-        <legend>Rechnungsadresse</legend>
-        <div class="grid2">
-          <div><label>Vorname *</label><input name="b_vorname"></div>
-          <div><label>Nachname *</label><input name="b_nachname"></div>
-        </div>
-        <label>Straße & Hausnummer *</label>
-        <input name="b_strasse">
-        <div class="grid2">
-          <div><label>PLZ *</label><input name="b_plz" pattern="\d{4,5}"></div>
-          <div><label>Ort *</label><input name="b_ort"></div>
-        </div>
-      </fieldset>
+    <div class="section" id="billingSection" style="display:none">
+      <p class="legend">Rechnungsadresse</p>
+      <div class="grid2">
+        <div><label>Vorname *</label><input name="b_vorname"></div>
+        <div><label>Nachname *</label><input name="b_nachname"></div>
+      </div>
+      <label>Straße & Hausnummer *</label>
+      <input name="b_strasse">
+      <div class="grid2">
+        <div><label>PLZ *</label><input name="b_plz" pattern="\d{4,5}"></div>
+        <div><label>Ort *</label><input name="b_ort"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <fieldset>
-        <legend>Zahlungsart</legend>
-        <div class="pay-opt">
-          <label><input type="radio" name="pay" value="karte" checked><span class="badge b-card">💳 Kreditkarte</span></label>
-          <label><input type="radio" name="pay" value="paypal"><span class="badge b-paypal">Pay<b>Pal</b></span></label>
-          <label><input type="radio" name="pay" value="klarna"><span class="badge b-klarna">Klarna.</span></label>
-          <label><input type="radio" name="pay" value="gpay"><span class="badge b-gpay">G Pay</span></label>
-          <label><input type="radio" name="pay" value="apay"><span class="badge b-apay"> Pay</span></label>
-        </div>
-      </fieldset>
-      <div class="agb-row">
-        <input type="checkbox" id="agb" required>
-        <label for="agb" style="margin:0">Ich akzeptiere die <a href="agb.html" target="_blank">AGB</a> und habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen. *</label>
+    <div class="section">
+      <p class="legend">Zahlungsart</p>
+      <div class="pay-opt">
+        <label><input type="radio" name="pay" value="karte" checked><span class="badge">💳 Kreditkarte</span></label>
+        <label><input type="radio" name="pay" value="paypal"><span class="badge">PayPal</span></label>
+        <label><input type="radio" name="pay" value="klarna"><span class="badge">Klarna</span></label>
+        <label><input type="radio" name="pay" value="gpay"><span class="badge">Google Pay</span></label>
+        <label><input type="radio" name="pay" value="apay"><span class="badge">Apple Pay</span></label>
+      </div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:10px">Sobald ein echter Zahlungsanbieter angebunden ist, erscheinen hier automatisch die offiziellen Buttons/Logos der jeweiligen Anbieter-SDKs.</p>
+    </div>
+
+    <div class="section">
+      <p class="legal-note">Mit dem Absenden deiner Bestellung erklärst du dich mit unseren <button type="button" class="legal-note" onclick="toggleLegal('agb')">AGB</button> einverstanden und bestätigst, unsere <button type="button" class="legal-note" onclick="toggleLegal('ds')">Datenschutzerklärung</button> gelesen zu haben.</p>
+      <div class="legal-text" id="legal-agb">
+        <h4>1. Geltungsbereich</h4><p>Diese AGB gelten für alle Bestellungen über den Online-Shop von [Firmenname].</p>
+        <h4>2. Vertragsschluss</h4><p>Mit Klick auf "Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail zustande.</p>
+        <h4>3. Preise & Versand</h4><p>Alle Preise inkl. gesetzlicher MwSt. Ab 50,00 € Bestellwert liefern wir innerhalb Deutschlands versandkostenfrei.</p>
+        <h4>4. Widerrufsrecht</h4><p>Es gilt ein gesetzliches Widerrufsrecht von 14 Tagen gemäß separater Widerrufsbelehrung.</p>
+        <h4>5. Schlussbestimmungen</h4><p>Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Stand: [Datum].</p>
+        <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung rechtlich prüfen lassen.</p>
+      </div>
+      <div class="legal-text" id="legal-ds">
+        <h4>1. Verantwortlicher</h4><p>[Firmenname], [Adresse], [E-Mail]</p>
+        <h4>2. Verarbeitete Daten</h4><p>Name, Anschrift, E-Mail, Telefonnummer (optional) und Zahlungsdaten, soweit für die Bestellabwicklung nötig.</p>
+        <h4>3. Rechtsgrundlage</h4><p>Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie gesetzliche Pflichten gem. lit. c.</p>
+        <h4>4. Zahlungsdienstleister</h4><p>Je nach Auswahl verarbeiten externe Anbieter (PayPal, Klarna u. a.) die Zahlungsdaten in eigener Verantwortung.</p>
+        <h4>5. Ihre Rechte</h4><p>Auskunft, Berichtigung, Löschung, Widerspruch – Kontakt: [E-Mail]. Beschwerderecht bei einer Aufsichtsbehörde.</p>
+        <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
       </div>
     </div>
   </div>
 
-  <div>
-    <div class="card summary">
-      <details class="accordion" style="margin-bottom:14px">
+  <div class="sheet summary">
+    <div class="section">
+      <details class="accordion">
         <summary>Bestellübersicht anzeigen</summary>
-        <div id="miniList" style="margin-top:10px"></div>
+        <div id="miniList" style="margin-top:12px"></div>
       </details>
+    </div>
+    <div class="section">
       <div id="sumRows"></div>
       <button class="pay-btn" type="submit">Jetzt bestellen</button>
       <div class="trust">🔒 Verbindung verschlüsselt (HTTPS)</div>
@@ -176,14 +190,18 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
-// Rechnungsadresse ein-/ausblenden
-const billingCard=document.getElementById('billingCard');
+function toggleLegal(which){
+  const el=document.getElementById('legal-'+which);
+  el.classList.toggle('open');
+}
+
+const billingSection=document.getElementById('billingSection');
 document.getElementById('diffBilling').addEventListener('change', e=>{
-  billingCard.style.display=e.target.checked?'block':'none';
-  billingCard.querySelectorAll('input').forEach(i=>i.required=e.target.checked);
+  billingSection.style.display=e.target.checked?'block':'none';
+  billingSection.querySelectorAll('input').forEach(i=>i.required=e.target.checked);
 });
 
-// Demo-Adresssuche (in echt: Backend-Proxy zu einer Adress-API, Key nie im Frontend)
+// Demo-Adresssuche (in echt: Backend-Proxy zu Adress-API, Key nie im Frontend)
 const demoAdressen=[
   {label:'Musterstraße 1, 10115 Berlin', strasse:'Musterstraße 1', plz:'10115', ort:'Berlin'},
   {label:'Bahnhofstraße 5, 80335 München', strasse:'Bahnhofstraße 5', plz:'80335', ort:'München'},
