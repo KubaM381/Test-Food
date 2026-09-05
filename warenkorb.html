@@ -15,22 +15,22 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 .back{color:var(--text);text-decoration:none;font-size:.9rem}
 .back:hover{color:var(--acc)}
 h1{font-size:1.6rem;margin:32px 0 20px}
-.layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-.sheet{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.section{padding:20px 22px;border-bottom:1px solid var(--line)}
+.section{padding:20px 0;border-bottom:1px solid var(--line)}
 .section:last-child{border-bottom:none}
 
 .progress-msg{font-size:.9rem;margin:0 0 10px;font-weight:600}
 .progress-track{position:relative;height:8px;background:#f1ede6;border-radius:99px}
 .progress-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s ease}
-.progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
+.progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
 .progress-mark.reached{border-color:var(--acc);background:var(--acc)}
 
-.item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:0}
+.item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 0}
+.item+.item{border-top:1px solid var(--line)}
 .item-main{display:flex;align-items:center;gap:14px;flex:1 1 220px;min-width:0}
-.remove{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#f7f5f1;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.remove{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
 .remove:hover{background:#fcebea;border-color:#e3a7a1;color:#c0392b}
 .thumb{flex:0 0 auto;width:60px;height:60px;border-radius:8px;background:#f1ede6;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
 .info{min-width:0}
@@ -38,12 +38,14 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .item-actions{display:flex;align-items:center;gap:22px;margin-left:auto}
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.qty button{width:34px;height:34px;border:none;background:#f5f2ec;cursor:pointer;font-size:1.1rem}
+.qty button{width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:1.1rem}
 .qty span{width:32px;text-align:center;font-size:.9rem}
 .price{font-weight:700;min-width:70px;text-align:right}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}}
 
-.summary{padding:22px;position:sticky;top:80px}
+.summary{padding:0}
+@media(min-width:761px){.summary{border-left:1px solid var(--line);padding-left:32px}}
+@media(max-width:760px){.summary{border-top:1px solid var(--line);padding-top:24px;margin-top:8px}}
 .summary h2{font-size:1.1rem;margin:0 0 16px}
 .discount{display:flex;gap:8px;margin-bottom:16px}
 .discount input{flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-size:.88rem}
@@ -68,7 +70,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 <main class="wrap">
 <h1>Dein Warenkorb</h1>
 <div class="layout">
-  <div class="sheet" id="sheet">
+  <div>
     <div class="section" id="progressBox" style="display:none">
       <p class="progress-msg" id="progressMsg"></p>
       <div class="progress-track">
@@ -77,9 +79,9 @@ h1{font-size:1.6rem;margin:32px 0 20px}
         <div class="progress-mark" id="markGift" style="left:100%">🎁</div>
       </div>
     </div>
-    <div id="list"></div>
+    <div class="section" id="list"></div>
   </div>
-  <div class="sheet summary" id="summary" style="display:none">
+  <div class="summary" id="summary" style="display:none">
     <h2>Zusammenfassung</h2>
     <div class="discount">
       <input type="text" id="discountInput" placeholder="Rabattcode">
@@ -130,7 +132,7 @@ function render(){
   sum.style.display='block'; pbox.style.display='block';
 
   list.innerHTML=cart.map((it,i)=>`
-    <div class="section item">
+    <div class="item">
       <div class="item-main">
         <button class="remove" onclick="removeItem(${i})" title="Entfernen">✕</button>
         <div class="thumb">${it.icon||'📦'}</div>
@@ -162,7 +164,7 @@ function render(){
   document.getElementById('markShip').classList.toggle('reached', rawSub>=FREE_SHIP);
   document.getElementById('markGift').classList.toggle('reached', rawSub>=GIFT_AT);
   const pmsg=document.getElementById('progressMsg');
-  if(rawSub>=GIFT_AT) pmsg.textContent='🎉 Du hast eine Überraschung freigeschaltet + gratis Versand!';
+  if(rawSub>=GIFT_AT) pmsg.textContent='🎉 Du hast eine Überraschung und eine kostenlose Lieferung erhalten!';
   else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Gratis Versand freigeschaltet – noch ${eur(GIFT_AT-rawSub)} bis zur Überraschung`;
   else pmsg.textContent=`Noch ${eur(FREE_SHIP-rawSub)} bis zum gratis Versand`;
 }
