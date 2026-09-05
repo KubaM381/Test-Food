@@ -17,7 +17,6 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-/* Gleiches flaches Design wie im Warenkorb: kein Kartenhintergrund, nur graue Trennlinien */
 .section{padding:20px 0;border-bottom:1px solid var(--line)}
 .section:last-child{border-bottom:none}
 legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
@@ -25,6 +24,8 @@ legend,.legend{font-weight:700;margin-bottom:12px;padding:0;width:100%}
 @media(max-width:480px){.grid2{grid-template-columns:1fr}}
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 input{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem;background:#fff}
+/* Checkboxen/Radios sollen NICHT die generische Input-Breite/Padding erben (verursachte den Versatz) */
+input[type=checkbox],input[type=radio]{width:auto;height:auto;padding:0;border-radius:0;background:none}
 fieldset{border:none;padding:0;margin:0}
 
 .field-rel{position:relative}
@@ -32,14 +33,17 @@ fieldset{border:none;padding:0;margin:0}
 .suggest{position:absolute;z-index:5;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
 .suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer;white-space:normal;word-break:break-word;line-height:1.4}
 .suggest div:hover{background:#f5f2ec}
-.toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
 
+.toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
+.toggle-row input[type=checkbox]{width:16px;height:16px;flex:0 0 auto;accent-color:var(--acc);border:1px solid var(--line);border-radius:4px}
+.toggle-row label{display:inline-block;margin:0}
+
+/* Zahlungsart als auswählbare, abgerundete Kästchen statt sichtbarem Radio-Button */
 .pay-opt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 @media(max-width:480px){.pay-opt{grid-template-columns:1fr}}
-.pay-opt label{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer}
-.pay-opt input{width:auto;margin:0}
-.pay-opt label:has(input:checked){border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
-.badge{height:20px;display:flex;align-items:center}
+.pay-opt label{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--text);transition:border-color .15s,background-color .15s}
+.pay-opt input{position:absolute;opacity:0;pointer-events:none}
+.pay-opt label:has(input:checked){border-color:var(--acc);background:#f7f0e8;color:var(--acc-d)}
 
 .legal-note{font-size:.82rem;color:var(--muted);margin-top:16px;line-height:1.5}
 .legal-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--blue);cursor:pointer;text-decoration:underline}
@@ -47,11 +51,12 @@ fieldset{border:none;padding:0;margin:0}
 
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
 .modal-backdrop.open{display:flex}
-.modal-box{background:#fff;border-radius:10px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
+.modal-box{background:#fff;border-radius:10px;max-width:540px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
 .modal-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--muted)}
-.modal-box h4{margin:14px 0 4px;font-size:.9rem}
-.modal-box h4:first-child{margin-top:0}
-.modal-box p{font-size:.85rem;color:#4a423b;line-height:1.6;margin:0 0 4px}
+.modal-box h3{margin:0 0 14px;font-size:1.1rem}
+.modal-box h4{margin:16px 0 4px;font-size:.9rem}
+.modal-box h4:first-of-type{margin-top:0}
+.modal-box p{font-size:.85rem;color:#4a423b;line-height:1.65;margin:0 0 4px}
 
 .summary{position:sticky;top:20px}
 @media(min-width:761px){.summary{border-left:1px solid var(--line);padding-left:32px}}
@@ -84,14 +89,6 @@ fieldset{border:none;padding:0;margin:0}
 <form id="checkoutForm" class="layout" novalidate>
   <div>
     <div class="section">
-      <p class="legend">Kontakt</p>
-      <label>E-Mail *</label>
-      <input type="email" name="email" required>
-      <label>Telefonnummer (optional)</label>
-      <input type="tel" name="telefon">
-    </div>
-
-    <div class="section">
       <p class="legend">Lieferadresse</p>
       <div class="grid2">
         <div><label>Vorname *</label><input name="vorname" required></div>
@@ -113,7 +110,7 @@ fieldset{border:none;padding:0;margin:0}
       </div>
       <div class="toggle-row">
         <input type="checkbox" id="diffBilling">
-        <label for="diffBilling" style="margin:0">Abweichende Rechnungsadresse</label>
+        <label for="diffBilling">Abweichende Rechnungsadresse</label>
       </div>
     </div>
 
@@ -132,6 +129,14 @@ fieldset{border:none;padding:0;margin:0}
     </div>
 
     <div class="section">
+      <p class="legend">Kontakt</p>
+      <label>E-Mail *</label>
+      <input type="email" name="email" required>
+      <label>Telefonnummer (optional)</label>
+      <input type="tel" name="telefon">
+    </div>
+
+    <div class="section">
       <p class="legend">Zahlungsart</p>
       <div class="pay-opt">
         <label><input type="radio" name="pay" value="karte" checked><span class="badge">💳 Kreditkarte</span></label>
@@ -140,7 +145,6 @@ fieldset{border:none;padding:0;margin:0}
         <label><input type="radio" name="pay" value="gpay"><span class="badge">Google Pay</span></label>
         <label><input type="radio" name="pay" value="apay"><span class="badge">Apple Pay</span></label>
       </div>
-      <p style="font-size:.78rem;color:var(--muted);margin-top:10px">Sobald ein echter Zahlungsanbieter angebunden ist, erscheinen hier automatisch die offiziellen Buttons/Logos der jeweiligen Anbieter-SDKs.</p>
     </div>
 
     <div class="section">
@@ -161,20 +165,42 @@ fieldset{border:none;padding:0;margin:0}
 </main>
 
 <template id="tpl-agb">
-  <h4>1. Geltungsbereich</h4><p>Diese AGB gelten für alle Bestellungen über den Online-Shop von [Firmenname].</p>
-  <h4>2. Vertragsschluss</h4><p>Mit Klick auf "Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail zustande.</p>
-  <h4>3. Preise & Versand</h4><p>Alle Preise inkl. gesetzlicher MwSt. Ab 50,00 € Bestellwert liefern wir innerhalb Deutschlands versandkostenfrei.</p>
-  <h4>4. Widerrufsrecht</h4><p>Es gilt ein gesetzliches Widerrufsrecht von 14 Tagen gemäß separater Widerrufsbelehrung.</p>
-  <h4>5. Schlussbestimmungen</h4><p>Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Stand: [Datum].</p>
-  <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung rechtlich prüfen lassen.</p>
+  <h3>Allgemeine Geschäftsbedingungen</h3>
+  <h4>§1 Geltungsbereich</h4>
+  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen, die Verbraucher und Unternehmer über den Online-Shop der Holzmanufaktur [Firmenname] abschließen.</p>
+  <h4>§2 Vertragspartner und Vertragsschluss</h4>
+  <p>Vertragspartner ist die Holzmanufaktur [Firmenname], [Adresse]. Die Darstellung der Produkte im Shop stellt kein bindendes Angebot dar, sondern eine unverbindliche Aufforderung zur Bestellung. Mit Klick auf „Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail oder durch Auslieferung der Ware zustande.</p>
+  <h4>§3 Preise und Versandkosten</h4>
+  <p>Alle angegebenen Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer, zuzüglich einer im Bestellvorgang ausgewiesenen Versandkostenpauschale. Ab einem Bestellwert von 50,00 € liefern wir innerhalb Deutschlands versandkostenfrei.</p>
+  <h4>§4 Zahlung</h4>
+  <p>Die Zahlung erfolgt wahlweise per Kreditkarte, PayPal, Klarna, Google Pay oder Apple Pay. Die Abwicklung übernehmen die jeweiligen Zahlungsdienstleister gemäß deren eigenen Nutzungsbedingungen.</p>
+  <h4>§5 Lieferung und Eigentumsvorbehalt</h4>
+  <p>Die Lieferung erfolgt an die von Ihnen angegebene Adresse innerhalb der im Shop genannten Lieferzeit. Die Ware bleibt bis zur vollständigen Bezahlung Eigentum der Holzmanufaktur [Firmenname].</p>
+  <h4>§6 Widerrufsrecht</h4>
+  <p>Verbrauchern steht ein gesetzliches Widerrufsrecht von 14 Tagen zu. Einzelheiten regelt die separate Widerrufsbelehrung, die vor Vertragsschluss zur Verfügung gestellt wird.</p>
+  <h4>§7 Gewährleistung</h4>
+  <p>Es gelten die gesetzlichen Gewährleistungsrechte.</p>
+  <h4>§8 Schlussbestimmungen</h4>
+  <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Zwingende Verbraucherschutzvorschriften am gewöhnlichen Aufenthaltsort des Kunden bleiben unberührt.</p>
+  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠️ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung von einem Anwalt prüfen lassen.</p>
 </template>
 <template id="tpl-ds">
-  <h4>1. Verantwortlicher</h4><p>[Firmenname], [Adresse], [E-Mail]</p>
-  <h4>2. Verarbeitete Daten</h4><p>Name, Anschrift, E-Mail, Telefonnummer (optional) und Zahlungsdaten, soweit für die Bestellabwicklung nötig.</p>
-  <h4>3. Rechtsgrundlage</h4><p>Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie gesetzliche Pflichten gem. lit. c.</p>
-  <h4>4. Zahlungsdienstleister</h4><p>Je nach Auswahl verarbeiten externe Anbieter (PayPal, Klarna u. a.) die Zahlungsdaten in eigener Verantwortung.</p>
-  <h4>5. Ihre Rechte</h4><p>Auskunft, Berichtigung, Löschung, Widerspruch – Kontakt: [E-Mail]. Beschwerderecht bei einer Aufsichtsbehörde.</p>
-  <p style="margin-top:12px;color:var(--muted)">⚠️ Vorlage – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
+  <h3>Datenschutzerklärung</h3>
+  <h4>1. Verantwortlicher</h4>
+  <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur [Firmenname], [Adresse], E-Mail: [E-Mail-Adresse].</p>
+  <h4>2. Erhebung und Verarbeitung Ihrer Daten</h4>
+  <p>Im Rahmen des Bestellvorgangs verarbeiten wir Ihren Namen, Ihre Liefer- und ggf. Rechnungsadresse, E-Mail-Adresse, Telefonnummer (sofern angegeben) sowie die für die Zahlung erforderlichen Daten – ausschließlich zur Abwicklung Ihrer Bestellung.</p>
+  <h4>3. Rechtsgrundlage</h4>
+  <p>Die Verarbeitung erfolgt zur Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie zur Erfüllung gesetzlicher Pflichten, z. B. steuerrechtlicher Aufbewahrungsfristen, gem. Art. 6 Abs. 1 lit. c DSGVO.</p>
+  <h4>4. Weitergabe an Dritte</h4>
+  <p>Zur Vertragsabwicklung geben wir Ihre Daten an beauftragte Versanddienstleister sowie, je nach gewählter Zahlungsart, an PayPal, Klarna, Google Pay oder Apple Pay weiter. Diese verarbeiten Zahlungsdaten in eigener Verantwortung.</p>
+  <h4>5. Speicherdauer</h4>
+  <p>Ihre Daten werden gelöscht, sobald sie für die genannten Zwecke nicht mehr benötigt werden, spätestens nach Ablauf der gesetzlichen Aufbewahrungsfristen.</p>
+  <h4>6. Ihre Rechte</h4>
+  <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie ein Widerspruchsrecht. Kontakt hierfür: [E-Mail-Adresse]. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.</p>
+  <h4>7. Sicherheit</h4>
+  <p>Ihre Daten werden während der Übertragung durch eine SSL-Verschlüsselung geschützt.</p>
+  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠️ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
 </template>
 
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeLegal()">
