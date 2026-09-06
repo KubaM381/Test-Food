@@ -58,7 +58,7 @@
 </main>
 
 <script>
-const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
+const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
 const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
 let discountPct=0, discountCode='';
 
@@ -89,8 +89,16 @@ function mergeDuplicates(cart){
 function applyDiscount(){
   const val=document.getElementById('discountInput').value.trim().toUpperCase();
   const msg=document.getElementById('discountMsg');
-  if(CODES[val]){ discountPct=CODES[val]; discountCode=val; msg.textContent=`Code „${val}" wurde erfolgreich angewendet (-${CODES[val]*100}%).`; msg.style.color='#3f7d3f'; }
-  else { discountPct=0; discountCode=''; msg.textContent='Dieser Code ist leider ungültig.'; msg.style.color='#c0392b'; }
+  if(CODES[val]){
+    discountPct=CODES[val]; discountCode=val;
+    localStorage.setItem(DISCOUNT_KEY, val);
+    msg.textContent=`Code „${val}" wurde erfolgreich angewendet (-${CODES[val]*100}%).`; msg.style.color='#3f7d3f';
+  }
+  else {
+    discountPct=0; discountCode='';
+    localStorage.removeItem(DISCOUNT_KEY);
+    msg.textContent='Dieser Code ist leider ungültig.'; msg.style.color='#c0392b';
+  }
   msg.style.display='block';
   render();
 }
@@ -158,6 +166,10 @@ function render(){
   save(cart);
   const list=document.getElementById('list'), sum=document.getElementById('summary'), pbox=document.getElementById('progressBox'), layout=document.getElementById('layout');
   if(!cart.length){
+    // Ohne Artikel gibt es nichts zu rabattieren - Code mit aufräumen,
+    // damit kein "verwaister" Rabatt beim nächsten Einkauf auftaucht.
+    discountPct=0; discountCode='';
+    localStorage.removeItem(DISCOUNT_KEY);
     layout.classList.add('is-empty');
     list.innerHTML=`
       <div class="empty">
@@ -245,6 +257,25 @@ function setQty(i,val,refocus){
 }
 
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
+
+// Zuvor angewendeten Rabattcode wiederherstellen (z.B. nach Rücksprung
+// aus der Kasse), damit er nicht erneut eingegeben werden muss.
+(function restoreDiscount(){
+  const stored=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
+  if(stored && CODES[stored]){
+    discountPct=CODES[stored];
+    discountCode=stored;
+    const input=document.getElementById('discountInput');
+    const msg=document.getElementById('discountMsg');
+    if(input) input.value=stored;
+    if(msg){
+      msg.textContent=`Code „${stored}" ist weiterhin aktiv (-${CODES[stored]*100}%).`;
+      msg.style.color='#3f7d3f';
+      msg.style.display='block';
+    }
+  }
+})();
+
 render();
 </script>
 </body>
