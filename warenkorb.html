@@ -40,7 +40,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 
 .item{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:16px 0}
 .item+.item{border-top:1px solid var(--line)}
-.item.limit-active{padding-bottom:38px}
+.item.limit-active{padding-bottom:50px}
 .item-main{display:flex;align-items:center;gap:16px;flex:1 1 220px;min-width:0}
 .remove{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
 .remove:hover{background:#fcebea;border-color:#e3a7a1;color:#c0392b}
@@ -63,7 +63,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 
 /* Fehlermeldung zentriert schwebend unter dem Mengenfeld */
 .qty-field{position:relative}
-.qty-error{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:190px;display:none;margin:0;font-size:.72rem;line-height:1.2;color:#c0392b;text-align:center;pointer-events:none;z-index:5}
+.qty-error{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:150px;display:none;margin:0;font-size:.72rem;line-height:1.35;color:#c0392b;text-align:center;pointer-events:none;z-index:5}
 .qty-error.show{display:block}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}.qty-error{left:0;transform:none;text-align:left}}
 
@@ -288,7 +288,7 @@ function render(){
             <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="onQtyInput(this, ${i})" onchange="setQty(${i}, this.value)">
             <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
           </div>
-          <p class="qty-error ${it.qty>=MAX_QTY?'show':''}">Maximal 1.000 Stück pro Artikel möglich</p>
+          <p class="qty-error ${it.qty>=MAX_QTY?'show':''}">Maximal 1.000 Stück<br>pro Artikel möglich</p>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
