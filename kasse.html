@@ -23,7 +23,8 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-.perks-banner{display:none;align-items:center;gap:8px;background:#eef6ec;border:1px solid #cfe8c8;color:#3f7d3f;font-weight:600;font-size:.88rem;border-radius:8px;padding:12px 16px;margin:0 0 24px}
+.perks-banner{display:none;align-items:center;gap:8px;color:var(--acc-d);font-weight:700;font-size:.98rem;margin:0 0 24px}
+.perks-banner svg{flex:0 0 auto;width:20px;height:20px}
 
 .section{padding:20px 0;border-bottom:1px solid var(--line)}
 .section:last-child{border-bottom:none}
@@ -265,10 +266,12 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
+const confettiIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l6-2 9-9-4-4-9 9-2 6Z"/><path d="M15 5l1.5-1.5"/><path d="M18 8.5l2-1"/><path d="M19.5 12l1.7.6"/><circle cx="20" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`;
+
 const perksBanner=document.getElementById('perksBanner');
 if(sub>=GIFT_AT){
   perksBanner.style.display='flex';
-  perksBanner.textContent='🎉 Kostenloser Versand und eine exklusive Überraschung sind dir sicher!';
+  perksBanner.innerHTML=`${confettiIcon}<span>Kostenloser Versand und eine exklusive Überraschung sind dir sicher!</span>`;
 }else if(sub>=FREE_SHIP){
   perksBanner.style.display='flex';
   perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
