@@ -29,9 +29,15 @@ fieldset{border:none;padding:0;margin:0}
 
 .field-rel{position:relative}
 .search-ic{position:absolute;top:50%;right:12px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-.suggest{position:absolute;z-index:5;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none}
-.suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer;white-space:normal;word-break:break-word;line-height:1.4}
+.search-ic.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+.suggest{position:absolute;z-index:5;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;box-shadow:0 6px 16px rgba(0,0,0,.08);overflow:hidden;display:none;max-height:280px;overflow-y:auto}
+.suggest div{padding:10px 12px;font-size:.88rem;cursor:pointer;white-space:normal;word-break:break-word;line-height:1.4;display:flex;gap:8px;align-items:flex-start}
 .suggest div:hover{background:#f5f2ec}
+.suggest .suggest-pin{flex:0 0 auto;opacity:.6}
+.suggest .suggest-empty,.suggest .suggest-loading{color:var(--muted);cursor:default}
+.suggest .suggest-empty:hover,.suggest .suggest-loading:hover{background:#fff}
+.addr-attr{font-size:.72rem;color:var(--muted);margin-top:6px}
 
 .toggle-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.88rem}
 .toggle-row input[type=checkbox]{width:16px;height:16px;flex:0 0 auto;accent-color:var(--acc);border:1px solid var(--line);border-radius:4px}
@@ -74,8 +80,8 @@ fieldset{border:none;padding:0;margin:0}
 .free-ship{color:#3f7d3f;font-weight:600}
 .pay-btn{width:100%;background:var(--acc);color:#fff;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:16px}
 .pay-btn:hover{background:var(--acc-d)}
+.pay-btn:disabled{opacity:.7;cursor:default}
 .trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
-.hint{background:#fff8ec;border:1px solid #f0e0b8;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#6b5c2f;margin-bottom:18px}
 </style>
 </head>
 <body>
@@ -86,7 +92,6 @@ fieldset{border:none;padding:0;margin:0}
 
 <main class="wrap">
 <h1>Kasse</h1>
-<div class="hint">⚠ Demo: Formular & Zahlungs-Buttons sind noch nicht mit einem echten Zahlungsanbieter verbunden.</div>
 
 <form id="checkoutForm" class="layout" novalidate>
   <div>
@@ -100,10 +105,11 @@ fieldset{border:none;padding:0;margin:0}
       <input name="firma">
       <label>Adresse *</label>
       <div class="field-rel">
-        <input name="strasse" id="strasse" required autocomplete="off" placeholder="Straße & Hausnummer suchen…" style="padding-right:38px">
-        <svg class="search-ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        <input name="strasse" id="strasse" required autocomplete="off" placeholder="Adresse eingeben…" style="padding-right:38px">
+        <svg class="search-ic" id="searchIc" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
         <div class="suggest" id="suggest"></div>
       </div>
+      <p class="addr-attr">Adressvorschläge basieren auf Daten von © OpenStreetMap-Mitwirkenden</p>
       <label>Adresszusatz (optional)</label>
       <input name="zusatz" placeholder="z. B. 2. Stock, Wohnung 4">
       <div class="grid2">
@@ -189,7 +195,7 @@ fieldset{border:none;padding:0;margin:0}
   <h4>1. Verantwortlicher</h4>
   <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur [Firmenname], [Adresse], E-Mail: [E-Mail-Adresse].</p>
   <h4>2. Erhebung und Verarbeitung Ihrer Daten</h4>
-  <p>Im Rahmen des Bestellvorgangs verarbeiten wir Ihren Namen, Ihre Liefer- und ggf. Rechnungsadresse, E-Mail-Adresse, Telefonnummer (sofern angegeben) sowie die für die Zahlung erforderlichen Daten – ausschließlich zur Abwicklung Ihrer Bestellung.</p>
+  <p>Im Rahmen des Bestellvorgangs verarbeiten wir Ihren Namen, Ihre Liefer- und ggf. Rechnungsadresse, E-Mail-Adresse, Telefonnummer (sofern angegeben) sowie die für die Zahlung erforderlichen Daten – ausschließlich zur Abwicklung Ihrer Bestellung. Bei der Adresseingabe erfolgt zudem eine Anfrage an den Kartendienst OpenStreetMap/Nominatim zur Anzeige von Adressvorschlägen.</p>
   <h4>3. Rechtsgrundlage</h4>
   <p>Die Verarbeitung erfolgt zur Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie zur Erfüllung gesetzlicher Pflichten, z. B. steuerrechtlicher Aufbewahrungsfristen, gem. Art. 6 Abs. 1 lit. c DSGVO.</p>
   <h4>4. Weitergabe an Dritte</h4>
@@ -250,28 +256,62 @@ document.getElementById('diffBilling').addEventListener('change', e=>{
   billingSection.querySelectorAll('input').forEach(i=>i.required=e.target.checked);
 });
 
-const demoAdressen=[
-  {label:'Musterstraße 1, 10115 Berlin', strasse:'Musterstraße 1', plz:'10115', ort:'Berlin'},
-  {label:'Bahnhofstraße 5, 80335 München', strasse:'Bahnhofstraße 5', plz:'80335', ort:'München'},
-  {label:'Hauptstraße 22, 50667 Köln', strasse:'Hauptstraße 22', plz:'50667', ort:'Köln'},
-  {label:'Königsallee 3, 40212 Düsseldorf', strasse:'Königsallee 3', plz:'40212', ort:'Düsseldorf'},
-  {label:'Reeperbahn 10, 20359 Hamburg', strasse:'Reeperbahn 10', plz:'20359', ort:'Hamburg'}
-];
-const strasseInput=document.getElementById('strasse'), suggestBox=document.getElementById('suggest');
-strasseInput.addEventListener('input', ()=>{
-  const q=strasseInput.value.trim().toLowerCase();
-  if(q.length<2){ suggestBox.style.display='none'; return; }
-  const hits=demoAdressen.filter(a=>a.label.toLowerCase().includes(q));
-  if(!hits.length){ suggestBox.style.display='none'; return; }
-  suggestBox.innerHTML=hits.map(a=>`<div data-i="${demoAdressen.indexOf(a)}">${a.label}</div>`).join('');
+/* Adresssuche: echte, freie Adresssuche über die OpenStreetMap-Nominatim-API.
+   Es gibt keine feste Liste mehr – alle weltweit auffindbaren Adressen können
+   gesucht und übernommen werden. Eingaben werden per Debounce gebündelt, um
+   die Anzahl der Anfragen gering zu halten. */
+const strasseInput=document.getElementById('strasse'), suggestBox=document.getElementById('suggest'), searchIc=document.getElementById('searchIc');
+let searchTimer=null, activeController=null, lastResults=[];
+
+function formatAddress(a){
+  const addr=a.address||{};
+  const strasseTeil=[addr.road||addr.pedestrian||addr.footway, addr.house_number].filter(Boolean).join(' ');
+  const ortTeil=addr.city||addr.town||addr.village||addr.municipality||addr.county||'';
+  const plzOrt=[addr.postcode, ortTeil].filter(Boolean).join(' ');
+  const zeile=[strasseTeil, plzOrt].filter(Boolean).join(', ');
+  return zeile || a.display_name;
+}
+
+async function searchAddress(query){
+  if(activeController) activeController.abort();
+  activeController=new AbortController();
+  searchIc.classList.add('spin');
+  suggestBox.innerHTML='<div class="suggest-loading">Adressen werden gesucht…</div>';
   suggestBox.style.display='block';
+  try{
+    const url='https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7&q='+encodeURIComponent(query);
+    const res=await fetch(url,{signal:activeController.signal, headers:{'Accept-Language':'de'}});
+    const data=await res.json();
+    lastResults=data;
+    if(!data.length){
+      suggestBox.innerHTML='<div class="suggest-empty">Keine passende Adresse gefunden</div>';
+      return;
+    }
+    suggestBox.innerHTML=data.map((a,i)=>`<div data-i="${i}"><span class="suggest-pin">📍</span><span>${formatAddress(a)}</span></div>`).join('');
+  }catch(err){
+    if(err.name==='AbortError') return;
+    suggestBox.innerHTML='<div class="suggest-empty">Adresssuche momentan nicht erreichbar – bitte manuell eingeben</div>';
+  }finally{
+    searchIc.classList.remove('spin');
+  }
+}
+
+strasseInput.addEventListener('input', ()=>{
+  const q=strasseInput.value.trim();
+  clearTimeout(searchTimer);
+  if(q.length<3){ suggestBox.style.display='none'; suggestBox.innerHTML=''; return; }
+  searchTimer=setTimeout(()=>searchAddress(q), 400);
 });
+
 suggestBox.addEventListener('click', e=>{
-  const i=e.target.dataset.i; if(i===undefined) return;
-  const a=demoAdressen[i];
-  strasseInput.value=a.strasse;
-  document.getElementById('plz').value=a.plz;
-  document.getElementById('ort').value=a.ort;
+  const row=e.target.closest('[data-i]');
+  if(!row) return;
+  const a=lastResults[row.dataset.i];
+  const addr=a.address||{};
+  const strasseTeil=[addr.road||addr.pedestrian||addr.footway, addr.house_number].filter(Boolean).join(' ');
+  strasseInput.value=strasseTeil || a.display_name;
+  document.getElementById('plz').value=addr.postcode||'';
+  document.getElementById('ort').value=addr.city||addr.town||addr.village||addr.municipality||addr.county||'';
   suggestBox.style.display='none';
 });
 document.addEventListener('click', e=>{ if(!e.target.closest('.field-rel')) suggestBox.style.display='none'; });
@@ -284,10 +324,11 @@ document.getElementById('checkoutForm').addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
+  // TODO: Zahlungsanbieter-Integration ergänzen, sobald ein Payment-Provider angebunden ist.
   await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
-  alert('Danke für deine Bestellung! (Demo – es wurde nichts echt bezahlt)');
+  alert('Vielen Dank für deine Bestellung! Du erhältst in Kürze eine Bestätigung per E-Mail.');
   location.href='index.html';
 });
 </script>
