@@ -300,26 +300,35 @@ document.getElementById('diffBilling').addEventListener('change', e=>{
 });
 
 /* Eigene Feldvalidierung: statt der Browser-Standardblase bekommt jedes
-   ungültige Feld einen roten Rahmen plus einen kurzen Hinweistext darunter. */
+   ungültige Feld einen roten Rahmen plus einen kurzen Hinweistext darunter.
+   Die Fehlermeldung wird IMMER nach dem "Feld-Block" eingefügt (also nach
+   .field-rel, falls das Input darin steckt) statt direkt nach dem <input>.
+   So bleibt z. B. das Lupen-Icon im Adressfeld an fester Position, weil sich
+   die Höhe von .field-rel dadurch nicht mehr verändert. */
 function fieldMessage(el){
   if(el.validity.valueMissing) return 'Dieses Feld muss ausgefüllt werden';
   if(el.validity.typeMismatch) return 'Bitte eine gültige E-Mail-Adresse eingeben';
   if(el.validity.patternMismatch) return 'Bitte eine gültige Postleitzahl eingeben';
   return 'Bitte überprüfe dieses Feld';
 }
+function errorAnchor(el){
+  return el.closest('.field-rel') || el;
+}
 function showFieldError(el){
   el.classList.add('invalid');
-  let msg=el.nextElementSibling;
+  const anchor=errorAnchor(el);
+  let msg=anchor.nextElementSibling;
   if(!msg || !msg.classList.contains('field-error-msg')){
     msg=document.createElement('div');
     msg.className='field-error-msg';
-    el.insertAdjacentElement('afterend', msg);
+    anchor.insertAdjacentElement('afterend', msg);
   }
   msg.textContent=fieldMessage(el);
 }
 function clearFieldError(el){
   el.classList.remove('invalid');
-  const msg=el.nextElementSibling;
+  const anchor=errorAnchor(el);
+  const msg=anchor.nextElementSibling;
   if(msg && msg.classList.contains('field-error-msg')) msg.remove();
 }
 
@@ -327,6 +336,97 @@ const checkoutForm=document.getElementById('checkoutForm');
 checkoutForm.querySelectorAll('input').forEach(el=>{
   el.addEventListener('invalid', e=>{ e.preventDefault(); showFieldError(el); });
   el.addEventListener('input', ()=>{ if(el.validity.valid) clearFieldError(el); });
+});
+
+/* --- Adresssuche (OpenStreetMap / Nominatim) --- */
+const strasseInput=document.getElementById('strasse');
+const suggestBox=document.getElementById('suggest');
+const searchIc=document.getElementById('searchIc');
+const plzInput=document.getElementById('plz');
+const ortInput=document.getElementById('ort');
+let addrDebounce=null;
+let addrAbort=null;
+
+function hideSuggest(){
+  suggestBox.style.display='none';
+  suggestBox.innerHTML='';
+}
+
+function renderSuggestions(list){
+  if(!list.length){
+    suggestBox.innerHTML='<div class="suggest-empty">Keine Treffer gefunden</div>';
+  }else{
+    suggestBox.innerHTML=list.map((item,i)=>
+      `<div data-i="${i}"><span class="suggest-pin">📍</span><span>${item.display_name}</span></div>`
+    ).join('');
+    suggestBox.querySelectorAll('div[data-i]').forEach(div=>{
+      div.addEventListener('click', ()=>applySuggestion(list[Number(div.dataset.i)]));
+    });
+  }
+  suggestBox.style.display='block';
+}
+
+function applySuggestion(item){
+  const addr=item.address||{};
+  const road=addr.road||addr.pedestrian||addr.footway||addr.residential||'';
+  const houseNr=addr.house_number||'';
+  strasseInput.value=[road,houseNr].filter(Boolean).join(' ')||item.display_name;
+  clearFieldError(strasseInput);
+
+  if(addr.postcode){
+    plzInput.value=addr.postcode;
+    clearFieldError(plzInput);
+  }
+  const ort=addr.city||addr.town||addr.village||addr.municipality||'';
+  if(ort){
+    ortInput.value=ort;
+    clearFieldError(ortInput);
+  }
+  hideSuggest();
+}
+
+strasseInput.addEventListener('input', ()=>{
+  const q=strasseInput.value.trim();
+  clearTimeout(addrDebounce);
+  if(addrAbort) addrAbort.abort();
+
+  if(q.length<3){
+    hideSuggest();
+    searchIc.classList.remove('spin');
+    return;
+  }
+
+  addrDebounce=setTimeout(async ()=>{
+    searchIc.classList.add('spin');
+    suggestBox.innerHTML='<div class="suggest-loading">Suche läuft…</div>';
+    suggestBox.style.display='block';
+    addrAbort=new AbortController();
+    try{
+      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=de,at,ch&q='+encodeURIComponent(q);
+      const res=await fetch(url,{signal:addrAbort.signal, headers:{'Accept-Language':'de'}});
+      if(!res.ok) throw new Error('Nominatim-Fehler');
+      const data=await res.json();
+      renderSuggestions(data);
+    }catch(err){
+      if(err.name!=='AbortError'){
+        suggestBox.innerHTML='<div class="suggest-empty">Suche momentan nicht verfügbar</div>';
+        suggestBox.style.display='block';
+      }
+    }finally{
+      searchIc.classList.remove('spin');
+    }
+  }, 400);
+});
+
+strasseInput.addEventListener('focus', ()=>{
+  if(suggestBox.innerHTML.trim()) suggestBox.style.display='block';
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.field-rel')) hideSuggest();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') hideSuggest();
 });
 
 checkoutForm.addEventListener('submit', async e=>{
