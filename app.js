@@ -109,7 +109,7 @@
         id: product.id,
         name: product.name || 'Produkt',
         price: parseFloat(product.price) || 0,
-        icon: product.icon || '📦',
+        image: product.image || '',
         qty: quantity
       });
     }
@@ -123,22 +123,50 @@
      ======================================================================== */
   function renderFeatures(features) {
     els.featuresList.innerHTML = '';
-    
-    // Falls keine Features in der DB hinterlegt sind
+
     if (!features || !Array.isArray(features) || features.length === 0) {
-      features = ['Hochwertige Verarbeitung', 'Nachhaltiges Material', 'Direkt vom Hersteller'];
+      return;
     }
 
-    features.forEach((feature) => {
+    features.forEach((item) => {
       const li = document.createElement('li');
-      const icon = document.createElement('span');
-      icon.innerHTML = CHECK_ICON;
+      li.className = 'feature-item';
 
-      const text = document.createElement('span');
-      text.textContent = feature;
+      if (typeof item === 'object' && item !== null) {
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'feature-icon';
+        iconSpan.textContent = item.icon || '✓';
 
-      li.appendChild(icon);
-      li.appendChild(text);
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'feature-content';
+
+        const titleEl = document.createElement('strong');
+        titleEl.className = 'feature-title';
+        titleEl.textContent = item.title || '';
+
+        const subEl = document.createElement('span');
+        subEl.className = 'feature-subtitle';
+        subEl.textContent = item.subtitle || '';
+
+        contentDiv.appendChild(titleEl);
+        if (item.subtitle) {
+          contentDiv.appendChild(document.createElement('br'));
+          contentDiv.appendChild(subEl);
+        }
+
+        li.appendChild(iconSpan);
+        li.appendChild(contentDiv);
+      } else {
+        const icon = document.createElement('span');
+        icon.innerHTML = CHECK_ICON;
+
+        const text = document.createElement('span');
+        text.textContent = String(item);
+
+        li.appendChild(icon);
+        li.appendChild(text);
+      }
+
       els.featuresList.appendChild(li);
     });
   }
@@ -169,7 +197,6 @@
   function renderProduct(product) {
     state.product = product;
 
-    // Falls Produktbild vorhanden ist, nutzen. Sonst Fallback.
     if (product.image) {
       els.image.src = product.image;
     } else {
@@ -178,10 +205,9 @@
     els.image.alt = product.name || 'Produktbild';
 
     els.name.textContent = product.name || 'Unbenanntes Produkt';
-    
-    // Bewertung
-    const rating = product.rating || 5.0;
-    const reviews = product.reviewCount || 12;
+
+    const rating = parseFloat(product.rating) || 5.0;
+    const reviews = parseInt(product.reviewCount) || 0;
     els.ratingValue.textContent = rating.toFixed(1);
     els.reviewCount.textContent = `(${reviews} Bewertungen)`;
 
@@ -229,7 +255,7 @@
     });
 
     els.buyBtn.addEventListener('click', handleBuyClick);
-    
+
     els.backBtn.addEventListener('click', () => {
       window.location.href = 'index.html';
     });
