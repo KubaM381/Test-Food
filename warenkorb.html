@@ -131,10 +131,12 @@ function renderRecommendation(cart){
   const pick=options[0];
   if(!pick){ box.style.display='none'; return; }
   document.getElementById('recommendCard').innerHTML=`
-    <div class="thumb">${pick.icon}</div>
-    <div class="recommend-info">
-      <p class="name">${pick.name}</p>
-      <p class="unit">${eur(pick.price)}</p>
+    <div class="recommend-main">
+      <div class="thumb">${pick.icon}</div>
+      <div class="recommend-info">
+        <p class="name">${pick.name}</p>
+        <p class="unit">${eur(pick.price)}</p>
+      </div>
     </div>
     <button class="recommend-add" onclick="addRecommendation('${pick.name.replace(/'/g,"\\'")}')">In den Warenkorb</button>`;
   box.style.display='block';
