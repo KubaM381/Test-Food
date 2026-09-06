@@ -16,6 +16,8 @@ nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
 .nav-back:hover{color:var(--acc)}
 .cart-icon-btn{justify-self:end;position:relative;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--text);text-decoration:none;flex:0 0 auto;transition:border-color .15s,color .15s}
 .cart-icon-btn:hover{border-color:var(--acc);color:var(--acc-d)}
+.cart-icon-btn.nav-back-icon{justify-self:start}
+.nav-spacer{width:40px;height:40px}
 .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--acc);color:#fff;font-size:.62rem;font-weight:700;min-width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1}
 @media(max-width:480px){.logo{font-size:1rem}.nav-back{font-size:.78rem}}
 h1{font-size:1.6rem;margin:32px 0 20px}
@@ -30,6 +32,8 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .progress-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s ease}
 .progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
 .progress-mark.reached{border-color:var(--acc);background:var(--acc)}
+.progress-mark svg{width:12px;height:12px;color:var(--muted);transition:color .2s}
+.progress-mark.reached svg{color:#fff}
 
 .item{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:18px 0}
 .item+.item{border-top:1px solid var(--line)}
@@ -46,6 +50,8 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .qty button{width:30px;height:34px;border:none;background:#fff;cursor:pointer;font-size:.95rem;color:var(--muted);flex:0 0 auto}
 .qty button:hover{color:var(--text)}
+.qty button:disabled{opacity:.35;cursor:default}
+.qty button:disabled:hover{color:var(--muted)}
 .qty input{height:34px;width:2.5ch;min-width:2.5ch;text-align:center;font-size:.9rem;border:none;background:#fff;padding:0;color:var(--text);-moz-appearance:textfield}
 .qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .qty input:focus{outline:none;background:#f7f4ef}
@@ -87,7 +93,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .checkout-btn:hover{background:var(--acc-d)}
 .trust{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
 .empty{text-align:center;padding:70px 20px}
-.empty-icon{font-size:2.4rem;margin-bottom:14px}
+.empty-icon{margin-bottom:14px;display:flex;justify-content:center;color:var(--muted)}
 .empty-title{font-weight:700;font-size:1.15rem;margin:0 0 8px}
 .empty-sub{color:var(--muted);font-size:.92rem;margin:0 0 24px;max-width:360px;margin-left:auto;margin-right:auto}
 .empty-btn{display:inline-block;background:var(--acc);color:#fff;text-decoration:none;font-weight:700;font-size:.95rem;padding:12px 28px;border-radius:8px}
@@ -96,12 +102,11 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 </head>
 <body>
 <header><div class="wrap"><nav>
-<a href="index.html" class="nav-back">← Weiter einkaufen</a>
-<a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-<a href="warenkorb.html" class="cart-icon-btn" aria-label="Warenkorb">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-  <span class="cart-badge" id="cartBadge">0</span>
+<a href="index.html" class="cart-icon-btn nav-back-icon" aria-label="Weiter einkaufen" title="Weiter einkaufen">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>
 </a>
+<a href="index.html" class="logo">🪵 Holzmanufaktur</a>
+<span class="nav-spacer" aria-hidden="true"></span>
 </nav></div></header>
 
 <main class="wrap">
@@ -112,8 +117,12 @@ h1{font-size:1.6rem;margin:32px 0 20px}
       <p class="progress-msg" id="progressMsg"></p>
       <div class="progress-track">
         <div class="progress-fill" id="progressFill"></div>
-        <div class="progress-mark" id="markShip" style="left:50%">🚚</div>
-        <div class="progress-mark" id="markGift" style="left:100%">🎁</div>
+        <div class="progress-mark" id="markShip" style="left:50%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="12" height="9" rx="1"/><path d="M13 10h4.5L21 13.5V16h-8"/><circle cx="5.5" cy="17.5" r="1.6"/><circle cx="16.5" cy="17.5" r="1.6"/></svg>
+        </div>
+        <div class="progress-mark" id="markGift" style="left:100%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18"/><path d="M12 9v12"/><path d="M12 9c-1.5-4-6-4.5-6-1.5 0 1.5 1.5 1.5 3 1.5"/><path d="M12 9c1.5-4 6-4.5 6-1.5 0 1.5-1.5 1.5-3 1.5"/></svg>
+        </div>
       </div>
     </div>
     <div class="section" id="list"></div>
@@ -143,7 +152,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 </main>
 
 <script>
-const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
+const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
 const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05}; // Hinweis: Rabattcodes in Produktion serverseitig validieren
 let discountPct=0, discountCode='';
 
@@ -162,8 +171,8 @@ const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 function mergeDuplicates(cart){
   const map=new Map();
   cart.forEach(it=>{
-    if(map.has(it.name)) map.get(it.name).qty += (it.qty||1);
-    else map.set(it.name,{...it, qty:it.qty||1});
+    if(map.has(it.name)) map.get(it.name).qty = Math.min(MAX_QTY, map.get(it.name).qty + (it.qty||1));
+    else map.set(it.name,{...it, qty:Math.min(MAX_QTY, it.qty||1)});
   });
   return [...map.values()];
 }
@@ -175,11 +184,6 @@ function applyDiscount(){
   else { discountPct=0; discountCode=''; msg.textContent='Dieser Code ist leider ungültig.'; msg.style.color='#c0392b'; }
   msg.style.display='block';
   render();
-}
-
-function updateHeaderBadge(cart){
-  const total=cart.reduce((s,it)=>s+(it.qty||1),0);
-  document.getElementById('cartBadge').textContent=total;
 }
 
 function sizeQty(el){
@@ -209,7 +213,7 @@ function addRecommendation(name){
   if(!pick) return;
   const cart=load();
   const existing=cart.find(it=>it.name===pick.name);
-  if(existing) existing.qty=(existing.qty||1)+1;
+  if(existing) existing.qty=Math.min(MAX_QTY, (existing.qty||1)+1);
   else cart.push({name:pick.name, price:pick.price, icon:pick.icon, qty:1});
   save(cart);
   render();
@@ -218,12 +222,13 @@ function addRecommendation(name){
 function render(){
   let cart=mergeDuplicates(load());
   save(cart);
-  updateHeaderBadge(cart);
   const list=document.getElementById('list'), sum=document.getElementById('summary'), pbox=document.getElementById('progressBox');
   if(!cart.length){
     list.innerHTML=`
       <div class="empty">
-        <div class="empty-icon">🛒</div>
+        <div class="empty-icon">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/><line x1="6" y1="7" x2="18" y2="7"/></svg>
+        </div>
         <p class="empty-title">Dein Warenkorb ist noch leer</p>
         <p class="empty-sub">Entdecke unsere handgefertigten Holzprodukte und finde dein neues Lieblingsstück.</p>
         <a href="index.html" class="empty-btn">Produkte entdecken</a>
@@ -243,8 +248,8 @@ function render(){
       <div class="item-actions">
         <div class="qty">
           <button onclick="changeQty(${i},-1)">−</button>
-          <input type="number" inputmode="numeric" min="1" value="${it.qty}" oninput="sizeQty(this)" onchange="setQty(${i}, this.value)" onclick="this.select()">
-          <button onclick="changeQty(${i},1)">+</button>
+          <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="sizeQty(this)" onchange="setQty(${i}, this.value)" onclick="this.select()">
+          <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
@@ -273,15 +278,16 @@ function render(){
   document.getElementById('markShip').classList.toggle('reached', rawSub>=FREE_SHIP);
   document.getElementById('markGift').classList.toggle('reached', rawSub>=GIFT_AT);
   const pmsg=document.getElementById('progressMsg');
-  if(rawSub>=GIFT_AT) pmsg.textContent='🎉 Kostenloser Versand und eine exklusive Überraschung warten auf dich!';
+  if(rawSub>=GIFT_AT) pmsg.textContent='🎉 Exklusive Überraschung freigeschaltet!';
   else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Kostenloser Versand freigeschaltet – nur noch ${eur(GIFT_AT-rawSub)} bis zu deiner Überraschung`;
   else pmsg.textContent=`Nur noch ${eur(FREE_SHIP-rawSub)} bis zum kostenlosen Versand`;
 }
-function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,c[i].qty+d); save(c); render(); }
+function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,Math.min(MAX_QTY,c[i].qty+d)); save(c); render(); }
 function setQty(i,val){
   const c=mergeDuplicates(load());
   let q=parseInt(val,10);
   if(isNaN(q)||q<1) q=1;
+  if(q>MAX_QTY) q=MAX_QTY;
   c[i].qty=q;
   save(c);
   render();
