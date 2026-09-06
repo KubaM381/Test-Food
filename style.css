@@ -1,115 +1,126 @@
-/* ==========================================================================
-   Base Styles & Resets
-   ========================================================================== */
-*, *::before, *::after {
+:root {
+  --bg-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6c757d;
+  --accent-color: #8b5a2b;
+  --accent-hover: #6b431f;
+  --border-color: #e9ecef;
+  --radius: 12px;
+}
+
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #f8f9fa;
-  color: #1a1a1a;
-  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   padding-bottom: 90px;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 16px;
+[hidden] {
+  display: none !important;
 }
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
+/* Header */
 .header {
-  background: #ffffff;
-  border-bottom: 1px solid #e9ecef;
   position: sticky;
   top: 0;
-  z-index: 100;
-}
-
-.header-inner {
+  background: var(--card-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
 }
 
-.brand-logo {
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: -0.5px;
+.header-title {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.btn-icon {
-  background: transparent;
+.icon-btn {
+  background: none;
   border: none;
+  font-size: 1.2rem;
   cursor: pointer;
   padding: 8px;
   position: relative;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-icon svg {
-  width: 24px;
-  height: 24px;
 }
 
 .badge {
   position: absolute;
   top: 2px;
   right: 2px;
-  background: #0066cc;
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 10px;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 0.7rem;
   padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
 }
 
-/* ==========================================================================
-   Product Grid
-   ========================================================================== */
-.product-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-  margin-top: 24px;
+/* Container */
+.main-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
 }
 
-@media (min-width: 768px) {
-  .product-grid {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
+/* Fehleransicht */
+.not-found {
+  text-align: center;
+  padding: 40px 16px;
+}
+
+.not-found h2 {
+  margin-bottom: 8px;
+}
+
+.not-found p {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+/* Produkt-Karte */
+.product-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f1f1f1;
 }
 
 .product-image {
   width: 100%;
-  max-height: 500px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 12px;
-  background-color: #e9ecef;
+}
+
+.product-details {
+  padding: 20px;
 }
 
 .product-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
 }
 
-.rating-container {
+.rating-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-bottom: 12px;
   font-size: 0.9rem;
 }
 
@@ -117,164 +128,89 @@ body {
   color: #ffb400;
 }
 
-.rating-val {
+.rating-value {
   font-weight: 600;
 }
 
 .review-count {
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
-.price-tag {
+.product-price {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-top: 16px;
-  color: #111;
+  margin-bottom: 16px;
 }
 
-.description-text {
-  margin-top: 12px;
-  color: #495057;
-  font-size: 0.95rem;
+.product-description {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
 }
 
-.section-label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #6c757d;
-  margin-bottom: 8px;
-  margin-top: 24px;
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
 
-/* ==========================================================================
-   Controls (Menge & Chips)
-   ========================================================================== */
+/* Mengenauswahl */
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .qty-picker {
   display: flex;
   align-items: center;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fff;
+  overflow: hidden;
 }
 
 .qty-btn {
-  background: none;
   border: none;
-  padding: 8px 16px;
-  font-size: 1.2rem;
+  background: var(--bg-color);
+  padding: 8px 14px;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
-.qty-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.qty-val {
-  width: 32px;
-  text-align: center;
+.qty-value {
+  padding: 0 12px;
   font-weight: 600;
 }
 
-.chip-group {
+.chips-group {
   display: flex;
   gap: 8px;
 }
 
 .chip {
-  background: #e9ecef;
-  border: none;
-  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  background: none;
+  padding: 8px 12px;
   border-radius: 20px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-size: 0.85rem;
 }
 
 .chip.is-active {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--text-primary);
+  color: #fff;
+  border-color: var(--text-primary);
 }
 
-/* ==========================================================================
-   Features List
-   ========================================================================== */
-.features-list {
-  list-style: none;
-}
-
-.features-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-}
-
-.features-list span svg {
-  width: 18px;
-  height: 18px;
-  color: #2b8a3e;
-  flex-shrink: 0;
-  margin-top: 3px;
-}
-
-/* ==========================================================================
-   Action Bar (Bottom)
-   ========================================================================== */
-.action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-top: 1px solid #e9ecef;
-  padding: 12px 0;
-  z-index: 90;
-}
-
-.btn-primary {
-  width: 100%;
-  background: #0066cc;
-  color: #ffffff;
-  border: none;
-  padding: 16px;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-primary:hover {
-  background: #0052a3;
-}
-
-.btn-primary.is-added {
-  background: #2b8a3e;
-}
-
-.not-found {
-  text-align: center;
-  padding: 60px 0;
-}
-/* Custom Features Styling */
+/* Custom Features */
 .features-list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 12px;
-  padding: 0;
 }
 
 .feature-item {
@@ -296,11 +232,54 @@ body {
 }
 
 .feature-title {
-  color: var(--text, #111);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .feature-subtitle {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.85rem;
+}
+
+/* Sticky Kaufleiste unten */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+  width: 100%;
+  max-width: 600px;
+  font-size: 1rem;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
