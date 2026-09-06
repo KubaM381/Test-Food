@@ -31,6 +31,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .progress-track{position:relative;height:8px;background:#f1ede6;border-radius:99px}
 .progress-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s ease}
 .progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
+.progress-mark.end{left:auto;right:0;transform:none}
 .progress-mark.reached{border-color:var(--acc);background:var(--acc)}
 .progress-mark svg{width:12px;height:12px;color:var(--muted);transition:color .2s}
 .progress-mark.reached svg{color:#fff}
@@ -56,6 +57,11 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .qty input:focus{outline:none;background:#f7f4ef}
 .price{font-weight:700;min-width:70px;text-align:right}
+
+.qty-field{position:relative}
+.qty-hint{position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:.72rem;line-height:1.3;padding:6px 10px;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .15s ease;z-index:5;pointer-events:none}
+.qty-hint::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text)}
+.qty-hint.show{opacity:1;visibility:visible}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}}
 
 @media(min-width:761px){
@@ -120,7 +126,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
         <div class="progress-mark" id="markShip" style="left:50%">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="12" height="9" rx="1"/><path d="M13 10h4.5L21 13.5V16h-8"/><circle cx="5.5" cy="17.5" r="1.6"/><circle cx="16.5" cy="17.5" r="1.6"/></svg>
         </div>
-        <div class="progress-mark" id="markGift" style="left:100%">
+        <div class="progress-mark end" id="markGift">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18"/><path d="M12 9v12"/><path d="M12 9c-1.5-4-6-4.5-6-1.5 0 1.5 1.5 1.5 3 1.5"/><path d="M12 9c1.5-4 6-4.5 6-1.5 0 1.5-1.5 1.5-3 1.5"/></svg>
         </div>
       </div>
@@ -191,6 +197,15 @@ function sizeQty(el){
   el.style.width=Math.max(2, len+0.8)+'ch';
 }
 
+function showQtyHint(el){
+  const hint=el.closest('.qty-field').querySelector('.qty-hint');
+  if(hint) hint.classList.add('show');
+}
+function hideQtyHint(el){
+  const hint=el.closest('.qty-field').querySelector('.qty-hint');
+  if(hint) hint.classList.remove('show');
+}
+
 function renderRecommendation(cart){
   const box=document.getElementById('recommendBox');
   if(cart.length!==1){ box.style.display='none'; return; }
@@ -246,10 +261,13 @@ function render(){
         <div class="info"><p class="name">${it.name}</p><p class="unit">${eur(it.price)} / Stk.</p></div>
       </div>
       <div class="item-actions">
-        <div class="qty">
-          <button onclick="changeQty(${i},-1)">−</button>
-          <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="sizeQty(this)" onchange="setQty(${i}, this.value)" onclick="this.select()">
-          <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
+        <div class="qty-field">
+          <div class="qty">
+            <button onclick="changeQty(${i},-1)">−</button>
+            <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="sizeQty(this)" onchange="setQty(${i}, this.value)" onclick="this.select()" onfocus="showQtyHint(this)" onblur="hideQtyHint(this)">
+            <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
+          </div>
+          <div class="qty-hint">Maximal 1.000 Stück pro Artikel</div>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
@@ -279,7 +297,7 @@ function render(){
   document.getElementById('markGift').classList.toggle('reached', rawSub>=GIFT_AT);
   const pmsg=document.getElementById('progressMsg');
   if(rawSub>=GIFT_AT) pmsg.textContent='🎉 Exklusive Überraschung freigeschaltet!';
-  else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Kostenloser Versand freigeschaltet – nur noch ${eur(GIFT_AT-rawSub)} bis zu deiner Überraschung`;
+  else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Kostenloser Versand gesichert – nur noch ${eur(GIFT_AT-rawSub)} bis zu deiner exklusiven Überraschung!`;
   else pmsg.textContent=`Nur noch ${eur(FREE_SHIP-rawSub)} bis zum kostenlosen Versand`;
 }
 function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,Math.min(MAX_QTY,c[i].qty+d)); save(c); render(); }
