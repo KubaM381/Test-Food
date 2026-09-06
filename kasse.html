@@ -147,13 +147,22 @@
 </div>
 
 <script>
-const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
+const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
+const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const cart=JSON.parse(localStorage.getItem(KEY))||[];
 if(!cart.length) location.href='warenkorb.html';
 
-const sub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
-const ship=sub>=FREE_SHIP?0:SHIP_COST;
+const rawSub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
+
+// Im Warenkorb angewendeter Rabattcode gilt auch hier - derselbe
+// localStorage-Schlüssel wie in warenkorb.html, damit er beim Wechsel
+// zur Kasse (und zurück) erhalten bleibt statt neu eingegeben werden zu müssen.
+const discountCode=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
+const discountPct=CODES[discountCode]||0;
+const discountAmount=rawSub*discountPct;
+const sub=rawSub-discountAmount;
+const ship=rawSub>=FREE_SHIP?0:SHIP_COST;
 
 document.getElementById('miniList').innerHTML=cart.map(it=>
   `<div class="mini-item">
@@ -169,17 +178,18 @@ const totalQty=cart.reduce((s,it)=>s+(it.qty||1),0);
 document.getElementById('cartBadge').textContent=totalQty;
 
 document.getElementById('sumRows').innerHTML=`
-  <div class="row"><span>Artikel (${cart.length})</span><span>${eur(sub)}</span></div>
+  <div class="row"><span>Artikel (${cart.length})</span><span>${eur(rawSub)}</span></div>
+  ${discountPct>0?`<div class="row"><span>Rabatt (${discountCode})</span><span>−${eur(discountAmount)}</span></div>`:''}
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
 const surpriseIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>`;
 
 const perksBanner=document.getElementById('perksBanner');
-if(sub>=GIFT_AT){
+if(rawSub>=GIFT_AT){
   perksBanner.style.display='flex';
   perksBanner.innerHTML=`${surpriseIcon}<span>Du bekommst kostenlosen Versand und eine exklusive Überraschung</span>`;
-}else if(sub>=FREE_SHIP){
+}else if(rawSub>=FREE_SHIP){
   perksBanner.style.display='flex';
   perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
 }
@@ -352,6 +362,7 @@ checkoutForm.addEventListener('submit', async e=>{
   await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
+  localStorage.removeItem(DISCOUNT_KEY);
   alert('Vielen Dank für deine Bestellung! Du erhältst in Kürze eine Bestätigung per E-Mail.');
   location.href='index.html';
 });
