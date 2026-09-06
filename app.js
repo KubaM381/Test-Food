@@ -38,14 +38,18 @@
      Datenbank-Abruf (Supabase)
      ======================================================================== */
   async function fetchProductById(id) {
-    if (!id) return null;
+    if (!id || !window.supabase) {
+      console.error('Keine ID vorhanden oder Supabase SDK nicht geladen.');
+      return null;
+    }
+
     try {
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -94,8 +98,10 @@
   function updateCartBadge() {
     const cart = getCart();
     const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
-    els.cartBadge.textContent = String(totalItems);
-    els.cartBadge.hidden = totalItems <= 0;
+    if (els.cartBadge) {
+      els.cartBadge.textContent = String(totalItems);
+      els.cartBadge.hidden = totalItems <= 0;
+    }
   }
 
   function addToCart(product, quantity) {
@@ -172,7 +178,7 @@
   }
 
   function updateBuyButtonLabel() {
-    if (els.buyBtn.disabled || !state.product) return;
+    if (!els.buyBtn || els.buyBtn.disabled || !state.product) return;
     const total = (parseFloat(state.product.price) || 0) * state.quantity;
     els.buyBtnLabel.textContent = `In den Warenkorb – ${formatPrice(total)}`;
   }
@@ -181,9 +187,9 @@
     const clamped = Math.min(99, Math.max(1, nextValue));
     state.quantity = clamped;
 
-    els.qtyValue.textContent = String(clamped);
-    els.qtyMinus.disabled = clamped <= 1;
-    els.qtyPlus.disabled = clamped >= 99;
+    if (els.qtyValue) els.qtyValue.textContent = String(clamped);
+    if (els.qtyMinus) els.qtyMinus.disabled = clamped <= 1;
+    if (els.qtyPlus) els.qtyPlus.disabled = clamped >= 99;
 
     els.chips.forEach((chip) => {
       const isActive = Number(chip.dataset.qty) === clamped;
@@ -196,6 +202,10 @@
 
   function renderProduct(product) {
     state.product = product;
+
+    if (els.productView) els.productView.hidden = false;
+    if (els.actionBar) els.actionBar.hidden = false;
+    if (els.notFoundView) els.notFoundView.hidden = true;
 
     if (product.image) {
       els.image.src = product.image;
@@ -218,14 +228,13 @@
     setQuantity(1);
     updateCartBadge();
 
-    els.productView.hidden = false;
-    els.actionBar.hidden = false;
-
     document.title = `${product.name} – Produktdetails`;
   }
 
   function showNotFound() {
-    els.notFoundView.hidden = false;
+    if (els.productView) els.productView.hidden = true;
+    if (els.actionBar) els.actionBar.hidden = true;
+    if (els.notFoundView) els.notFoundView.hidden = false;
     document.title = 'Produkt nicht gefunden';
   }
 
@@ -247,22 +256,26 @@
   }
 
   function bindEvents() {
-    els.qtyMinus.addEventListener('click', () => setQuantity(state.quantity - 1));
-    els.qtyPlus.addEventListener('click', () => setQuantity(state.quantity + 1));
+    if (els.qtyMinus) els.qtyMinus.addEventListener('click', () => setQuantity(state.quantity - 1));
+    if (els.qtyPlus) els.qtyPlus.addEventListener('click', () => setQuantity(state.quantity + 1));
 
     els.chips.forEach((chip) => {
       chip.addEventListener('click', () => setQuantity(Number(chip.dataset.qty)));
     });
 
-    els.buyBtn.addEventListener('click', handleBuyClick);
+    if (els.buyBtn) els.buyBtn.addEventListener('click', handleBuyClick);
 
-    els.backBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
+    if (els.backBtn) {
+      els.backBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
 
-    els.cartBtn.addEventListener('click', () => {
-      window.location.href = 'warenkorb.html';
-    });
+    if (els.cartBtn) {
+      els.cartBtn.addEventListener('click', () => {
+        window.location.href = 'warenkorb.html';
+      });
+    }
   }
 
   /* ========================================================================
