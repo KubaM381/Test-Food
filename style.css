@@ -38,7 +38,7 @@ body {
 }
 
 /* =========================================================
-   HEADER (Nur für Warenkorb sticky, Kasse behält den normalen Header)
+   HEADER (Nur bei Warenkorb mit .sticky-header aktiv, Kasse bleibt statisch)
    ========================================================= */
 header {
   background: #fff;
@@ -303,7 +303,7 @@ header {
 }
 
 /* =========================================================
-   Stile für Kasse.html
+   Stile für Kasse.html & Layout
    ========================================================= */
 .wrap {
   max-width: 1000px;
@@ -586,11 +586,11 @@ input.invalid {
 }
 
 /* =========================================================
-   ZAHLUNGSART-FIX (Bug behoben: Klicks/Auswahl funktionieren wieder einwandfrei)
+   Zahlungsarten (Sauberes Styling und Markierung)
    ========================================================= */
 .pay-opt {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-top: 6px;
 }
@@ -599,31 +599,23 @@ input.invalid {
   position: relative;
   border: 1.5px solid var(--line);
   border-radius: 12px;
-  padding: 10px 16px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: .88rem;
+  font-size: 0.9rem;
   color: var(--text);
-  transition: border-color .15s, background-color .15s;
-  margin: 0; /* Überschreibt standardmäßiges margin */
+  background: #fff;
+  transition: all 0.15s ease;
+  margin: 0;
 }
 
-/* Versteckt den Radio-Button nicht mehr komplett über opacity/pointer-events, 
-   sondern sauber, damit der Browser-Status zuverlässig trackt */
 .pay-opt input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
+  accent-color: var(--acc);
 }
 
-/* Sauberer Selektor über data-Attribut oder direkte Prüfung im JS/CSS */
-.pay-opt label.is-checked,
-.pay-opt input[type="radio"]:checked + span,
 .pay-opt label:has(input[type="radio"]:checked) {
   border-color: var(--acc);
   background: #f7f0e8;
