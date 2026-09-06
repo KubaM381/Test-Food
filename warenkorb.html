@@ -1,132 +1,85 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warenkorb – Holzmanufaktur</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warenkorb – Holzmanufaktur</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="header-wrap">
-      <nav>
-        <a href="index.html" class="nav-back">← Weiter einkaufen</a>
-        <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-        <span class="nav-spacer" aria-hidden="true"></span>
-      </nav>
-    </div>
-  </header>
 
-  <main class="wrap">
-    <h1>Warenkorb</h1>
+<!-- HIER HAT DER HEADER DIE KLASSE .sticky-header, DAMIT ER MITSCROLLT -->
+<header class="sticky-header">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" class="nav-back">← Weiter einkaufen</a>
+      <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
+      <span class="nav-spacer" aria-hidden="true"></span>
+    </nav>
+  </div>
+</header>
 
-    <div id="cartView">
-      <div id="emptyCart" class="not-found" hidden>
+<main class="wrap">
+  <h1>Dein Warenkorb</h1>
+  <div id="cartContent">
+    <!-- Wird dynamisch befüllt -->
+  </div>
+</main>
+
+<script>
+const KEY = 'warenkorbItems';
+const cart = JSON.parse(localStorage.getItem(KEY)) || [];
+const container = document.getElementById('cartContent');
+
+function renderCart() {
+  if (!cart.length) {
+    container.innerHTML = `
+      <div class="not-found">
         <h2>Dein Warenkorb ist leer</h2>
         <p>Entdecke unsere handgefertigten Produkte aus Holz.</p>
-        <a href="index.html" class="btn btn-secondary">Jetzt einkaufen</a>
+        <a href="index.html" class="btn btn-primary" style="display:inline-block; width:auto;">Zum Shop</a>
       </div>
+    `;
+    return;
+  }
 
-      <div id="cartContent" class="cart-layout" hidden>
-        <div class="cart-items-list" id="cartItemsList"></div>
-
-        <div class="summary">
-          <p class="legend">Zusammenfassung</p>
-          <div id="cartSummaryRows"></div>
-          <a href="kasse.html" class="btn btn-primary pay-btn" style="display:block; text-align:center; text-decoration:none;">Zur Kasse gehen</a>
-          <div class="trust">🔒 Sichere Bestellung & Verschlüsselung</div>
-        </div>
+  const sub = cart.reduce((s, it) => s + it.price * (it.qty || 1), 0);
+  
+  container.innerHTML = `
+    <div class="layout">
+      <div>
+        ${cart.map((it, idx) => `
+          <div class="mini-item" style="padding: 14px 0; border-bottom: 1px solid var(--line);">
+            <div class="mini-item-left" style="gap: 14px;">
+              <div class="mini-thumb" style="width: 50px; height: 50px;">${it.icon || '📦'}</div>
+              <div>
+                <strong>${it.name}</strong>
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">Menge: ${it.qty || 1}</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <strong>${(it.price * (it.qty || 1)).toFixed(2).replace('.', ',')} €</strong>
+              <div><button onclick="removeItem(${idx})" style="background:none; border:none; color:var(--err); font-size:0.75rem; cursor:pointer; margin-top:4px;">Entfernen</button></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="summary" style="position:static;">
+        <div class="row total"><span>Gesamtsumme</span><span>${sub.toFixed(2).replace('.', ',')} €</span></div>
+        <button class="pay-btn" onclick="location.href='kasse.html'">Weiter zur Kasse</button>
       </div>
     </div>
-  </main>
+  `;
+}
 
-  <script>
-    const KEY = 'warenkorbItems';
-    const FREE_SHIP = 50;
-    const SHIP_COST = 4.95;
+function removeItem(index) {
+  cart.splice(index, 1);
+  localStorage.setItem(KEY, JSON.stringify(cart));
+  renderCart();
+}
 
-    const eur = n => n.toFixed(2).replace('.', ',') + ' €';
+renderCart();
+</script>
 
-    function getCart() {
-      return JSON.parse(localStorage.getItem(KEY)) || [];
-    }
-
-    function saveCart(cart) {
-      localStorage.setItem(KEY, JSON.stringify(cart));
-      renderCart();
-    }
-
-    function updateQty(id, delta) {
-      let cart = getCart();
-      const idx = cart.findIndex(item => String(item.id) === String(id));
-      if (idx > -1) {
-        cart[idx].qty = (cart[idx].qty || 1) + delta;
-        if (cart[idx].qty <= 0) {
-          cart.splice(idx, 1);
-        }
-        saveCart(cart);
-      }
-    }
-
-    function removeItem(id) {
-      let cart = getCart();
-      cart = cart.filter(item => String(item.id) !== String(id));
-      saveCart(cart);
-    }
-
-    function renderCart() {
-      const cart = getCart();
-      const emptyCartEl = document.getElementById('emptyCart');
-      const cartContentEl = document.getElementById('cartContent');
-      const cartItemsList = document.getElementById('cartItemsList');
-      const cartSummaryRows = document.getElementById('cartSummaryRows');
-
-      if (!cart || cart.length === 0) {
-        emptyCartEl.hidden = false;
-        cartContentEl.hidden = true;
-        return;
-      }
-
-      emptyCartEl.hidden = true;
-      cartContentEl.hidden = false;
-
-      cartItemsList.innerHTML = cart.map(item => {
-        const qty = item.qty || 1;
-        const itemTotal = (parseFloat(item.price) || 0) * qty;
-        const imgSrc = item.image || `https://picsum.photos/seed/${item.id}/200/200`;
-
-        return `
-          <div class="cart-item">
-            <img src="${imgSrc}" alt="${item.name}" class="cart-item-img">
-            <div class="cart-item-info">
-              <div class="cart-item-title">${item.name}</div>
-              <div class="cart-item-price">${eur(parseFloat(item.price) || 0)}</div>
-            </div>
-            <div class="cart-item-actions">
-              <div class="qty-picker">
-                <button class="qty-btn" onclick="updateQty('${item.id}', -1)">-</button>
-                <span class="qty-value">${qty}</span>
-                <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
-              </div>
-              <button class="remove-btn" onclick="removeItem('${item.id}')" aria-label="Entfernen">🗑</button>
-            </div>
-            <div class="cart-item-total">${eur(itemTotal)}</div>
-          </div>
-        `;
-      }).join('');
-
-      const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (item.qty || 1), 0);
-      const ship = subtotal >= FREE_SHIP ? 0 : SHIP_COST;
-      const total = subtotal + ship;
-
-      cartSummaryRows.innerHTML = `
-        <div class="row"><span>Zwischensumme</span><span>${eur(subtotal)}</span></div>
-        <div class="row"><span>Versandkosten</span><span class="${ship === 0 ? 'free-ship' : ''}">${ship === 0 ? 'Kostenlos ✓' : eur(ship)}</span></div>
-        <div class="row total"><span>Gesamtsumme</span><span>${eur(total)}</span></div>
-      `;
-    }
-
-    document.addEventListener('DOMContentLoaded', renderCart);
-  </script>
 </body>
 </html>
