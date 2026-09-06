@@ -5,10 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  /* Lokale Korrekturen, falls style.css noch überschreibt */
+  header {
+    position: static !important;
+    background: #fff;
+    border-bottom: 1px solid var(--line, #e5e1da);
+  }
+  .pay-opt label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 1.5px solid var(--line, #e5e1da);
+    border-radius: 12px;
+    cursor: pointer;
+    background: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+  }
+  .pay-opt input[type="radio"] {
+    accent-color: var(--acc, #8b5a2b);
+  }
+  .pay-opt label:has(input[type="radio"]:checked) {
+    border-color: var(--acc, #8b5a2b);
+    background: #f7f0e8;
+    color: var(--acc-d, #6b431f);
+  }
+</style>
 </head>
 <body>
 
-<!-- HIER IST DER HEADER OHNE STICKY-KLASSE, BLEIBT ALSO OBEN STEHEN -->
 <header>
   <div class="wrap">
     <nav>
@@ -77,15 +105,14 @@
       <input type="tel" name="telefon">
     </div>
 
-    <!-- ZAHLUNGSART-SEKTION (Bug behoben) -->
     <div class="section">
       <p class="legend">Zahlungsart</p>
-      <div class="pay-opt" id="payOptions">
+      <div class="pay-opt" style="display: flex; flex-direction: column; gap: 10px;">
         <label><input type="radio" name="pay" value="karte" checked> 💳 Kreditkarte</label>
-        <label><input type="radio" name="pay" value="paypal"> PayPal</label>
-        <label><input type="radio" name="pay" value="klarna"> Klarna</label>
-        <label><input type="radio" name="pay" value="gpay"> Google Pay</label>
-        <label><input type="radio" name="pay" value="apay"> Apple Pay</label>
+        <label><input type="radio" name="pay" value="paypal"> 🅿️ PayPal</label>
+        <label><input type="radio" name="pay" value="klarna"> KI Klarna</label>
+        <label><input type="radio" name="pay" value="gpay"> 🌐 Google Pay</label>
+        <label><input type="radio" name="pay" value="apay"> 🍎 Apple Pay</label>
       </div>
     </div>
 
@@ -108,11 +135,11 @@
 
 <template id="tpl-agb">
   <h4>§1 Geltungsbereich</h4>
-  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen, die Verbraucher und Unternehmer über den Online-Shop der Holzmanufaktur abschließen.</p>
+  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen...</p>
 </template>
 <template id="tpl-ds">
   <h4>1. Verantwortlicher</h4>
-  <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur.</p>
+  <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur...</p>
 </template>
 
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeLegal()">
@@ -144,28 +171,12 @@ document.getElementById('miniList').innerHTML=cart.map(it=>
    </div>`
 ).join('');
 
-const totalQty=cart.reduce((s,it)=>s+(it.qty||1),0);
-document.getElementById('cartBadge').textContent=totalQty;
+document.getElementById('cartBadge').textContent=cart.reduce((s,it)=>s+(it.qty||1),0);
 
 document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Artikel (${cart.length})</span><span>${eur(sub)}</span></div>
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
-
-// Script-Logik zur sauberen Steuerung des Zahlungsarten-Klicks (Fix)
-const payContainer = document.getElementById('payOptions');
-payContainer.addEventListener('change', () => {
-  payContainer.querySelectorAll('label').forEach(lbl => {
-    const radio = lbl.querySelector('input[type="radio"]');
-    if (radio && radio.checked) {
-      lbl.classList.add('is-checked');
-    } else {
-      lbl.classList.remove('is-checked');
-    }
-  });
-});
-// Initiale Markierung setzen
-payContainer.querySelector('input[type="radio"]:checked')?.dispatchEvent(new Event('change', {bubbles: true}));
 
 const legalTitles={agb:'Allgemeine Geschäftsbedingungen', ds:'Datenschutzerklärung'};
 function openLegal(which){
@@ -178,61 +189,22 @@ function closeLegal(){
   document.getElementById('modalBackdrop').classList.remove('open');
   document.body.style.overflow='';
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLegal(); });
 
 const billingSection=document.getElementById('billingSection');
 document.getElementById('diffBilling').addEventListener('change', e=>{
   billingSection.style.display=e.target.checked?'block':'none';
-  billingSection.querySelectorAll('input').forEach(i=>{
-    i.required=e.target.checked;
-    if(!e.target.checked) clearFieldError(i);
-  });
+  billingSection.querySelectorAll('input').forEach(i=>{ i.required=e.target.checked; });
 });
-
-function fieldMessage(el){
-  if(el.validity.valueMissing) return 'Dieses Feld muss ausgefüllt werden';
-  if(el.validity.typeMismatch) return 'Bitte eine gültige E-Mail-Adresse eingeben';
-  if(el.validity.patternMismatch) return 'Bitte eine gültige Postleitzahl eingeben';
-  return 'Bitte überprüfe dieses Feld';
-}
-function showFieldError(el){
-  el.classList.add('invalid');
-  let msg=el.nextElementSibling;
-  if(!msg || !msg.classList.contains('field-error-msg')){
-    msg=document.createElement('div');
-    msg.className='field-error-msg';
-    el.insertAdjacentElement('afterend', msg);
-  }
-  msg.textContent=fieldMessage(el);
-}
-function clearFieldError(el){
-  el.classList.remove('invalid');
-  const msg=el.nextElementSibling;
-  if(msg && msg.classList.contains('field-error-msg')) msg.remove();
-}
 
 const checkoutForm=document.getElementById('checkoutForm');
-checkoutForm.querySelectorAll('input').forEach(el=>{
-  el.addEventListener('invalid', e=>{ e.preventDefault(); showFieldError(el); });
-  el.addEventListener('input', ()=>{ if(el.validity.valid) clearFieldError(el); });
-});
-
 checkoutForm.addEventListener('submit', async e=>{
   e.preventDefault();
-  const form=e.target;
-  if(!form.checkValidity()){
-    const firstInvalid=form.querySelector('.invalid');
-    if(firstInvalid) firstInvalid.focus();
-    return;
-  }
-
-  const btn=form.querySelector('.pay-btn');
+  if(!checkoutForm.checkValidity()) return;
+  const btn=checkoutForm.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
-
   await new Promise(r=>setTimeout(r,900));
-
   localStorage.removeItem(KEY);
-  alert('Vielen Dank für deine Bestellung! Du erhältst in Kürze eine Bestätigung per E-Mail.');
+  alert('Vielen Dank für deine Bestellung!');
   location.href='index.html';
 });
 </script>
