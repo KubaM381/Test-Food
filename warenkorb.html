@@ -17,7 +17,7 @@ nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
 .cart-icon-btn{justify-self:end;position:relative;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--text);text-decoration:none;flex:0 0 auto;transition:border-color .15s,color .15s}
 .cart-icon-btn:hover{border-color:var(--acc);color:var(--acc-d)}
 .cart-icon-btn.nav-back-icon{justify-self:start}
-.nav-spacer{width:40px;height:40px}
+.nav-spacer{width:40px;height:40px;justify-self:end}
 .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--acc);color:#fff;font-size:.62rem;font-weight:700;min-width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1}
 @media(max-width:480px){.logo{font-size:1rem}.nav-back{font-size:.78rem}}
 h1{font-size:1.6rem;margin:32px 0 20px}
@@ -58,11 +58,10 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .qty input:focus{outline:none;background:#f7f4ef}
 .price{font-weight:700;min-width:70px;text-align:right}
 
+/* Mengenfeld: Fehlermeldung wird absolut positioniert, damit sie beim Einblenden
+   nicht die Zeilenhöhe verändert und dadurch die Mengenanzeige nicht verschiebt */
 .qty-field{position:relative}
-.qty-hint{position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:.72rem;line-height:1.3;padding:6px 10px;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .15s ease;z-index:5;pointer-events:none}
-.qty-hint::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text)}
-.qty-hint.show{opacity:1;visibility:visible}
-.qty-error{display:none;margin-top:6px;font-size:.72rem;line-height:1.3;color:#c0392b;text-align:center}
+.qty-error{position:absolute;top:calc(100% + 6px);left:0;right:0;display:none;margin:0;font-size:.72rem;line-height:1.3;color:#c0392b;text-align:center;pointer-events:none}
 .qty-error.show{display:block}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}}
 
@@ -173,7 +172,7 @@ const RECOMMENDATIONS=[
 ];
 
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
-const CONFETTI_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1em;height:1.1em;vertical-align:-3px;margin-right:2px"><path d="M3 21l6-2 9-9-4-4-9 9-2 6Z"/><path d="M15 5l1.5-1.5"/><path d="M18 8.5l2-1"/><path d="M19.5 12l1.7.6"/><circle cx="20" cy="4" r="1" fill="currentColor" stroke="none"/></svg>';
+const SURPRISE_ICON='<svg viewBox="0 0 24 24" fill="currentColor" style="width:1.1em;height:1.1em;vertical-align:-3px;margin-right:4px"><path d="M12 2c.5 3.4 1.2 5.9 2.6 7.3S18.6 11.5 22 12c-3.4.5-5.9 1.2-7.4 2.6S12.5 18.6 12 22c-.5-3.4-1.2-5.9-2.6-7.4S5.4 12.5 2 12c3.4-.5 5.9-1.2 7.4-2.6S11.5 5.4 12 2Z"/></svg>';
 const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
 const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 
@@ -200,26 +199,18 @@ function sizeQty(el){
   el.style.width=Math.max(2, len+0.8)+'ch';
 }
 
-function onQtyInput(el){
+function onQtyInput(el, i){
   const field=el.closest('.qty-field');
   const errorEl=field?field.querySelector('.qty-error'):null;
   const val=parseInt(el.value,10);
   if(!isNaN(val) && val>MAX_QTY){
-    el.value=MAX_QTY;
     if(errorEl) errorEl.classList.add('show');
-  } else if(errorEl){
-    errorEl.classList.remove('show');
+    // Sofort auf das Maximum begrenzen, Warenkorb speichern und Preis live nachziehen
+    setQty(i, MAX_QTY, true);
+    return;
   }
+  if(errorEl) errorEl.classList.remove('show');
   sizeQty(el);
-}
-
-function showQtyHint(el){
-  const hint=el.closest('.qty-field').querySelector('.qty-hint');
-  if(hint) hint.classList.add('show');
-}
-function hideQtyHint(el){
-  const hint=el.closest('.qty-field').querySelector('.qty-hint');
-  if(hint) hint.classList.remove('show');
 }
 
 function renderRecommendation(cart){
@@ -280,11 +271,10 @@ function render(){
         <div class="qty-field">
           <div class="qty">
             <button onclick="changeQty(${i},-1)">−</button>
-            <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="onQtyInput(this)" onchange="setQty(${i}, this.value)" onclick="this.select()" onfocus="showQtyHint(this)" onblur="hideQtyHint(this)">
+            <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="onQtyInput(this, ${i})" onchange="setQty(${i}, this.value)" onclick="this.select()">
             <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
           </div>
-          <div class="qty-hint">Maximal 1.000 Stück pro Artikel</div>
-          <p class="qty-error">Mehr als 1.000 Stück können nicht hinzugefügt werden</p>
+          <p class="qty-error">Es können maximal 1.000 Stück hinzugefügt werden</p>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
@@ -313,12 +303,12 @@ function render(){
   document.getElementById('markShip').classList.toggle('reached', rawSub>=FREE_SHIP);
   document.getElementById('markGift').classList.toggle('reached', rawSub>=GIFT_AT);
   const pmsg=document.getElementById('progressMsg');
-  if(rawSub>=GIFT_AT) pmsg.innerHTML=`${CONFETTI_ICON}Exklusive Überraschung freigeschaltet!`;
+  if(rawSub>=GIFT_AT) pmsg.innerHTML=`${SURPRISE_ICON}Exklusive Überraschung freigeschaltet!`;
   else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Kostenloser Versand gesichert – nur noch ${eur(GIFT_AT-rawSub)} bis zu deiner exklusiven Überraschung!`;
   else pmsg.textContent=`Nur noch ${eur(FREE_SHIP-rawSub)} bis zum kostenlosen Versand`;
 }
 function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,Math.min(MAX_QTY,c[i].qty+d)); save(c); render(); }
-function setQty(i,val){
+function setQty(i,val,refocus){
   const c=mergeDuplicates(load());
   let q=parseInt(val,10);
   if(isNaN(q)||q<1) q=1;
@@ -326,6 +316,10 @@ function setQty(i,val){
   c[i].qty=q;
   save(c);
   render();
+  if(refocus){
+    const input=document.querySelectorAll('.qty input')[i];
+    if(input){ input.focus(); input.select(); }
+  }
 }
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
 render();
