@@ -74,7 +74,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 }
 
 /* Symmetrische Abstände für die Empfehlungskarte */
-.recommend{display:none;padding:16px 0}
+.recommend{display:none;padding:12px 0}
 .recommend-head{margin:0 0 14px}
 .recommend-title{font-weight:700;font-size:1rem;margin:0 0 2px}
 .recommend-sub{color:var(--muted);font-size:.85rem;margin:0}
@@ -204,12 +204,25 @@ function sizeQty(el){
 }
 
 function onQtyInput(el, i){
-  const val=parseInt(el.value,10);
-  if(!isNaN(val) && val>MAX_QTY){
-    setQty(i, MAX_QTY, true);
-    return;
-  }
   sizeQty(el);
+
+  const raw=parseInt(el.value,10);
+  if(isNaN(raw)) return; // Feld gerade leer/im Tippen – onchange korrigiert das später
+
+  let val=raw;
+  if(val>MAX_QTY){ val=MAX_QTY; el.value=MAX_QTY; sizeQty(el); }
+  val=Math.max(1,val);
+
+  const cart=mergeDuplicates(load());
+  cart[i].qty=val;
+  save(cart);
+
+  const itemEl=el.closest('.item');
+  itemEl.querySelector('.price').textContent=eur(cart[i].price*val);
+  itemEl.querySelector('.qty button:last-child').disabled = val>=MAX_QTY;
+  itemEl.querySelector('.qty-error').classList.toggle('show', val>=MAX_QTY);
+
+  updateSummary(cart);
 }
 
 function renderRecommendation(cart){
@@ -281,7 +294,10 @@ function render(){
 
   list.querySelectorAll('.qty input').forEach(sizeQty);
   renderRecommendation(cart);
+  updateSummary(cart);
+}
 
+function updateSummary(cart){
   const rawSub=cart.reduce((s,it)=>s+it.price*it.qty,0);
   const discountAmount=rawSub*discountPct;
   const sub=rawSub-discountAmount;
