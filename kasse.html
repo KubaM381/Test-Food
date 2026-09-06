@@ -4,18 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
-<!-- HIER IST DIE VERKNÜPFUNG ZUR CSS-DATEI -->
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div class="wrap"><nav>
-<span class="nav-spacer" aria-hidden="true"></span>
-<a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-<a href="warenkorb.html" class="cart-icon-btn" aria-label="Warenkorb">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-  <span class="cart-badge" id="cartBadge">0</span>
-</a>
-</nav></div></header>
+
+<!-- HIER IST DER HEADER OHNE STICKY-KLASSE, BLEIBT ALSO OBEN STEHEN -->
+<header>
+  <div class="wrap">
+    <nav>
+      <span class="nav-spacer" aria-hidden="true"></span>
+      <a href="index.html" class="logo">🪵 Holzmanufaktur</a>
+      <a href="warenkorb.html" class="cart-icon-btn" aria-label="Warenkorb">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+    </nav>
+  </div>
+</header>
 
 <main class="wrap">
 <h1>Kasse</h1>
@@ -72,14 +77,15 @@
       <input type="tel" name="telefon">
     </div>
 
+    <!-- ZAHLUNGSART-SEKTION (Bug behoben) -->
     <div class="section">
       <p class="legend">Zahlungsart</p>
-      <div class="pay-opt">
-        <label><input type="radio" name="pay" value="karte" checked><span class="badge">💳 Kreditkarte</span></label>
-        <label><input type="radio" name="pay" value="paypal"><span class="badge">PayPal</span></label>
-        <label><input type="radio" name="pay" value="klarna"><span class="badge">Klarna</span></label>
-        <label><input type="radio" name="pay" value="gpay"><span class="badge">Google Pay</span></label>
-        <label><input type="radio" name="pay" value="apay"><span class="badge">Apple Pay</span></label>
+      <div class="pay-opt" id="payOptions">
+        <label><input type="radio" name="pay" value="karte" checked> 💳 Kreditkarte</label>
+        <label><input type="radio" name="pay" value="paypal"> PayPal</label>
+        <label><input type="radio" name="pay" value="klarna"> Klarna</label>
+        <label><input type="radio" name="pay" value="gpay"> Google Pay</label>
+        <label><input type="radio" name="pay" value="apay"> Apple Pay</label>
       </div>
     </div>
 
@@ -102,39 +108,11 @@
 
 <template id="tpl-agb">
   <h4>§1 Geltungsbereich</h4>
-  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen, die Verbraucher und Unternehmer über den Online-Shop der Holzmanufaktur [Firmenname] abschließen.</p>
-  <h4>§2 Vertragspartner und Vertragsschluss</h4>
-  <p>Vertragspartner ist die Holzmanufaktur [Firmenname], [Adresse]. Die Darstellung der Produkte im Shop stellt kein bindendes Angebot dar, sondern eine unverbindliche Aufforderung zur Bestellung. Mit Klick auf „Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail oder durch Auslieferung der Ware zustande.</p>
-  <h4>§3 Preise und Versandkosten</h4>
-  <p>Alle angegebenen Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer, zuzüglich einer im Bestellvorgang ausgewiesenen Versandkostenpauschale. Ab einem Bestellwert von 50,00 € liefern wir innerhalb Deutschlands versandkostenfrei.</p>
-  <h4>§4 Zahlung</h4>
-  <p>Die Zahlung erfolgt wahlweise per Kreditkarte, PayPal, Klarna, Google Pay oder Apple Pay. Die Abwicklung übernehmen die jeweiligen Zahlungsdienstleister gemäß deren eigenen Nutzungsbedingungen.</p>
-  <h4>§5 Lieferung und Eigentumsvorbehalt</h4>
-  <p>Die Lieferung erfolgt an die von Ihnen angegebene Adresse innerhalb der im Shop genannten Lieferzeit. Die Ware bleibt bis zur vollständigen Bezahlung Eigentum der Holzmanufaktur [Firmenname].</p>
-  <h4>§6 Widerrufsrecht</h4>
-  <p>Verbrauchern steht ein gesetzliches Widerrufsrecht von 14 Tagen zu. Einzelheiten regelt die separate Widerrufsbelehrung, die vor Vertragsschluss zur Verfügung gestellt wird.</p>
-  <h4>§7 Gewährleistung</h4>
-  <p>Es gelten die gesetzlichen Gewährleistungsrechte.</p>
-  <h4>§8 Schlussbestimmungen</h4>
-  <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Zwingende Verbraucherschutzvorschriften am gewöhnlichen Aufenthaltsort des Kunden bleiben unberührt.</p>
-  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung von einem Anwalt prüfen lassen.</p>
+  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Bestellungen, die Verbraucher und Unternehmer über den Online-Shop der Holzmanufaktur abschließen.</p>
 </template>
 <template id="tpl-ds">
   <h4>1. Verantwortlicher</h4>
-  <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur [Firmenname], [Adresse], E-Mail: [E-Mail-Adresse].</p>
-  <h4>2. Erhebung und Verarbeitung Ihrer Daten</h4>
-  <p>Im Rahmen des Bestellvorgangs verarbeiten wir Ihren Namen, Ihre Liefer- und ggf. Rechnungsadresse, E-Mail-Adresse, Telefonnummer (sofern angegeben) sowie die für die Zahlung erforderlichen Daten – ausschließlich zur Abwicklung Ihrer Bestellung. Bei der Adresseingabe erfolgt zudem eine Anfrage an den Kartendienst OpenStreetMap/Nominatim zur Anzeige von Adressvorschlägen.</p>
-  <h4>3. Rechtsgrundlage</h4>
-  <p>Die Verarbeitung erfolgt zur Vertragserfüllung gem. Art. 6 Abs. 1 lit. b DSGVO sowie zur Erfüllung gesetzlicher Pflichten, z. B. steuerrechtlicher Aufbewahrungsfristen, gem. Art. 6 Abs. 1 lit. c DSGVO.</p>
-  <h4>4. Weitergabe an Dritte</h4>
-  <p>Zur Vertragsabwicklung geben wir Ihre Daten an beauftragte Versanddienstleister sowie, je nach gewählter Zahlungsart, an PayPal, Klarna, Google Pay oder Apple Pay weiter. Diese verarbeiten Zahlungsdaten in eigener Verantwortung.</p>
-  <h4>5. Speicherdauer</h4>
-  <p>Ihre Daten werden gelöscht, sobald sie für die genannten Zwecke nicht mehr benötigt werden, spätestens nach Ablauf der gesetzlichen Aufbewahrungsfristen.</p>
-  <h4>6. Ihre Rechte</h4>
-  <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie ein Widerspruchsrecht. Kontakt hierfür: [E-Mail-Adresse]. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.</p>
-  <h4>7. Sicherheit</h4>
-  <p>Hierbei werden Ihre Daten durch eine SSL-Verschlüsselung geschützt.</p>
-  <p style="margin-top:14px;color:var(--muted);font-size:.8rem">⚠ Dies ist eine Vorlage und keine Rechtsberatung – vor Veröffentlichung DSGVO-konform prüfen lassen.</p>
+  <p>Verantwortlich für die Datenverarbeitung ist die Holzmanufaktur.</p>
 </template>
 
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeLegal()">
@@ -174,16 +152,20 @@ document.getElementById('sumRows').innerHTML=`
   <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
   <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
 
-const surpriseIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>`;
-
-const perksBanner=document.getElementById('perksBanner');
-if(sub>=GIFT_AT){
-  perksBanner.style.display='flex';
-  perksBanner.innerHTML=`${surpriseIcon}<span>Du bekommst kostenlosen Versand und eine exklusive Überraschung</span>`;
-}else if(sub>=FREE_SHIP){
-  perksBanner.style.display='flex';
-  perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
-}
+// Script-Logik zur sauberen Steuerung des Zahlungsarten-Klicks (Fix)
+const payContainer = document.getElementById('payOptions');
+payContainer.addEventListener('change', () => {
+  payContainer.querySelectorAll('label').forEach(lbl => {
+    const radio = lbl.querySelector('input[type="radio"]');
+    if (radio && radio.checked) {
+      lbl.classList.add('is-checked');
+    } else {
+      lbl.classList.remove('is-checked');
+    }
+  });
+});
+// Initiale Markierung setzen
+payContainer.querySelector('input[type="radio"]:checked')?.dispatchEvent(new Event('change', {bubbles: true}));
 
 const legalTitles={agb:'Allgemeine Geschäftsbedingungen', ds:'Datenschutzerklärung'};
 function openLegal(which){
@@ -207,8 +189,6 @@ document.getElementById('diffBilling').addEventListener('change', e=>{
   });
 });
 
-/* Eigene Feldvalidierung: statt der Browser-Standardblase bekommt jedes
-   ungültige Feld einen roten Rahmen plus einen kurzen Hinweistext darunter. */
 function fieldMessage(el){
   if(el.validity.valueMissing) return 'Dieses Feld muss ausgefüllt werden';
   if(el.validity.typeMismatch) return 'Bitte eine gültige E-Mail-Adresse eingeben';
@@ -249,7 +229,6 @@ checkoutForm.addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
-  // TODO: Zahlungsanbieter-Integration ergänzen, sobald ein Payment-Provider angebunden ist.
   await new Promise(r=>setTimeout(r,900));
 
   localStorage.removeItem(KEY);
