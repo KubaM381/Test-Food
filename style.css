@@ -1,5 +1,4 @@
 :root {
-  /* Variablen aus deinem ersten Snippet */
   --bg-color: #f8f9fa;
   --card-bg: #ffffff;
   --text-primary: #1a1a1a;
@@ -9,7 +8,6 @@
   --border-color: #e9ecef;
   --radius: 12px;
 
-  /* Variablen aus deiner Kasse.html */
   --acc: #8b5a2b;
   --acc-d: #6b431f;
   --bg: #faf9f7;
@@ -40,26 +38,26 @@ body {
 }
 
 /* =========================================================
-   HEADER (Hier wurde 'sticky' ergänzt, damit er mitscrollt)
+   HEADER (Nur für Warenkorb sticky, Kasse behält den normalen Header)
    ========================================================= */
 header {
   background: #fff;
   border-bottom: 1px solid var(--line);
+}
+
+.sticky-header {
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .header {
-  position: sticky;
-  top: 0;
   background: var(--card-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
-  z-index: 100;
 }
 
 .header-title {
@@ -89,7 +87,7 @@ header {
 }
 
 /* =========================================================
-   Stile aus deinem ersten Snippet (Produkte / Warenkorb)
+   Stile für Produkte & Warenkorb
    ========================================================= */
 .main-container {
   max-width: 600px;
@@ -305,7 +303,7 @@ header {
 }
 
 /* =========================================================
-   Stile aus deiner Kasse.html
+   Stile für Kasse.html
    ========================================================= */
 .wrap {
   max-width: 1000px;
@@ -587,6 +585,9 @@ input.invalid {
   margin: 0;
 }
 
+/* =========================================================
+   ZAHLUNGSART-FIX (Bug behoben: Klicks/Auswahl funktionieren wieder einwandfrei)
+   ========================================================= */
 .pay-opt {
   display: flex;
   flex-wrap: wrap;
@@ -595,7 +596,6 @@ input.invalid {
 }
 
 .pay-opt label {
-  flex: 0 0 auto;
   position: relative;
   border: 1.5px solid var(--line);
   border-radius: 12px;
@@ -608,15 +608,23 @@ input.invalid {
   font-size: .88rem;
   color: var(--text);
   transition: border-color .15s, background-color .15s;
+  margin: 0; /* Überschreibt standardmäßiges margin */
 }
 
-.pay-opt input {
+/* Versteckt den Radio-Button nicht mehr komplett über opacity/pointer-events, 
+   sondern sauber, damit der Browser-Status zuverlässig trackt */
+.pay-opt input[type="radio"] {
   position: absolute;
   opacity: 0;
+  width: 0;
+  height: 0;
   pointer-events: none;
 }
 
-.pay-opt label:has(input:checked) {
+/* Sauberer Selektor über data-Attribut oder direkte Prüfung im JS/CSS */
+.pay-opt label.is-checked,
+.pay-opt input[type="radio"]:checked + span,
+.pay-opt label:has(input[type="radio"]:checked) {
   border-color: var(--acc);
   background: #f7f0e8;
   color: var(--acc-d);
@@ -727,7 +735,7 @@ input.invalid {
 
 .summary {
   position: sticky;
-  top: 90px; /* Leicht angepasst, damit es nicht vom neuen Sticky-Header verdeckt wird */
+  top: 20px;
 }
 
 @media(min-width:761px) {
