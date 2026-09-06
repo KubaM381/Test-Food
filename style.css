@@ -816,12 +816,24 @@ h1 {
 
 .recommend-card {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 12px 16px;
   background: #faf8f4;
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 14px 16px;
+}
+
+/* Bild + Text bleiben als eine Einheit zusammen, damit sie bei zu wenig
+   Platz gemeinsam in die nächste Zeile rutschen, statt dass nur ein
+   einzelnes Wort des Produktnamens unschön umbricht. */
+.recommend-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 190px;
+  min-width: 0;
 }
 
 .recommend-card .thumb {
@@ -830,6 +842,7 @@ h1 {
   font-size: 1.3rem;
   background: #fff;
   border: 1px solid var(--line);
+  flex: 0 0 auto;
 }
 
 .recommend-info {
@@ -851,8 +864,8 @@ h1 {
   border: 1.5px solid var(--acc);
   color: var(--acc-d);
   font-weight: 600;
-  font-size: 0.85rem;
-  padding: 9px 16px;
+  font-size: 0.82rem;
+  padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
@@ -861,6 +874,17 @@ h1 {
 .recommend-add:hover {
   background: var(--acc);
   color: #fff;
+}
+
+/* Reicht der Platz nicht für Bild+Text+Button in einer Zeile, wird
+   .recommend-main umgebrochen und der Button nimmt die volle Breite
+   der zweiten Zeile ein – so bleibt die Kartenhöhe unabhängig von der
+   Länge des Produktnamens gleichmäßig. */
+@media (max-width: 480px) {
+  .recommend-add {
+    flex: 1 1 100%;
+    text-align: center;
+  }
 }
 
 .summary {
