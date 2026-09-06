@@ -24,10 +24,11 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;padding-bottom:60px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}}
 
-.section{padding:20px 0;border-bottom:1px solid var(--line)}
-.section:last-child{border-bottom:none}
+/* Saubere Trennlinien ohne doppelte Striche bei ausgeblandeten Elementen */
+.section{padding:20px 0}
+.section + .section{border-top:1px solid var(--line)}
 
-.progress-msg{font-size:.9rem;margin:0 0 10px;font-weight:600}
+.progress-msg{font-size:.9rem;margin:0 0 10px;font-weight:600;display:flex;align-items:center}
 .progress-track{position:relative;height:8px;background:#f1ede6;border-radius:99px}
 .progress-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s ease}
 .progress-mark{position:absolute;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;transform:translateX(-50%)}
@@ -47,7 +48,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .unit{color:var(--muted);font-size:.85rem;margin:0}
 .item-actions{display:flex;align-items:center;gap:22px;margin-left:auto}
 
-/* Mengenauswahl: dezente +/- Buttons in derselben Farbe wie die Zahl, keine Trennlinie, Feld wächst mit der Ziffernzahl */
+/* Mengenauswahl */
 .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .qty button{width:30px;height:34px;border:none;background:#fff;cursor:pointer;font-size:.95rem;color:var(--muted);flex:0 0 auto}
 .qty button:hover{color:var(--text)}
@@ -58,10 +59,9 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .qty input:focus{outline:none;background:#f7f4ef}
 .price{font-weight:700;min-width:70px;text-align:right}
 
-/* Mengenfeld: Fehlermeldung wird absolut positioniert, damit sie beim Einblenden
-   nicht die Zeilenhöhe verändert und dadurch die Mengenanzeige nicht verschiebt */
+/* Fehlermeldung zentriert schwebend unter dem Mengenfeld ohne Layout-Verzerrung */
 .qty-field{position:relative}
-.qty-error{position:absolute;top:calc(100% + 6px);left:0;right:0;display:none;margin:0;font-size:.72rem;line-height:1.3;color:#c0392b;text-align:center;pointer-events:none}
+.qty-error{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:190px;display:none;margin:0;font-size:.72rem;line-height:1.2;color:#c0392b;text-align:center;pointer-events:none;z-index:5}
 .qty-error.show{display:block}
 @media(max-width:480px){.item-actions{width:100%;justify-content:space-between;margin-left:0}}
 
@@ -81,7 +81,7 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .recommend-info{flex:1;min-width:0}
 .recommend-info .name{font-size:.95rem}
 .recommend-info .unit{margin-top:2px}
-.recommend-add{flex:0 0 auto;background:#fff;border:1.5px solid var(--acc);color:var(--acc-d);font-weight:600;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.recommend-add{flex:0 0 auto;background:#fff;border:1.5px solid var(--acc);color:var(--acc-d);font-weight:600;font-size:.85rem;padding:99px 16px;padding:9px 16px;border-radius:8px;cursor:pointer;white-space:nowrap}
 .recommend-add:hover{background:var(--acc);color:#fff}
 
 .summary{padding:0}
@@ -160,10 +160,9 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 
 <script>
 const KEY='warenkorbItems', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
-const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05}; // Hinweis: Rabattcodes in Produktion serverseitig validieren
+const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
 let discountPct=0, discountCode='';
 
-// Kleine, günstige Ergänzungsartikel für die Empfehlung bei nur einem Artikel im Warenkorb
 const RECOMMENDATIONS=[
   {name:'Holzpflegeöl, 250 ml', price:9.90, icon:'🧴'},
   {name:'Filzgleiter-Set, 8 Stück', price:6.50, icon:'🟤'},
@@ -172,7 +171,10 @@ const RECOMMENDATIONS=[
 ];
 
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
-const SURPRISE_ICON='<svg viewBox="0 0 24 24" fill="currentColor" style="width:1.1em;height:1.1em;vertical-align:-3px;margin-right:4px"><path d="M12 2c.5 3.4 1.2 5.9 2.6 7.3S18.6 11.5 22 12c-3.4.5-5.9 1.2-7.4 2.6S12.5 18.6 12 22c-.5-3.4-1.2-5.9-2.6-7.4S5.4 12.5 2 12c3.4-.5 5.9-1.2 7.4-2.6S11.5 5.4 12 2Z"/></svg>';
+
+// Hohl-Design Luftballon Icon (wie Geschenk/Lieferwagen)
+const SURPRISE_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.2em;height:1.2em;vertical-align:-3px;margin-right:6px"><path d="M8.5 13C11 13 13 10.8 13 8S11 3 8.5 3 4 5.2 4 8s2 5 4.5 5z"/><path d="M8.5 13l-0.8 1.5"/><path d="M7.7 14.5C6.5 17 5 18 3.5 20"/><path d="M15.5 15c2.2 0 4-1.8 4-4s-1.8-4-4-4c-1.1 0-2.1.4-2.8 1.2"/><path d="M15.5 15l-0.8 1.5"/><path d="M14.7 16.5C13.8 18.5 12.5 19.5 11 21"/></svg>';
+
 const load=()=>JSON.parse(localStorage.getItem(KEY))||[];
 const save=c=>localStorage.setItem(KEY,JSON.stringify(c));
 
@@ -196,20 +198,15 @@ function applyDiscount(){
 
 function sizeQty(el){
   const len=String(el.value).length;
-  el.style.width=Math.max(2, len+0.8)+'ch';
+  el.style.width=Math.max(2.5, len+0.8)+'ch';
 }
 
 function onQtyInput(el, i){
-  const field=el.closest('.qty-field');
-  const errorEl=field?field.querySelector('.qty-error'):null;
   const val=parseInt(el.value,10);
   if(!isNaN(val) && val>MAX_QTY){
-    if(errorEl) errorEl.classList.add('show');
-    // Sofort auf das Maximum begrenzen, Warenkorb speichern und Preis live nachziehen
     setQty(i, MAX_QTY, true);
     return;
   }
-  if(errorEl) errorEl.classList.remove('show');
   sizeQty(el);
 }
 
@@ -271,10 +268,10 @@ function render(){
         <div class="qty-field">
           <div class="qty">
             <button onclick="changeQty(${i},-1)">−</button>
-            <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="onQtyInput(this, ${i})" onchange="setQty(${i}, this.value)" onclick="this.select()">
+            <input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${it.qty}" oninput="onQtyInput(this, ${i})" onchange="setQty(${i}, this.value)">
             <button onclick="changeQty(${i},1)" ${it.qty>=MAX_QTY?'disabled':''}>+</button>
           </div>
-          <p class="qty-error">Es können maximal 1.000 Stück hinzugefügt werden</p>
+          <p class="qty-error ${it.qty>=MAX_QTY?'show':''}">Es können maximal 1.000 Stück hinzugefügt werden</p>
         </div>
         <div class="price">${eur(it.price*it.qty)}</div>
       </div>
@@ -307,7 +304,9 @@ function render(){
   else if(rawSub>=FREE_SHIP) pmsg.textContent=`✓ Kostenloser Versand gesichert – nur noch ${eur(GIFT_AT-rawSub)} bis zu deiner exklusiven Überraschung!`;
   else pmsg.textContent=`Nur noch ${eur(FREE_SHIP-rawSub)} bis zum kostenlosen Versand`;
 }
+
 function changeQty(i,d){ const c=mergeDuplicates(load()); c[i].qty=Math.max(1,Math.min(MAX_QTY,c[i].qty+d)); save(c); render(); }
+
 function setQty(i,val,refocus){
   const c=mergeDuplicates(load());
   let q=parseInt(val,10);
@@ -318,9 +317,14 @@ function setQty(i,val,refocus){
   render();
   if(refocus){
     const input=document.querySelectorAll('.qty input')[i];
-    if(input){ input.focus(); input.select(); }
+    if(input){
+      input.focus();
+      // Setzt den Cursor ans Ende, ohne den Text zu markieren/auszuwählen
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
   }
 }
+
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
 render();
 </script>
