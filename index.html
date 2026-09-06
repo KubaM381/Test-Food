@@ -21,15 +21,17 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0
 h1{font-size:1.6rem;margin:32px 0 20px}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;padding-bottom:60px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s;cursor:pointer;text-decoration:none;color:inherit}
 .card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
 .thumb{background:#f1ede6;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem}
 .info{padding:20px;display:flex;flex-direction:column;flex:1}
 .name{font-weight:600;margin:0 0 8px;font-size:1.1rem}
 .price{font-weight:700;color:var(--text);font-size:1.2rem;margin-bottom:20px}
-.btn{margin-top:auto;width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:12px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .2s}
-.btn:hover{border-color:var(--acc);color:var(--acc);background:#fcfbfa}
-.btn:active{background:#f7f0e8}
+.actions{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.btn{width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:10px;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none}
+.btn-primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn-primary:hover{background:var(--acc-d);color:#fff}
+.btn-secondary:hover{border-color:var(--acc);color:var(--acc);background:#fcfbfa}
 
 .loading{grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted);font-size:1.05rem}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#3f7d3f;color:#fff;padding:14px 28px;border-radius:8px;font-weight:600;font-size:.95rem;opacity:0;transition:all .3s ease;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)}
@@ -77,27 +79,40 @@ async function loadProducts() {
       return;
     }
 
-    // HTML für Produkte generieren
+    // HTML für Produkte generieren mit Verlinkung auf products.html?id=...
     grid.innerHTML = data.map(p => `
-      <div class="card">
+      <div class="card" data-url="products.html?id=${p.id}">
         <div class="thumb">${p.icon || '📦'}</div>
         <div class="info">
           <h2 class="name">${p.name || 'Produkt'}</h2>
           <div class="price">${eur(p.price)}</div>
-          <button class="btn add-btn" 
-            data-id="${p.id}" 
-            data-name="${escapeHtml(p.name)}" 
-            data-price="${p.price || 0}" 
-            data-icon="${p.icon || '📦'}">
-            In den Warenkorb
-          </button>
+          <div class="actions">
+            <button class="btn btn-primary add-btn" 
+              data-id="${p.id}" 
+              data-name="${escapeHtml(p.name)}" 
+              data-price="${p.price || 0}" 
+              data-icon="${p.icon || '📦'}">
+              In den Warenkorb
+            </button>
+            <a href="products.html?id=${p.id}" class="btn btn-secondary detail-btn">
+              Details ansehen
+            </a>
+          </div>
         </div>
       </div>
     `).join('');
 
-    // Event-Listener sauber an alle Buttons hängen
+    // Klick auf die Karte führt zur Produktdetailseite
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        window.location.href = card.dataset.url;
+      });
+    });
+
+    // Klick auf "In den Warenkorb" legt das Produkt in den Warenkorb ohne Weiterleitung
     document.querySelectorAll('.add-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Verhindert das Öffnen der Produktdetailseite beim Button-Klick
         const dataset = e.currentTarget.dataset;
         addToCart({
           id: dataset.id,
@@ -105,6 +120,13 @@ async function loadProducts() {
           price: parseFloat(dataset.price),
           icon: dataset.icon
         });
+      });
+    });
+
+    // Verhindert doppeltes Auslösen beim Klick auf "Details ansehen"
+    document.querySelectorAll('.detail-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
       });
     });
 
@@ -149,7 +171,7 @@ function showToast() {
   }, 2500);
 }
 
-// Initialer Badge-Aufruf beim Laden der Seite
+// Initialer Aufruf
 updateCartBadge();
 loadProducts();
 </script>
