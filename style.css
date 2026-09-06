@@ -30,7 +30,7 @@ body {
 }
 
 /* ========================================================================
-   Header & Navigation
+   Header & Navigation (Sticky fixiert beim Scrollen)
    ======================================================================== */
 header {
   background: #fff;
@@ -80,6 +80,11 @@ nav {
   color: var(--acc);
 }
 
+.nav-spacer {
+  width: 40px;
+  height: 40px;
+}
+
 .cart-icon-btn {
   justify-self: end;
   position: relative;
@@ -121,161 +126,106 @@ nav {
   line-height: 1;
 }
 
-/* Fallback Header (Produktdetails) */
-.header {
-  position: sticky;
-  top: 0;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--line);
-  z-index: 10;
+/* Layout Container */
+.wrap, .main-container {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
-.header-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--acc-d);
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 8px;
-  position: relative;
-  color: var(--text);
+h1 {
+  font-size: 1.6rem;
+  margin: 32px 0 20px;
 }
 
 /* ========================================================================
-   Layout & Container
+   Warenkorb & Kasse Layout
    ======================================================================== */
-.main-container, .wrap {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 24px 20px;
-}
-
-/* ========================================================================
-   Produktdetail-Seite (Produkte-Ansicht)
-   ======================================================================== */
-.product-card {
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
+.cart-layout, .layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+  padding-bottom: 60px;
 }
 
-@media (max-width: 768px) {
-  .product-card {
+@media (max-width: 760px) {
+  .cart-layout, .layout {
     grid-template-columns: 1fr;
   }
 }
 
-.image-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #f1ede6;
-  border-right: 1px solid var(--line);
-}
-
-@media (max-width: 768px) {
-  .image-wrapper {
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-  }
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.product-details {
-  padding: 32px 28px;
+.cart-items-list {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.product-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 8px;
-  line-height: 1.25;
-}
-
-.rating-row {
+.cart-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+  gap: 16px;
+  background: #fff;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
-.stars {
-  color: #e6a100;
-  letter-spacing: 1px;
+.cart-item-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f1ede6;
 }
 
-.rating-value {
-  font-weight: 700;
-  color: var(--text);
+.cart-item-info {
+  flex: 1;
 }
 
-.review-count {
-  color: var(--muted);
-}
-
-.product-price {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--acc-d);
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-
-.product-description {
-  color: var(--text);
-  line-height: 1.6;
+.cart-item-title {
+  font-weight: 600;
   font-size: 0.95rem;
-  margin-bottom: 28px;
+  margin-bottom: 4px;
 }
 
-.section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
+.cart-item-price {
   color: var(--muted);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
+  font-size: 0.88rem;
 }
 
-/* Mengenauswahl & Chips */
-.quantity-controls {
+.cart-item-actions {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
 }
 
+.remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--muted);
+  padding: 4px;
+}
+
+.remove-btn:hover {
+  color: var(--err);
+}
+
+.cart-item-total {
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Menge Picker */
 .qty-picker {
   display: flex;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 6px;
   background: #fff;
   overflow: hidden;
 }
@@ -283,11 +233,10 @@ nav {
 .qty-btn {
   border: none;
   background: none;
-  padding: 8px 14px;
-  font-size: 1.1rem;
+  padding: 6px 10px;
+  font-size: 1rem;
   cursor: pointer;
   color: var(--text);
-  transition: background 0.15s;
 }
 
 .qty-btn:hover {
@@ -295,150 +244,187 @@ nav {
 }
 
 .qty-value {
-  padding: 0 12px;
+  padding: 0 8px;
   font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.chips-group {
-  display: flex;
-  gap: 8px;
-}
-
-.chip {
-  border: 1.5px solid var(--line);
-  background: #fff;
-  padding: 8px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-  transition: all 0.15s;
-}
-
-.chip:hover {
-  border-color: var(--acc);
-}
-
-.chip.is-active {
-  background: #f7f0e8;
-  color: var(--acc-d);
-  border-color: var(--acc);
-}
-
-/* Highlights / Custom Features */
-.features-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: var(--bg);
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-}
-
-.feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.feature-icon {
-  font-size: 1.2rem;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.feature-content {
   font-size: 0.9rem;
-  line-height: 1.4;
 }
 
-.feature-title {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.feature-subtitle {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-/* ========================================================================
-   Sticky Kaufleiste unten (Action Bar)
-   ======================================================================== */
-.action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+/* Zusammenfassung (Sidebar) */
+.summary {
+  position: sticky;
+  top: 90px;
   background: #fff;
-  padding: 14px 20px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  justify-content: center;
-  z-index: 90;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.btn {
-  display: inline-block;
-  padding: 14px 24px;
-  border-radius: 8px;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  text-align: center;
-  transition: background 0.15s;
-}
-
-.btn-primary, .buy-btn {
-  background: var(--acc);
-  color: #fff;
-  width: 100%;
-  max-width: 600px;
-  font-size: 1rem;
-}
-
-.btn-primary:hover, .buy-btn:hover {
-  background: var(--acc-d);
-}
-
-.btn-primary.is-added, .buy-btn.is-added {
-  background: #3f7d3f;
-}
-
-.btn-secondary {
-  background: #fff;
-  color: var(--text);
-  border: 1px solid var(--line);
-}
-
-.btn-secondary:hover {
-  background: #f5f2ec;
-}
-
-/* ========================================================================
-   Fehleransicht
-   ======================================================================== */
-.not-found {
-  text-align: center;
-  padding: 60px 20px;
-  background: #fff;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
 
-.not-found h2 {
-  font-size: 1.4rem;
-  margin-bottom: 10px;
+.legend {
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
-.not-found p {
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  margin-bottom: 10px;
   color: var(--muted);
-  margin-bottom: 24px;
+}
+
+.row.total {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+
+.free-ship {
+  color: #3f7d3f;
+  font-weight: 600;
+}
+
+.pay-btn, .btn-primary {
+  width: 100%;
+  background: var(--acc);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.pay-btn:hover, .btn-primary:hover {
+  background: var(--acc-d);
+}
+
+.trust {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* Kasse Formular & Details */
+.section {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 10px 0 4px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.pay-opt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.pay-opt label {
+  flex: 0 0 auto;
+  position: relative;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.pay-opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pay-opt label:has(input:checked) {
+  border-color: var(--acc);
+  background: #f7f0e8;
+  color: var(--acc-d);
+}
+
+/* Modal */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-close {
+  background: #f1ede6;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.modal-content {
+  padding: 20px;
 }
