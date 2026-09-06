@@ -2,66 +2,18 @@
   'use strict';
 
   /* ========================================================================
-     Mock-Datenbank (Lokaler Datenbestand)
+     Konfiguration & Supabase-Anbindung
      ======================================================================== */
-  const PRODUCTS = [
-    {
-      id: 1,
-      name: 'Nordlicht One – Over-Ear Kopfhörer',
-      price: 349.0,
-      rating: 4.8,
-      reviewCount: 312,
-      description:
-        'Kabellose Over-Ear-Kopfhörer mit adaptiver Geräuschunterdrückung und einem 40-mm-Titanschwingsystem für einen warmen, präzisen Klang. Das eloxierte Aluminiumgehäuse und die Ohrpolster aus pflanzlich gegerbtem Leder sorgen für ganztägigen Tragekomfort.',
-      features: [
-        'Adaptive Geräuschunterdrückung mit Transparenzmodus',
-        'Bis zu 38 Stunden Akkulaufzeit, Schnellladung für 5 Stunden in 10 Minuten',
-        'Bluetooth 5.3 mit verlustfreiem LDAC-Codec',
-        'Faltbares Gehäuse aus eloxiertem Aluminium, nur 268 g'
-      ],
-      image: 'https://picsum.photos/seed/nordlicht-one/1200/1400'
-    },
-    {
-      id: 2,
-      name: 'Terra Mini – Bluetooth-Lautsprecher',
-      price: 129.0,
-      rating: 4.6,
-      reviewCount: 187,
-      description:
-        'Ein kompakter Lautsprecher mit erstaunlich vollem Klangbild, umhüllt von robustem Segeltuch und einem stoßfesten Silikonrahmen. IP67-zertifiziert und mit zwei Passivmembranen für satten Bass, auch im Freien.',
-      features: [
-        'Wasser- und staubdicht nach IP67',
-        '20 Stunden Akkulaufzeit bei mittlerer Lautstärke',
-        'Kopplung von zwei Lautsprechern für echten Stereoklang',
-        'Integriertes Freisprechmikrofon'
-      ],
-      image: 'https://picsum.photos/seed/terra-mini/1200/1400'
-    },
-    {
-      id: 3,
-      name: 'Pulse Pro – True-Wireless-Earbuds',
-      price: 199.0,
-      rating: 4.7,
-      reviewCount: 421,
-      description:
-        'Federleichte In-Ear-Kopfhörer mit individuell angepasstem Sitz, aktiver Geräuschunterdrückung und einer Ladehülle mit kabellosem Aufladen. Für den Sport ebenso geeignet wie für den Büroalltag.',
-      features: [
-        'Aktive Geräuschunterdrückung mit drei Stufen',
-        'Bis zu 7 Stunden pro Ladung, 28 Stunden mit Ladehülle',
-        'IPX4-Spritzwasserschutz',
-        'Kabelloses Laden (Qi-kompatibel)'
-      ],
-      image: 'https://picsum.photos/seed/pulse-pro/1200/1400'
-    }
-  ];
+  const SUPABASE_URL = 'https://keaahccmqnmvtcmabvvz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
+  const CART_KEY = 'warenkorbItems';
 
   /* ========================================================================
-     Zustand
+     Zustand & Cache
      ======================================================================== */
   const state = {
     product: null,
-    quantity: 1,
-    cartCount: parseInt(localStorage.getItem('cartCount') || '0', 10)
+    quantity: 1
   };
 
   const els = {};
@@ -73,25 +25,34 @@
      Hilfsfunktionen
      ======================================================================== */
   function formatPrice(value) {
-    return value.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-  }
-
-  function formatRating(value) {
-    return value.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const num = parseFloat(value) || 0;
+    return num.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
   }
 
   function getProductIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const raw = params.get('id');
-    if (raw === null || raw.trim() === '') {
-      return 1; // Fallback: Lädt Produkt 1 beim direkten Aufrufen ohne URL-Parameter
-    }
-    const id = Number(raw);
-    return Number.isFinite(id) ? id : 1;
+    return params.get('id');
   }
 
-  function findProductById(id) {
-    return PRODUCTS.find((item) => item.id === id);
+  /* ========================================================================
+     Datenbank-Abruf (Supabase)
+     ======================================================================== */
+  async function fetchProductById(id) {
+    if (!id) return null;
+    try {
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Fehler beim Laden des Produkts aus Supabase:', err);
+      return null;
+    }
   }
 
   /* ========================================================================
@@ -124,13 +85,52 @@
   }
 
   /* ========================================================================
+     Warenkorb-Logik
+     ======================================================================== */
+  function getCart() {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  }
+
+  function updateCartBadge() {
+    const cart = getCart();
+    const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+    els.cartBadge.textContent = String(totalItems);
+    els.cartBadge.hidden = totalItems <= 0;
+  }
+
+  function addToCart(product, quantity) {
+    let cart = getCart();
+    const existingIndex = cart.findIndex((item) => String(item.id) === String(product.id));
+
+    if (existingIndex > -1) {
+      cart[existingIndex].qty = (cart[existingIndex].qty || 1) + quantity;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name || 'Produkt',
+        price: parseFloat(product.price) || 0,
+        icon: product.icon || '📦',
+        qty: quantity
+      });
+    }
+
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartBadge();
+  }
+
+  /* ========================================================================
      Rendering
      ======================================================================== */
   function renderFeatures(features) {
     els.featuresList.innerHTML = '';
+    
+    // Falls keine Features in der DB hinterlegt sind
+    if (!features || !Array.isArray(features) || features.length === 0) {
+      features = ['Hochwertige Verarbeitung', 'Nachhaltiges Material', 'Direkt vom Hersteller'];
+    }
+
     features.forEach((feature) => {
       const li = document.createElement('li');
-
       const icon = document.createElement('span');
       icon.innerHTML = CHECK_ICON;
 
@@ -144,10 +144,8 @@
   }
 
   function updateBuyButtonLabel() {
-    if (els.buyBtn.disabled) {
-      return;
-    }
-    const total = state.product.price * state.quantity;
+    if (els.buyBtn.disabled || !state.product) return;
+    const total = (parseFloat(state.product.price) || 0) * state.quantity;
     els.buyBtnLabel.textContent = `In den Warenkorb – ${formatPrice(total)}`;
   }
 
@@ -168,32 +166,31 @@
     updateBuyButtonLabel();
   }
 
-  function updateCartBadge(delta) {
-    state.cartCount += delta;
-    localStorage.setItem('cartCount', String(state.cartCount));
-    els.cartBadge.textContent = String(state.cartCount);
-    els.cartBadge.hidden = state.cartCount <= 0;
-  }
-
   function renderProduct(product) {
     state.product = product;
 
-    els.image.src = product.image;
-    els.image.alt = product.name;
+    // Falls Produktbild vorhanden ist, nutzen. Sonst Fallback.
+    if (product.image) {
+      els.image.src = product.image;
+    } else {
+      els.image.src = `https://picsum.photos/seed/${product.id}/1200/1400`;
+    }
+    els.image.alt = product.name || 'Produktbild';
 
-    els.name.textContent = product.name;
-    els.ratingValue.textContent = formatRating(product.rating);
-    els.reviewCount.textContent = `(${product.reviewCount.toLocaleString('de-DE')} Bewertungen)`;
+    els.name.textContent = product.name || 'Unbenanntes Produkt';
+    
+    // Bewertung
+    const rating = product.rating || 5.0;
+    const reviews = product.reviewCount || 12;
+    els.ratingValue.textContent = rating.toFixed(1);
+    els.reviewCount.textContent = `(${reviews} Bewertungen)`;
+
     els.price.textContent = formatPrice(product.price);
-    els.description.textContent = product.description;
+    els.description.textContent = product.description || 'Keine Beschreibung verfügbar.';
 
     renderFeatures(product.features);
     setQuantity(1);
-
-    if (state.cartCount > 0) {
-      els.cartBadge.textContent = String(state.cartCount);
-      els.cartBadge.hidden = false;
-    }
+    updateCartBadge();
 
     els.productView.hidden = false;
     els.actionBar.hidden = false;
@@ -207,33 +204,20 @@
   }
 
   /* ========================================================================
-     Interaktionen
+     Interaktionen & Events
      ======================================================================== */
   function handleBuyClick() {
-    updateCartBadge(state.quantity);
+    addToCart(state.product, state.quantity);
 
-    const confirmedLabel = 'Zum Warenkorb hinzugefügt ✓';
     els.buyBtn.classList.add('is-added');
     els.buyBtn.disabled = true;
-    els.buyBtnLabel.textContent = confirmedLabel;
+    els.buyBtnLabel.textContent = 'Zum Warenkorb hinzugefügt ✓';
 
     window.setTimeout(() => {
       els.buyBtn.classList.remove('is-added');
       els.buyBtn.disabled = false;
       updateBuyButtonLabel();
     }, 1500);
-  }
-
-  function goBack() {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = 'index.html';
-    }
-  }
-
-  function goToCart() {
-    window.location.href = 'cart.html';
   }
 
   function bindEvents() {
@@ -245,18 +229,29 @@
     });
 
     els.buyBtn.addEventListener('click', handleBuyClick);
-    els.backBtn.addEventListener('click', goBack);
-    els.cartBtn.addEventListener('click', goToCart);
+    
+    els.backBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    els.cartBtn.addEventListener('click', () => {
+      window.location.href = 'warenkorb.html';
+    });
   }
 
   /* ========================================================================
      Initialisierung
      ======================================================================== */
-  function init() {
+  async function init() {
     cacheElements();
 
-    const id = getProductIdFromUrl();
-    const product = findProductById(id);
+    const productId = getProductIdFromUrl();
+    if (!productId) {
+      showNotFound();
+      return;
+    }
+
+    const product = await fetchProductById(productId);
 
     if (!product) {
       showNotFound();
