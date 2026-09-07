@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warenkorb – Holzmanufaktur</title>
 <link rel="stylesheet" href="style.css">
-<!-- Supabase SDK: wird für die dynamischen Empfehlungen (products.recommended = true) benötigt -->
+<!-- Supabase SDK: wird benötigt für (a) die dynamischen Empfehlungen
+     (products.recommended = true) und (b) die Validierung von Rabattcodes
+     über die bereits vorhandene sichere Edge-Function "validate-discount". -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -46,7 +48,7 @@
     <h2>Bestellübersicht</h2>
     <div class="discount">
       <input type="text" id="discountInput" placeholder="Rabattcode">
-      <button onclick="applyDiscount()">Anwenden</button>
+      <button id="discountBtn" onclick="applyDiscount()">Anwenden</button>
     </div>
     <p class="discount-msg" id="discountMsg" style="display:none"></p>
     <div class="row"><span>Zwischensumme</span><span id="sub">0,00 €</span></div>
@@ -61,13 +63,18 @@
 
 <script>
 const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
-const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
-let discountPct=0, discountCode='';
 
-// Supabase wird ausschließlich lesend verwendet, um die Empfehlungen zu laden
-// (products.recommended = true). Preise/Rabatte/Versand werden weiterhin
-// serverseitig über die Checkout-Edge-Function berechnet - daran ändert
-// sich hier nichts.
+// Rabatt-Zustand: die Quelle ist AUSSCHLIESSLICH die Antwort der
+// "validate-discount"-Edge-Function. Es gibt hier keine lokale Coupon-Liste
+// und keinen lokal hinterlegten Prozentsatz mehr.
+let discountCode='';   // vom Server bestätigter Code (Anzeige/Checkout)
+let discountType=null; // 'percent' | 'fixed' - kommt 1:1 vom Server
+let discountValue=0;   // Rohwert vom Server (z.B. 10 für 10%, oder 5 für 5,00€)
+
+// Supabase wird lesend für die Empfehlungen (products.recommended = true)
+// und für den Aufruf der sicheren "validate-discount"-Edge-Function verwendet.
+// Preise/Rabatte/Versand werden weiterhin serverseitig über die
+// Checkout-Edge-Function berechnet - daran ändert sich hier nichts.
 const SUPABASE_URL='https://keaahccmqnmvtcmabvvz.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
 let supabaseClient=null;
@@ -109,20 +116,70 @@ function mergeDuplicates(cart){
   return [...map.values()];
 }
 
-function applyDiscount(){
+// Setzt den Rabatt-Zustand vollständig zurück und entfernt den gespeicherten
+// Code. Wird bei ungültigem/abgelaufenem Code und bei leerem Warenkorb genutzt.
+function resetDiscount(){
+  discountCode='';
+  discountType=null;
+  discountValue=0;
+  localStorage.removeItem(DISCOUNT_KEY);
+}
+
+// Berechnet den Rabattbetrag ausschließlich aus den vom Server gelieferten
+// Werten (discountType/discountValue). Keine lokal hinterlegten Prozentsätze.
+function computeDiscountAmount(rawSub){
+  if(!discountType || !discountValue) return 0;
+  const amt = discountType==='fixed' ? discountValue : rawSub*(discountValue/100);
+  return Math.max(0, Math.min(amt, rawSub));
+}
+
+// Ruft die bereits vorhandene sichere Edge-Function "validate-discount" auf
+// und liefert bei Erfolg { code, type, value } zurück, sonst null.
+async function checkDiscountCode(code){
+  const { data, error } = await getSupabase().functions.invoke('validate-discount', { body: { code } });
+  if(error) throw error;
+  if(!data || data.valid===false || data.error) return null;
+  return {
+    code: data.code || code,
+    type: data.type,
+    value: Number(data.value)||0
+  };
+}
+
+async function applyDiscount(){
   const val=document.getElementById('discountInput').value.trim().toUpperCase();
   const msg=document.getElementById('discountMsg');
-  if(CODES[val]){
-    discountPct=CODES[val]; discountCode=val;
-    localStorage.setItem(DISCOUNT_KEY, val);
-    msg.textContent=`Code „${val}" wurde erfolgreich angewendet (-${CODES[val]*100}%).`; msg.style.color='#3f7d3f';
+  const btn=document.getElementById('discountBtn');
+
+  if(!val){
+    resetDiscount();
+    msg.style.display='none';
+    render();
+    return;
   }
-  else {
-    discountPct=0; discountCode='';
-    localStorage.removeItem(DISCOUNT_KEY);
-    msg.textContent='Dieser Code ist leider ungültig.'; msg.style.color='#c0392b';
+
+  btn.disabled=true;
+  try{
+    const result=await checkDiscountCode(val);
+    if(!result) throw new Error('Code ungültig');
+
+    discountCode=result.code;
+    discountType=result.type;
+    discountValue=result.value;
+    localStorage.setItem(DISCOUNT_KEY, discountCode);
+
+    msg.textContent = discountType==='fixed'
+      ? `Code „${discountCode}" wurde erfolgreich angewendet (−${eur(discountValue)}).`
+      : `Code „${discountCode}" wurde erfolgreich angewendet (-${discountValue}%).`;
+    msg.style.color='#3f7d3f';
+  }catch(err){
+    console.error('Rabattcode konnte nicht validiert werden:', err);
+    resetDiscount();
+    msg.textContent='Dieser Code ist leider ungültig.';
+    msg.style.color='#c0392b';
   }
   msg.style.display='block';
+  btn.disabled=false;
   render();
 }
 
@@ -207,8 +264,7 @@ function render(){
   if(!cart.length){
     // Ohne Artikel gibt es nichts zu rabattieren - Code mit aufräumen,
     // damit kein "verwaister" Rabatt beim nächsten Einkauf auftaucht.
-    discountPct=0; discountCode='';
-    localStorage.removeItem(DISCOUNT_KEY);
+    resetDiscount();
     layout.classList.add('is-empty');
     list.innerHTML=`
       <div class="empty">
@@ -252,13 +308,17 @@ function render(){
 
 function updateSummary(cart){
   const rawSub=cart.reduce((s,it)=>s+it.price*it.qty,0);
-  const discountAmount=rawSub*discountPct;
+  const discountAmount=computeDiscountAmount(rawSub);
   const sub=rawSub-discountAmount;
   const ship=rawSub>=FREE_SHIP?0:SHIP_COST;
 
   document.getElementById('sub').textContent=eur(rawSub);
   const dRow=document.getElementById('discountRow');
-  if(discountPct>0){ dRow.style.display='flex'; document.getElementById('discountLabel').textContent=`Rabatt (${discountCode})`; document.getElementById('discountAmount').textContent='−'+eur(discountAmount); }
+  if(discountAmount>0){
+    dRow.style.display='flex';
+    document.getElementById('discountLabel').textContent=`Rabatt (${discountCode})`;
+    document.getElementById('discountAmount').textContent='−'+eur(discountAmount);
+  }
   else dRow.style.display='none';
 
   const shipEl=document.getElementById('ship');
@@ -297,25 +357,48 @@ function setQty(i,val,refocus){
 
 function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c); render(); }
 
-// Zuvor angewendeten Rabattcode wiederherstellen (z.B. nach Rücksprung
-// aus der Kasse), damit er nicht erneut eingegeben werden muss.
-(function restoreDiscount(){
+// Zuvor angewendeten Rabattcode wiederherstellen (z.B. nach Rücksprung aus
+// der Kasse). WICHTIG: Der gespeicherte Code wird NICHT gegen eine lokale
+// Liste geprüft, sondern erneut live über "validate-discount" validiert.
+// Ist er nicht mehr gültig/abgelaufen/aufgebraucht, wird er entfernt und es
+// wird kein Rabatt angezeigt - es gibt keinerlei lokalen Fallback.
+async function restoreDiscount(){
   const stored=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
-  if(stored && CODES[stored]){
-    discountPct=CODES[stored];
-    discountCode=stored;
+  if(!stored) return;
+
+  const msg=document.getElementById('discountMsg');
+  try{
+    const result=await checkDiscountCode(stored);
+    if(!result) throw new Error('Code nicht mehr gültig');
+
+    discountCode=result.code;
+    discountType=result.type;
+    discountValue=result.value;
+
     const input=document.getElementById('discountInput');
-    const msg=document.getElementById('discountMsg');
-    if(input) input.value=stored;
+    if(input) input.value=discountCode;
     if(msg){
-      msg.textContent=`Code „${stored}" ist weiterhin aktiv (-${CODES[stored]*100}%).`;
+      msg.textContent = discountType==='fixed'
+        ? `Code „${discountCode}" ist weiterhin aktiv (−${eur(discountValue)}).`
+        : `Code „${discountCode}" ist weiterhin aktiv (-${discountValue}%).`;
       msg.style.color='#3f7d3f';
       msg.style.display='block';
     }
+  }catch(err){
+    console.error('Gespeicherter Rabattcode ist nicht mehr gültig:', err);
+    resetDiscount();
+    if(msg) msg.style.display='none';
   }
-})();
+}
 
 render();
+
+// Gespeicherten Rabattcode serverseitig neu validieren und die Anzeige danach
+// aktualisieren. Der Warenkorb selbst wird sofort (oben) angezeigt, damit es
+// dafür keine Wartezeit gibt.
+restoreDiscount().then(()=>{
+  render();
+});
 
 // Empfehlungen aus Supabase laden. Der Warenkorb wird sofort gerendert (oben),
 // damit es keine Wartezeit für die eigentliche Kernfunktion gibt; sobald die
