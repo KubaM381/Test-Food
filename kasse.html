@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasse – Holzmanufaktur</title>
 <link rel="stylesheet" href="style.css">
+<!-- Supabase SDK: wird ausschließlich benötigt, um die bereits vorhandene
+     sichere "checkout"-Edge-Function aufzurufen. Es wird NICHT direkt in
+     die Tabelle public.orders geschrieben. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="checkout-page">
 <header><div class="header-wrap"><nav>
@@ -93,6 +97,7 @@
       <div id="miniList" style="margin-top:12px"></div>
     </details>
     <div id="sumRows"></div>
+    <p class="discount-msg" id="checkoutError" style="display:none;color:#c0392b;margin-top:10px"></p>
     <button class="pay-btn" type="submit">Jetzt bestellen</button>
     <div class="trust">🔒 Verbindung verschlüsselt (HTTPS)</div>
   </div>
@@ -153,11 +158,23 @@ const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const cart=JSON.parse(localStorage.getItem(KEY))||[];
 if(!cart.length) location.href='warenkorb.html';
 
+/* --- Supabase-Client: wird ausschließlich verwendet, um die bereits
+   vorhandene sichere "checkout"-Edge-Function aufzurufen. Es findet KEIN
+   direkter Insert/Update in public.orders vom Frontend aus statt - das
+   erledigt weiterhin serverseitig ausschließlich die Edge-Function
+   (inkl. Berechnung von zwischensumme/versand/gesamtbetrag). */
+const SUPABASE_URL='https://keaahccmqnmvtcmabvvz.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const rawSub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
 
 // Im Warenkorb angewendeter Rabattcode gilt auch hier - derselbe
 // localStorage-Schlüssel wie in warenkorb.html, damit er beim Wechsel
 // zur Kasse (und zurück) erhalten bleibt statt neu eingegeben werden zu müssen.
+// Hinweis: Diese lokale Berechnung dient NUR der Anzeige in der Bestellübersicht.
+// Die verbindliche Berechnung (inkl. Rabatt, Versand, Gesamtbetrag) erfolgt
+// ausschließlich serverseitig in der checkout-Edge-Function.
 const discountCode=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
 const discountPct=CODES[discountCode]||0;
 const discountAmount=rawSub*discountPct;
@@ -346,8 +363,25 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape') hideSuggest();
 });
 
+/* --- Bestellung absenden: ruft ausschließlich die bereits vorhandene
+   sichere "checkout"-Edge-Function auf. Diese erwartet laut Vorgabe:
+   vorname, nachname, strasse, plz, ort, email, telefon, zahlungsart,
+   items, discount_code - und berechnet zwischensumme, versand und
+   gesamtbetrag serverseitig, bevor sie den Datensatz in public.orders
+   anlegt. Das Frontend liest/schreibt orders zu keinem Zeitpunkt direkt. */
+const checkoutErrorEl=document.getElementById('checkoutError');
+
+function showCheckoutError(msg){
+  checkoutErrorEl.textContent=msg;
+  checkoutErrorEl.style.display='block';
+}
+function hideCheckoutError(){
+  checkoutErrorEl.style.display='none';
+}
+
 checkoutForm.addEventListener('submit', async e=>{
   e.preventDefault();
+  hideCheckoutError();
   const form=e.target;
   if(!form.checkValidity()){
     const firstInvalid=form.querySelector('.invalid');
@@ -358,13 +392,48 @@ checkoutForm.addEventListener('submit', async e=>{
   const btn=form.querySelector('.pay-btn');
   btn.disabled=true; btn.textContent='Wird verarbeitet…';
 
-  // TODO: Zahlungsanbieter-Integration ergänzen, sobald ein Payment-Provider angebunden ist.
-  await new Promise(r=>setTimeout(r,900));
+  const fd=new FormData(form);
 
-  localStorage.removeItem(KEY);
-  localStorage.removeItem(DISCOUNT_KEY);
-  alert('Vielen Dank für deine Bestellung! Du erhältst in Kürze eine Bestätigung per E-Mail.');
-  location.href='index.html';
+  // Nur id, name und qty werden mitgeschickt - der Preis wird von der
+  // Edge-Function serverseitig anhand von public.products nachgeschlagen,
+  // damit Beträge nicht vom Client manipuliert werden können.
+  const items=cart.map(it=>({ id: it.id, name: it.name, qty: it.qty||1 }));
+
+  const payload={
+    vorname: fd.get('vorname'),
+    nachname: fd.get('nachname'),
+    strasse: fd.get('strasse'),
+    plz: fd.get('plz'),
+    ort: fd.get('ort'),
+    email: fd.get('email'),
+    telefon: fd.get('telefon') || null,
+    zahlungsart: fd.get('pay'),
+    items,
+    discount_code: discountCode || null
+  };
+
+  try{
+    // Name der Edge-Function ("checkout") ggf. anpassen, falls deine
+    // Function anders heißt - der restliche Aufruf bleibt gleich.
+    const { data, error } = await supabaseClient.functions.invoke('checkout', { body: payload });
+
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(DISCOUNT_KEY);
+
+    const bestaetigterBetrag=(data && typeof data.gesamtbetrag==='number')
+      ? eur(data.gesamtbetrag)
+      : eur(sub+ship);
+
+    alert(`Vielen Dank für deine Bestellung! Gesamtbetrag: ${bestaetigterBetrag}. Du erhältst in Kürze eine Bestätigung per E-Mail.`);
+    location.href='index.html';
+  }catch(err){
+    console.error('Fehler beim Checkout:', err);
+    showCheckoutError('Deine Bestellung konnte leider nicht abgeschlossen werden. Bitte überprüfe deine Angaben und versuche es erneut.');
+    btn.disabled=false; btn.textContent='Jetzt bestellen';
+  }
 });
 </script>
 </body>
