@@ -814,6 +814,15 @@ h1 {
   margin: 0;
 }
 
+/* Container für eine variable Anzahl von Empfehlungskarten (0..n, abhängig
+   davon, wie viele Produkte in Supabase aktuell "recommended = true" sind).
+   Stapelt die Karten sauber untereinander - auch auf kleinen Displays. */
+.recommend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .recommend-card {
   display: flex;
   flex-wrap: wrap;
