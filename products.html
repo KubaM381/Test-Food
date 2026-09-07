@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produktdetails – Holzmanufaktur</title>
   <link rel="stylesheet" href="style.css">
-  
+
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
   <script src="app.js" defer></script>
 </head>
-<body>
+<body class="product-page-body">
   <header class="header">
     <button id="backBtn" class="icon-btn" aria-label="Zurück">←</button>
     <h1 class="header-title">Shop</h1>
@@ -21,7 +21,7 @@
     </button>
   </header>
 
-  <main class="main-container">
+  <main class="main-container product-page-main">
     <!-- Fehleransicht -->
     <div id="notFoundView" class="not-found" hidden>
       <h2>Produkt nicht gefunden</h2>
@@ -30,12 +30,15 @@
     </div>
 
     <!-- Hauptansicht Produkt -->
-    <div id="productView" class="product-card">
-      <div class="image-wrapper">
+    <div id="productView" class="product-card product-page-card" hidden>
+
+      <!-- Links: Galerie (sticky auf Desktop) -->
+      <div class="image-wrapper product-page-gallery">
         <img id="productImage" src="" alt="Produktbild" class="product-image">
       </div>
 
-      <div class="product-details">
+      <!-- Rechts: Kaufinformationen -->
+      <div class="product-details product-page-info">
         <h2 id="productName" class="product-title">...</h2>
 
         <div class="rating-row">
@@ -46,29 +49,85 @@
 
         <div id="productPrice" class="product-price">0,00 €</div>
 
-        <p id="productDescription" class="product-description"></p>
+        <!-- Highlights auf einen Blick -->
+        <ul id="featuresList" class="features-list product-page-highlights"></ul>
 
-        <div class="section-title">MENGE AUSWÄHLEN:</div>
-        <div class="quantity-controls">
-          <div class="qty-picker">
-            <button id="qtyMinus" class="qty-btn" aria-label="Menge verringern">-</button>
-            <span id="qtyValue" class="qty-value">1</span>
-            <button id="qtyPlus" class="qty-btn" aria-label="Menge erhöhen">+</button>
-          </div>
-          <div class="chips-group">
-            <button class="chip is-active" data-qty="1">1</button>
-            <button class="chip" data-qty="2">2</button>
-            <button class="chip" data-qty="5">5</button>
+        <p id="productDescription" class="product-description" hidden></p>
+
+        <!-- Mengenauswahl -->
+        <div class="product-page-options">
+          <div>
+            <div class="section-title">Menge</div>
+            <div class="quantity-controls">
+              <div class="qty-picker">
+                <button id="qtyMinus" class="qty-btn" aria-label="Menge verringern">-</button>
+                <span id="qtyValue" class="qty-value">1</span>
+                <button id="qtyPlus" class="qty-btn" aria-label="Menge erhöhen">+</button>
+              </div>
+              <div class="chips-group">
+                <button class="chip is-active" data-qty="1" aria-pressed="true">1</button>
+                <button class="chip" data-qty="2" aria-pressed="false">2</button>
+                <button class="chip" data-qty="5" aria-pressed="false">5</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="section-title">HIGHLIGHTS:</div>
-        <ul id="featuresList" class="features-list"></ul>
+        <!-- CTA direkt im Info-Bereich (Desktop); auf Mobile übernimmt die
+             fixierte .action-bar unten dieselbe Funktion. -->
+        <div class="product-page-desktop-cta">
+          <button id="buyBtnDesktop" class="btn btn-primary buy-btn" type="button">
+            <span id="buyBtnLabelDesktop">In den Warenkorb</span>
+          </button>
+        </div>
+
+        <!-- Trust-Elemente -->
+        <div class="product-page-trust">
+          <div class="product-page-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>
+            <span>Kostenloser Versand</span>
+          </div>
+          <div class="product-page-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+            <span>Sichere Zahlung</span>
+          </div>
+          <div class="product-page-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg>
+            <span>30 Tage Rückgabe</span>
+          </div>
+        </div>
+
+        <!-- Details als Accordion -->
+        <div class="product-page-details">
+          <details class="product-page-accordion-item" open>
+            <summary>Beschreibung</summary>
+            <div class="product-page-accordion-body">
+              <p id="productDescriptionAccordion"></p>
+            </div>
+          </details>
+          <details class="product-page-accordion-item">
+            <summary>Material &amp; Pflege</summary>
+            <div class="product-page-accordion-body">
+              <p>Handgefertigt aus sorgfältig ausgewähltem Massivholz. Mit einem leicht feuchten Tuch reinigen, direkte Hitze und pralle Sonne vermeiden. Gelegentliches Auffrischen mit Holzöl erhält den natürlichen Glanz.</p>
+            </div>
+          </details>
+          <details class="product-page-accordion-item">
+            <summary>Versand &amp; Rückgabe</summary>
+            <div class="product-page-accordion-body">
+              <ul>
+                <li>Versand innerhalb Deutschlands kostenlos, Lieferzeit 3–5 Werktage</li>
+                <li>30 Tage Rückgaberecht ab Erhalt der Ware</li>
+                <li>Sorgfältig verpackt für einen sicheren Transport</li>
+              </ul>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   </main>
 
-  <footer id="actionBar" class="action-bar">
+  <!-- Mobile Sticky-CTA (auf Desktop per CSS ausgeblendet) -->
+  <footer id="actionBar" class="action-bar" hidden>
     <button id="buyBtn" class="btn btn-primary buy-btn">
       <span id="buyBtnLabel">In den Warenkorb</span>
     </button>
