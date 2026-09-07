@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Icons Voting - Seite 1</title>
+  <title>Custom Shopping Icons Voting</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -23,7 +23,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       padding: 1.5rem;
-      padding-bottom: 6rem;
+      padding-bottom: 5rem;
       line-height: 1.5;
     }
 
@@ -47,12 +47,6 @@
       margin-bottom: 0.5rem;
     }
 
-    .counter-badges {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.85rem;
-    }
-
     .progress-bar {
       height: 10px;
       background: var(--card-bg);
@@ -61,17 +55,17 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Konstant auf 0% für Seite 1 */
     .progress-fill {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.3s ease;
     }
 
     .section-title {
       font-size: 1.25rem;
       color: var(--accent);
-      margin: 2rem 0 1rem 0;
+      margin: 2.5rem 0 1rem 0;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 0.5rem;
       display: flex;
@@ -155,7 +149,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0f172abf;
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(8px);
       padding: 1rem;
       border-top: 1px solid var(--border-color);
@@ -183,110 +177,290 @@
 </head>
 <body>
 
-  <!-- Sticky Header mit konstantem Progress -->
+  <!-- Sticky Header mit Progress -->
   <div class="header-sticky">
     <div class="progress-info">
       <span>Fortschritt: Seite 1</span>
-      <div class="counter-badges">
-        <span>Ausgewählt: <strong id="count-general">0</strong> / 12</span>
-      </div>
+      <span>Ausgewählt: <strong id="count">0</strong> / 12 Icons</span>
     </div>
     <div class="progress-bar">
-      <div class="progress-fill"></div>
+      <div class="progress-fill" id="pfill"></div>
     </div>
   </div>
 
   <header style="text-align: center;">
-    <h1>Custom Icons Voting</h1>
-    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Wähle deine Favoriten aus (mind. 1, max. 12).</p>
+    <h1>Custom E-Commerce Icons Voting</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Wähle deine Favoriten aus (maximal 12 insgesamt)</p>
   </header>
 
-  <!-- KATEGORIE 1: ALLGEMEINE ICONS -->
+  <!-- ================= SEKTION 1: HOHLE ICONS ================= -->
   <div class="section-title">
-    <span>Icon-Auswahl</span>
-    <span style="font-size: 0.8rem; color: var(--text-muted);">(Maximal 12)</span>
+    <span>1. Hohle Icons (Outline)</span>
+  </div>
+  <div class="grid">
+    <div class="icon-card" data-id="01-hohl" data-name="Klassik Wagen (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h3l1.8 9H18l2-7H6"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/><path d="M7 12h10l-1 4H8z"/></svg>
+      <span class="card-title">01. Klassik</span>
+    </div>
+    <div class="icon-card" data-id="02-hohl" data-name="Minimal Wagen (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2v12h14v-2H7V4"/><path d="M8 6h13v6H8z"/><rect x="7" y="18" width="3" height="3"/><rect x="16" y="18" width="3" height="3"/></svg>
+      <span class="card-title">02. Minimal</span>
+    </div>
+    <div class="icon-card" data-id="03-hohl" data-name="Soft Curves (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2.5l2 10a2 2 0 002 1.5h8a2 2 0 002-1.5l1.5-7H6"/><circle cx="9.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg>
+      <span class="card-title">03. Curves</span>
+    </div>
+    <div class="icon-card" data-id="04-hohl" data-name="Speed Wagen (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h4l3 10h10l3-8H8"/><line x1="2" y1="9" x2="6" y2="9"/><line x1="1" y1="13" x2="5" y2="13"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+      <span class="card-title">04. Speed</span>
+    </div>
+    <div class="icon-card" data-id="05-hohl" data-name="Deep Basket (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h3l1 13h10l2-10H7"/><line x1="11" y1="7" x2="11" y2="17"/><line x1="15" y1="7" x2="15" y2="17"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
+      <span class="card-title">05. Deep</span>
+    </div>
+    <div class="icon-card" data-id="06-hohl" data-name="Gitter Wagen (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h3l2 11h11l2-7H6"/><line x1="9" y1="7" x2="19" y2="7"/><line x1="10" y1="11" x2="18" y2="11"/><line x1="12" y1="4" x2="12" y2="14"/><line x1="16" y1="4" x2="16" y2="14"/><circle cx="8" cy="18" r="1"/><circle cx="17" cy="18" r="1"/></svg>
+      <span class="card-title">06. Wire Mesh</span>
+    </div>
+    <div class="icon-card" data-id="07-hohl" data-name="Etagen Wagen (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.5 13H18"/><path d="M7 5h12l-1 4H7.8"/><path d="M8.5 11h9.5l-1 4H9.3"/><circle cx="8" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+      <span class="card-title">07. Etage</span>
+    </div>
+    <div class="icon-card" data-id="08-hohl" data-name="Tech Cart (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h4l2 7h11l2-5H7"/><path d="M8 10l-1 4h11"/><circle cx="8" cy="18" r="1"/><circle cx="17" cy="18" r="1"/></svg>
+      <span class="card-title">08. Tech</span>
+    </div>
+    <div class="icon-card" data-id="09-hohl" data-name="Roller Basket (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 8h-11Z"/><path d="M9 8V5a3 3 0 016 0v3"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg>
+      <span class="card-title">09. Roller</span>
+    </div>
+    <div class="icon-card" data-id="10-hohl" data-name="Futurist Arc (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4c3 0 4 2 5 5h12l-2.5 7H7.5"/><path d="M7.5 16l-1 2h12"/><circle cx="7" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      <span class="card-title">10. Futurist</span>
+    </div>
+    <div class="icon-card" data-id="11-hohl" data-name="Paper Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span class="card-title">11. Papiertüte</span>
+    </div>
+    <div class="icon-card" data-id="12-hohl" data-name="Plastic Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v5a3 3 0 006 0V3m0 0v5a3 3 0 006 0V3"/><path d="M6 3H4a1 1 0 00-1 1v16a2 2 0 002 2h14a2 2 0 002-2V4a1 1 0 00-1-1h-2"/></svg>
+      <span class="card-title">12. Plastik</span>
+    </div>
+    <div class="icon-card" data-id="13-hohl" data-name="Boutique Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-1 12h16l-1-12H5z"/><path d="M9 9V6a3 3 0 016 0v3"/></svg>
+      <span class="card-title">13. Boutique</span>
+    </div>
+    <div class="icon-card" data-id="14-hohl" data-name="Soft Tote (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10c0 8 2 11 8 11s8-3 8-11H4z"/><path d="M8 10V6a4 4 0 018 0v4"/></svg>
+      <span class="card-title">14. Tote Bag</span>
+    </div>
+    <div class="icon-card" data-id="15-hohl" data-name="Lunch Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14v13H5z"/><path d="M4 5h16l-1 3H5z"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span class="card-title">15. Lunch Bag</span>
+    </div>
+    <div class="icon-card" data-id="16-hohl" data-name="Gift Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14v12H5z"/><path d="M9 9V6a3 3 0 016 0v3"/><circle cx="12" cy="14" r="1.5"/><path d="M10.5 13.5L9 12M13.5 13.5L15 12M10.5 14.5L9 16M13.5 14.5L15 16"/></svg>
+      <span class="card-title">16. Geschenk</span>
+    </div>
+    <div class="icon-card" data-id="17-hohl" data-name="Eco Punch (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="9" y="6" width="6" height="3" rx="1.5"/></svg>
+      <span class="card-title">17. Eco Punch</span>
+    </div>
+    <div class="icon-card" data-id="18-hohl" data-name="Gusset Bag (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v15H4z"/><path d="M4 6l3 15M20 6l-3 15"/><path d="M9 6V4a3 3 0 016 0v2"/></svg>
+      <span class="card-title">18. Gusset</span>
+    </div>
+    <div class="icon-card" data-id="19-hohl" data-name="Drawstring (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9c0 7 2 12 6 12s6-5 6-12H6z"/><path d="M6 9l2-4h8l2 4"/><path d="M10 5L8 2M14 5l2-2"/></svg>
+      <span class="card-title">19. Beutel</span>
+    </div>
+    <div class="icon-card" data-id="20-hohl" data-name="Zipper Pouch (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M7 6v4"/></svg>
+      <span class="card-title">20. Zipper</span>
+    </div>
+    <div class="icon-card" data-id="21-hohl" data-name="Hand Basket (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-2 10H5L3 10z"/><path d="M8 10V5a2 2 0 012-2h4a2 2 0 012 2v5"/></svg>
+      <span class="card-title">21. Handkorb</span>
+    </div>
+    <div class="icon-card" data-id="22-hohl" data-name="Twin Basket (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9h20l-2 10H4L2 9z"/><path d="M6 9l4-5M18 9l-4-5"/></svg>
+      <span class="card-title">22. Twin Korb</span>
+    </div>
+    <div class="icon-card" data-id="23-hohl" data-name="Picnic Basket (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16l-1.5 9h-13Z"/><path d="M6 11c0-4 2.7-7 6-7s6 3 6 7"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="9" y1="11" x2="9" y2="20"/><line x1="15" y1="11" x2="15" y2="20"/></svg>
+      <span class="card-title">23. Flechtkorb</span>
+    </div>
+    <div class="icon-card" data-id="24-hohl" data-name="Crate (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="1"/><rect x="9" y="12" width="6" height="3" rx="1"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      <span class="card-title">24. Kiste</span>
+    </div>
+    <div class="icon-card" data-id="25-hohl" data-name="Mesh Bowl (Hohl)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c1 8 3 11 9 11s8-3 9-11H3z"/><path d="M12 4v5"/><path d="M8 5l4 4 4-4"/></svg>
+      <span class="card-title">25. Mesh Bowl</span>
+    </div>
   </div>
 
+
+  <!-- ================= SEKTION 2: AUSGEFÜLLTE ICONS ================= -->
+  <div class="section-title">
+    <span>2. Ausgefüllte Icons (Solid)</span>
+  </div>
   <div class="grid">
-    <div class="icon-card" data-type="general" data-id="icon-01" data-name="Klassik Pfeil">
+    <div class="icon-card" data-id="01-voll" data-name="Klassik Wagen (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      <span class="card-title">01. Klassik Pfeil</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 2a1 1 0 000 2h1.68l1.72 8.6A2 2 0 007.36 14H17a1 1 0 100-2H7.36l-.4-2H18a2 2 0 001.94-1.51l1.5-6A1 1 0 0020.47 1H5.21l-.4-2H2z"/><circle cx="8" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>
+      <span class="card-title">01. Klassik</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-02" data-name="Chevron Links">
+    <div class="icon-card" data-id="02-voll" data-name="Minimal Wagen (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      <span class="card-title">02. Chevron</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 3a1 1 0 011-1h3v13h13a1 1 0 110 2H5a1 1 0 01-1-1V4H3a1 1 0 01-1-1z"/><path d="M8 5h13v7H8z"/><rect x="7" y="18" width="3" height="3"/><rect x="16" y="18" width="3" height="3"/></svg>
+      <span class="card-title">02. Minimal</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-03" data-name="Symmetrisches Haus">
+    <div class="icon-card" data-id="03-voll" data-name="Soft Curves (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1v-9.5z"/>
-        <path d="M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6"/>
-      </svg>
-      <span class="card-title">03. Haus Symmetrisch</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 2a1 1 0 000 2h1.1l2.1 10.3A3.5 3.5 0 009.6 17h6.8a3.5 3.5 0 003.4-2.7l1.7-7.8A1 1 0 0020.5 5H6.1L5.5 2H3z"/><circle cx="9.5" cy="20" r="1.5"/><circle cx="16.5" cy="20" r="1.5"/></svg>
+      <span class="card-title">03. Curves</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-04" data-name="Minimal Line Haus">
+    <div class="icon-card" data-id="04-voll" data-name="Speed Wagen (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8a1 1 0 001 1h12a1 1 0 001-1v-8h3L12 3z"/></svg>
-      <span class="card-title">04. Minimal Haus</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 4a1 1 0 000 2h3.2l3 10A1 1 0 009.2 17h10a1 1 0 001-.7l3-8A1 1 0 0022.3 7H7.8l-.6-2H2z"/><path d="M1 9h4a1 1 0 000-2H1a1 1 0 000 2zM0 13h4a1 1 0 000-2H0a1 1 0 000 2z"/><circle cx="10" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
+      <span class="card-title">04. Speed</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-05" data-name="Einstellungen Zahnrad">
+    <div class="icon-card" data-id="05-voll" data-name="Deep Basket (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span class="card-title">05. Zahnrad</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 4a1 1 0 011-1h3a1 1 0 011 .9l.3 3.1H20a1 1 0 011 1.2l-2 10A1 1 0 0118 19H8a1 1 0 01-1-.9L5.2 4H4a1 1 0 01-1-1z"/><circle cx="9" cy="21" r="1.5"/><circle cx="17" cy="21" r="1.5"/></svg>
+      <span class="card-title">05. Deep</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-06" data-name="Suchen Lupe">
+    <div class="icon-card" data-id="06-voll" data-name="Gitter Wagen (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <span class="card-title">06. Lupe</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M2 2a1 1 0 000 2h1.6l2 11A1 1 0 006.6 16H18a1 1 0 001-.8l2-7A1 1 0 0020 7H6.1L5.5 4H2zm5.7 7h11.5l-1.1 4H8.4L7.7 9z"/><circle cx="8" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+      <span class="card-title">06. Wire Mesh</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-07" data-name="Benutzer Profil">
+    <div class="icon-card" data-id="07-voll" data-name="Etagen Wagen (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="card-title">07. Benutzer</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 3a1 1 0 011-1h2a1 1 0 011 .8L6.7 6H19a1 1 0 011 1.2l-1 4a1 1 0 01-1 .8H7.7l.6 3H18a1 1 0 110 2H7a1 1 0 01-1-.8L3.2 3H2z"/><circle cx="8" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
+      <span class="card-title">07. Etage</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-08" data-name="Glocke Benachrichtigung">
+    <div class="icon-card" data-id="08-voll" data-name="Tech Cart (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-      <span class="card-title">08. Glocke</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 3a1 1 0 000 2h2.5l2.4 8.3A1 1 0 007.8 14H18a1 1 0 001-.8l2-7a1 1 0 00-.9-1.2H6.3L5.4 3H2z"/><circle cx="8" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg>
+      <span class="card-title">08. Tech</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-09" data-name="Herz Favorit">
+    <div class="icon-card" data-id="09-voll" data-name="Roller Basket (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-      <span class="card-title">09. Herz</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5a4 4 0 018 0v2h3a1 1 0 011 1.2l-1.7 9a1 1 0 01-1 .8H5.7a1 1 0 01-1-.8L3 8.2A1 1 0 014 7h3V5zm2 2h4V5a2 2 0 10-4 0v2z"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="16.5" cy="20" r="1.5"/></svg>
+      <span class="card-title">09. Roller</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-10" data-name="Stern Bewertung">
+    <div class="icon-card" data-id="10-voll" data-name="Futurist Arc (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span class="card-title">10. Stern</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3a1 1 0 000 2c1.7 0 2.8.9 3.6 3H20a1 1 0 001-1.3l-2.5 7A1 1 0 0017.5 15H8.2l-.6 1.3A1 1 0 008.5 18H18a1 1 0 100-2H9.8l1.3-2.6H17.5a3 3 0 002-2l2.5-7A3 3 0 0020 1H8A5 5 0 003 3z"/><circle cx="7" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      <span class="card-title">10. Futurist</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-11" data-name="Warenkorb">
+    <div class="icon-card" data-id="11-voll" data-name="Paper Bag (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-      <span class="card-title">11. Warenkorb</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.2 2A1 1 0 004.4 2.5l-3 4A1 1 0 001 7v13a3 3 0 003 3h16a3 3 0 003-3V7a1 1 0 00-.4-.5l-3-4A1 1 0 0018.8 2H5.2zM15 10a3 3 0 11-6 0 1 1 0 016 0z"/></svg>
+      <span class="card-title">11. Papiertüte</span>
     </div>
-
-    <div class="icon-card" data-type="general" data-id="icon-12" data-name="Filter">
+    <div class="icon-card" data-id="12-voll" data-name="Plastic Bag (Solid)">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-      <span class="card-title">12. Filter</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2a2 2 0 00-2 2v16a3 3 0 003 3h12a3 3 0 003-3V4a2 2 0 00-2-2h-1v5a2 2 0 01-4 0V2h-2v5a2 2 0 01-4 0V2H5z"/></svg>
+      <span class="card-title">12. Plastik</span>
+    </div>
+    <div class="icon-card" data-id="13-voll" data-name="Boutique Bag (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6a4 4 0 018 0v2h3a1 1 0 011 1.1l-1.2 13A1 1 0 0117.8 23H6.2a1 1 0 01-1-.9L4 9.1A1 1 0 015 8h3V6zm2 2h4V6a2 2 0 10-4 0v2z"/></svg>
+      <span class="card-title">13. Boutique</span>
+    </div>
+    <div class="icon-card" data-id="14-voll" data-name="Soft Tote (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 6a5 5 0 0110 0v3h2a1 1 0 011 1c0 9-3 12-10 12S3 19 3 10a1 1 0 011-1h3V6zm2 3h6V6a3 3 0 00-6 0v3z"/></svg>
+      <span class="card-title">14. Tote Bag</span>
+    </div>
+    <div class="icon-card" data-id="15-voll" data-name="Lunch Bag (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5a1 1 0 011-1h16a1 1 0 01.9 1.4l-1.3 4H4.4L3.1 5.4A1 1 0 013 5z"/><path d="M4 10h16v11a2 2 0 01-2 2H6a2 2 0 01-2-2V10zm4 3a1 1 0 100 2h8a1 1 0 100-2H8z"/></svg>
+      <span class="card-title">15. Lunch Bag</span>
+    </div>
+    <div class="icon-card" data-id="16-voll" data-name="Gift Bag (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6a4 4 0 018 0v2h3a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V9a1 1 0 011-1h3V6zm2 2h4V6a2 2 0 10-4 0v2z"/></svg>
+      <span class="card-title">16. Geschenk</span>
+    </div>
+    <div class="icon-card" data-id="17-voll" data-name="Eco Punch (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 3a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H6zm3 4.5a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 010 3h-3A1.5 1.5 0 019 7.5z"/></svg>
+      <span class="card-title">17. Eco Punch</span>
+    </div>
+    <div class="icon-card" data-id="18-voll" data-name="Gusset Bag (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 4a4 4 0 018 0v1h3a1 1 0 011 1v15a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1h3V4zm2 1h4V4a2 2 0 10-4 0v1z"/></svg>
+      <span class="card-title">18. Gusset</span>
+    </div>
+    <div class="icon-card" data-id="19-voll" data-name="Drawstring (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.6 5l-1.4-2.8a1 1 0 111.8-.9L9.4 4h5.2l1.4-2.7a1 1 0 111.8.9L16.4 5H18a1 1 0 011 .9l-1 4.1C18 17 15.6 22 12 22S6 17 6 10l-1-4.1A1 1 0 016 5h1.6z"/></svg>
+      <span class="card-title">19. Beutel</span>
+    </div>
+    <div class="icon-card" data-id="20-voll" data-name="Zipper Pouch (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 4a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5zm0 5h14V6H5v3zm3-2a1 1 0 100 2 1 1 0 000-2z"/></svg>
+      <span class="card-title">20. Zipper</span>
+    </div>
+    <div class="icon-card" data-id="21-voll" data-name="Hand Basket (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 3a2 2 0 00-2 2v4H3a1 1 0 00-1 1.2l2 10A2 2 0 006 22h12a2 2 0 002-1.8l2-10A1 1 0 0021 9h-4V5a2 2 0 00-2-2H9zm6 6V5H9v4h6z"/></svg>
+      <span class="card-title">21. Handkorb</span>
+    </div>
+    <div class="icon-card" data-id="22-voll" data-name="Twin Basket (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.1 3.2a1 1 0 011.4.3L13.2 8h-2.4L8.7 4.5a1 1 0 01.4-1.3zM14.9 3.2a1 1 0 01.3 1.3L13.2 8h2.4l2.1-4.5a1 1 0 011.4-.3 1 1 0 01.3 1.4L17.7 8H21a1 1 0 011 1.2l-2 10A2 2 0 0118 21H6a2 2 0 01-2-1.8l-2-10A1 1 0 013 8h3.3L4.6 4.5a1 1 0 011.3-1.3l2.7 4.8h.1"/></svg>
+      <span class="card-title">22. Twin Korb</span>
+    </div>
+    <div class="icon-card" data-id="23-voll" data-name="Picnic Basket (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10h16c0-4.4-3.6-8-8-8zm-6 7a6 6 0 0112 0H6z"/><path d="M3.1 12l1.3 8a2 2 0 002 1.8h11.2a2 2 0 002-1.8l1.3-8H3.1z"/></svg>
+      <span class="card-title">23. Flechtkorb</span>
+    </div>
+    <div class="icon-card" data-id="24-voll" data-name="Crate (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 9a1 1 0 011-1h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9zm6 4a1 1 0 011-1h4a1 1 0 011 1v1a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1z"/></svg>
+      <span class="card-title">24. Kiste</span>
+    </div>
+    <div class="icon-card" data-id="25-voll" data-name="Mesh Bowl (Solid)">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a1 1 0 011 1v4.6l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L11 7.6V3a1 1 0 011-1z"/><path d="M2.1 10c.6 7.5 3 11 9.9 11s9.3-3.5 9.9-11H2.1z"/></svg>
+      <span class="card-title">25. Mesh Bowl</span>
     </div>
   </div>
 
   <!-- Bottom Bar mit Weiter Button -->
   <div class="action-bar">
-    <button class="btn" onclick="submitVotes()">Weiter zu Seite 2 ➔</button>
+    <button class="btn" onclick="submitVotes()">Weiter zu Teil 2 ➔</button>
   </div>
 
   <script>
@@ -294,53 +468,57 @@
       history.replaceState(null, '', '/icons');
     }
 
-    const selectedIcons = new Map();
+    const MAX_SELECTION = 12;
+    const selectedMap = new Map();
 
     document.querySelectorAll('.icon-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = card.dataset.id;
         const name = card.dataset.name;
 
-        if (selectedIcons.has(id)) {
-          selectedIcons.delete(id);
+        if (selectedMap.has(id)) {
+          selectedMap.delete(id);
           card.classList.remove('selected');
         } else {
-          if (selectedIcons.size >= 12) {
-            alert('Du kannst maximal 12 Icons auswählen.');
+          if (selectedMap.size >= MAX_SELECTION) {
+            alert(`Du kannst maximal ${MAX_SELECTION} Icons auswählen.`);
             return;
           }
-          selectedIcons.set(id, name);
+          selectedMap.set(id, name);
           card.classList.add('selected');
         }
 
-        // Aktualisiert nur den Textzähler, nicht die Fortschrittsleiste
-        document.getElementById('count-general').textContent = selectedIcons.size;
+        updateUI();
       });
     });
 
+    function updateUI() {
+      const count = selectedMap.size;
+      document.getElementById('count').textContent = count;
+      
+      const pct = Math.round((count / MAX_SELECTION) * 50);
+      document.getElementById('pfill').style.width = pct + '%';
+    }
+
     function submitVotes() {
-      if (selectedIcons.size < 1) {
-        alert('Bitte wähle mindestens 1 Icon aus!');
+      if (selectedMap.size === 0) {
+        alert('Bitte wähle mindestens ein Icon aus.');
         return;
       }
 
-      // Votes aus LocalStorage laden oder neu anlegen
       const votes = JSON.parse(localStorage.getItem('icon_votes') || '[]');
       
-      selectedIcons.forEach((name, id) => {
+      selectedMap.forEach((name, id) => {
         votes.push({
           id: id,
           icon: name,
-          category: 'general',
           page: 1,
           time: new Date().toISOString()
         });
       });
 
       localStorage.setItem('icon_votes', JSON.stringify(votes));
-
-      // Korrekte Weiterleitung zu icons2
-      window.location.href = 'https://kubam381.github.io/Test-Food/icons2';
+      window.location.href = '/icons2';
     }
   </script>
 </body>
