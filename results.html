@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icon Voting - Dashboard & Ranking</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --accent: #38bdf8;
+      --accent-solid: #818cf8;
+      --danger: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h1 { font-size: 1.75rem; color: var(--text-main); }
+
+    /* Key Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Layout Sections */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Ranking List */
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .rank-num {
+      font-weight: 700;
+      font-size: 1.1rem;
+      width: 28px;
+      color: var(--accent);
+    }
+
+    .item-info { flex: 1; }
+    .item-name { font-weight: 600; font-size: 0.95rem; }
+
+    .item-tags {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 2px;
+    }
+
+    .tag {
+      background: var(--border-color);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .bar-container {
+      width: 120px;
+      height: 8px;
+      background: var(--bg-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+    }
+
+    .vote-count {
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    /* Style Ratio Bar */
+    .style-ratio-bar {
+      height: 20px;
+      background: var(--border-color);
+      border-radius: 10px;
+      display: flex;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .ratio-hohl { background: var(--accent); transition: width 0.3s; }
+    .ratio-voll { background: var(--accent-solid); transition: width 0.3s; }
+
+    .ratio-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    /* Controls & Table */
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      flex: 1;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th { color: var(--text-muted); font-weight: 600; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Icon Voting Dashboard</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Auswertung aller Klicks & Präferenzen</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="btn btn-secondary" onclick="exportCSV()">CSV Export</button>
+      <button class="btn btn-danger" onclick="clearData()">Daten zurücksetzen</button>
+    </div>
+  </header>
+
+  <!-- Key Metrics -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-title">Gesamte Klicks</div>
+      <div class="metric-value" id="total-votes">0</div>
+      <div class="metric-sub">Stimmen über alle Seiten</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Gewählte Icons</div>
+      <div class="metric-value" id="unique-icons">0</div>
+      <div class="metric-sub">Mindestens 1x angeklickt</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Bevorzugter Stil</div>
+      <div class="metric-value" id="top-style">-</div>
+      <div class="metric-sub" id="style-percent">0% Verteilung</div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Top Ranking -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>Top Icons (Ranking nach Klicks)</span>
+      </div>
+      <div class="ranking-list" id="ranking-container">
+        <!-- Dynamisch befüllt -->
+      </div>
+    </div>
+
+    <!-- Style Distribution -->
+    <div class="panel">
+      <div class="panel-title">Stil-Verteilung</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Gegenüberstellung von Outline (Hohl) vs. Solid (Ausgefüllt).</p>
+      
+      <div class="style-ratio-bar">
+        <div class="ratio-hohl" id="bar-hohl" style="width: 50%;"></div>
+        <div class="ratio-voll" id="bar-voll" style="width: 50%;"></div>
+      </div>
+
+      <div class="ratio-legend">
+        <div><span class="dot" style="background: var(--accent);"></span> Outline: <strong id="cnt-hohl">0</strong></div>
+        <div><span class="dot" style="background: var(--accent-solid);"></span> Solid: <strong id="cnt-voll">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw Data Table -->
+  <div class="panel">
+    <div class="panel-title">Detailübersicht aller Icons</div>
+    <div class="controls">
+      <input type="text" id="search-input" placeholder="Nach Icon-Name oder ID suchen..." oninput="renderTable()">
+    </div>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Icon Name</th>
+            <th>Stil-Typ</th>
+            <th>Seite</th>
+            <th>Anzahl Klicks</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Dynamisch befüllt -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // URL-Säuberung: Zeigt nur /results im Browser an
+    if (window.location.pathname.endsWith('.html')) {
+      history.replaceState(null, '', '/results');
+    }
+
+    let rawVotes = [];
+    let aggregatedData = [];
+
+    function loadData() {
+      rawVotes = JSON.parse(localStorage.getItem('icon_votes') || '[]');
+      
+      // Aggregation nach Icon ID (Klicks zählen)
+      const counts = {};
+      rawVotes.forEach(vote => {
+        if (!counts[vote.id]) {
+          counts[vote.id] = {
+            id: vote.id,
+            name: vote.icon,
+            page: vote.page || 1,
+            count: 0,
+            type: vote.id.includes('hohl') ? 'Outline' : 'Solid'
+          };
+        }
+        counts[vote.id].count += 1;
+      });
+
+      aggregatedData = Object.values(counts).sort((a, b) => b.count - a.count);
+
+      renderMetrics();
+      renderRankings();
+      renderRatio();
+      renderTable();
+    }
+
+    function renderMetrics() {
+      const total = rawVotes.length;
+      document.getElementById('total-votes').textContent = total;
+      document.getElementById('unique-icons').textContent = aggregatedData.length;
+
+      const hohlCount = rawVotes.filter(v => v.id.includes('hohl')).length;
+      const vollCount = rawVotes.filter(v => v.id.includes('voll')).length;
+
+      if (total > 0) {
+        if (hohlCount >= vollCount) {
+          document.getElementById('top-style').textContent = 'Outline';
+          document.getElementById('style-percent').textContent = Math.round((hohlCount / total) * 100) + '% aller Klicks';
+        } else {
+          document.getElementById('top-style').textContent = 'Solid';
+          document.getElementById('style-percent').textContent = Math.round((vollCount / total) * 100) + '% aller Klicks';
+        }
+      } else {
+        document.getElementById('top-style').textContent = '-';
+        document.getElementById('style-percent').textContent = '0% Verteilung';
+      }
+    }
+
+    function renderRankings() {
+      const container = document.getElementById('ranking-container');
+      container.innerHTML = '';
+
+      if (aggregatedData.length === 0) {
+        container.innerHTML = '<div class="empty-state">Noch keine Abstimmungsdaten vorhanden.</div>';
+        return;
+      }
+
+      const maxVotes = aggregatedData[0]?.count || 1;
+      const topItems = aggregatedData.slice(0, 5); // Zeigt die Top 5
+
+      topItems.forEach((item, index) => {
+        const pct = Math.round((item.count / maxVotes) * 100);
+        const el = document.createElement('div');
+        el.className = 'ranking-item';
+        el.innerHTML = `
+          <div class="rank-num">#${index + 1}</div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-tags">
+              <span class="tag">${item.type}</span>
+              <span class="tag">Seite ${item.page}</span>
+            </div>
+          </div>
+          <div class="bar-container">
+            <div class="bar-fill" style="width: ${pct}%"></div>
+          </div>
+          <div class="vote-count">${item.count} Klick${item.count > 1 ? 's' : ''}</div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function renderRatio() {
+      const hohlCount = rawVotes.filter(v => v.id.includes('hohl')).length;
+      const vollCount = rawVotes.filter(v => v.id.includes('voll')).length;
+      const total = hohlCount + vollCount || 1;
+
+      const hohlPct = Math.round((hohlCount / total) * 100);
+      const vollPct = 100 - hohlPct;
+
+      document.getElementById('bar-hohl').style.width = hohlPct + '%';
+      document.getElementById('bar-voll').style.width = vollPct + '%';
+      document.getElementById('cnt-hohl').textContent = hohlCount;
+      document.getElementById('cnt-voll').textContent = vollCount;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      const query = document.getElementById('search-input').value.toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = aggregatedData.filter(item => 
+        item.name.toLowerCase().includes(query) || item.id.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 1.5rem;">Keine passenden Icons gefunden.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${item.id}</code></td>
+          <td><strong>${item.name}</strong></td>
+          <td>${item.type}</td>
+          <td>Seite ${item.page}</td>
+          <td><strong>${item.count}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportCSV() {
+      if (rawVotes.length === 0) {
+        alert('Keine Daten zum Exportieren vorhanden.');
+        return;
+      }
+
+      let csv = 'ID;Icon Name;Typ;Seite;Zeitstempel\n';
+      rawVotes.forEach(v => {
+        const type = v.id.includes('hohl') ? 'Outline' : 'Solid';
+        csv += `"${v.id}";"${v.icon}";"${type}";"${v.page || 1}";"${v.time}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `icon_voting_results_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    function clearData() {
+      if (confirm('Möchtest du wirklich alle Klicks und Abstimmungen zurücksetzen?')) {
+        localStorage.removeItem('icon_votes');
+        loadData();
+      }
+    }
+
+    // Initiales Laden beim Seitenaufruf
+    loadData();
+  </script>
+</body>
+</html>
