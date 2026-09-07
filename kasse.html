@@ -12,11 +12,11 @@
 </head>
 <body class="checkout-page">
 <header><div class="header-wrap"><nav>
-<a href="warenkorb.html" class="cart-icon-btn nav-back-icon" aria-label="Zurück zum Warenkorb" title="Zurück zum Warenkorb">
+<a href="warenkorb" class="cart-icon-btn nav-back-icon" aria-label="Zurück zum Warenkorb" title="Zurück zum Warenkorb">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>
 </a>
 <span class="nav-spacer" aria-hidden="true"></span>
-<a href="index.html" class="logo" style="justify-self:end">🪵 Holzmanufaktur</a>
+<a href="./" class="logo" style="justify-self:end">🪵 Holzmanufaktur</a>
 </nav></div></header>
 
 <main class="wrap">
@@ -154,7 +154,7 @@
 const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const cart=JSON.parse(localStorage.getItem(KEY))||[];
-if(!cart.length) location.href='warenkorb.html';
+if(!cart.length) location.href='warenkorb';
 
 /* --- Supabase-Client: wird verwendet, um
    (a) die bereits vorhandene sichere "checkout"-Edge-Function aufzurufen und
@@ -171,7 +171,7 @@ const supabaseClient=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const rawSub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
 
 // Im Warenkorb angewendeter Rabattcode gilt auch hier - derselbe
-// localStorage-Schlüssel wie in warenkorb.html, damit er beim Wechsel
+// localStorage-Schlüssel wie in warenkorb, damit er beim Wechsel
 // zur Kasse (und zurück) erhalten bleibt statt neu eingegeben werden zu müssen.
 // WICHTIG: Es gibt hier keine lokale Coupon-Liste mehr. Der gespeicherte Code
 // wird über die vorhandene sichere "validate-discount"-Edge-Function geprüft,
