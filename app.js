@@ -75,6 +75,10 @@
     els.description = document.getElementById('productDescription');
     els.featuresList = document.getElementById('featuresList');
 
+    // NEU: Beschreibung im Accordion (zusätzlich zum versteckten Original-
+    // Feld, das aus Kompatibilitätsgründen im DOM bleibt).
+    els.descriptionAccordion = document.getElementById('productDescriptionAccordion');
+
     els.backBtn = document.getElementById('backBtn');
     els.cartBtn = document.getElementById('cartBtn');
     els.cartBadge = document.getElementById('cartBadge');
@@ -84,8 +88,13 @@
     els.qtyValue = document.getElementById('qtyValue');
     els.chips = Array.from(document.querySelectorAll('.chip'));
 
+    // Zwei Kauf-Buttons: einer inline im Info-Bereich (Desktop), einer in
+    // der fixierten unteren Leiste (Mobile). Nur einer ist per CSS je
+    // Breakpoint sichtbar, aber beide werden synchron aktualisiert.
     els.buyBtn = document.getElementById('buyBtn');
     els.buyBtnLabel = document.getElementById('buyBtnLabel');
+    els.buyBtnDesktop = document.getElementById('buyBtnDesktop');
+    els.buyBtnLabelDesktop = document.getElementById('buyBtnLabelDesktop');
   }
 
   /* ========================================================================
@@ -164,9 +173,11 @@
         li.appendChild(contentDiv);
       } else {
         const icon = document.createElement('span');
+        icon.className = 'feature-icon';
         icon.innerHTML = CHECK_ICON;
 
         const text = document.createElement('span');
+        text.className = 'feature-content';
         text.textContent = String(item);
 
         li.appendChild(icon);
@@ -177,10 +188,19 @@
     });
   }
 
+  // Aktualisiert Label + Preis auf BEIDEN Kauf-Buttons (Desktop-Inline und
+  // mobile Sticky-Leiste), damit sie nie auseinanderlaufen.
   function updateBuyButtonLabel() {
-    if (!els.buyBtn || els.buyBtn.disabled || !state.product) return;
+    if (!state.product) return;
     const total = (parseFloat(state.product.price) || 0) * state.quantity;
-    els.buyBtnLabel.textContent = `In den Warenkorb – ${formatPrice(total)}`;
+    const label = `In den Warenkorb – ${formatPrice(total)}`;
+
+    if (els.buyBtnLabel && els.buyBtn && !els.buyBtn.disabled) {
+      els.buyBtnLabel.textContent = label;
+    }
+    if (els.buyBtnLabelDesktop && els.buyBtnDesktop && !els.buyBtnDesktop.disabled) {
+      els.buyBtnLabelDesktop.textContent = label;
+    }
   }
 
   function setQuantity(nextValue) {
@@ -222,7 +242,14 @@
     els.reviewCount.textContent = `(${reviews} Bewertungen)`;
 
     els.price.textContent = formatPrice(product.price);
-    els.description.textContent = product.description || 'Keine Beschreibung verfügbar.';
+
+    const descriptionText = product.description || 'Keine Beschreibung verfügbar.';
+    els.description.textContent = descriptionText;
+    // Dieselbe Beschreibung erscheint jetzt sichtbar im "Beschreibung"-
+    // Accordion-Panel statt im (jetzt versteckten) Original-Absatz.
+    if (els.descriptionAccordion) {
+      els.descriptionAccordion.textContent = descriptionText;
+    }
 
     renderFeatures(product.features);
     setQuantity(1);
@@ -244,13 +271,24 @@
   function handleBuyClick() {
     addToCart(state.product, state.quantity);
 
-    els.buyBtn.classList.add('is-added');
-    els.buyBtn.disabled = true;
-    els.buyBtnLabel.textContent = 'Zum Warenkorb hinzugefügt ✓';
+    // Beide Buttons (mobil + desktop) zeigen dieselbe kurze Bestätigung,
+    // damit die Rückmeldung unabhängig vom aktuellen Breakpoint konsistent ist.
+    [
+      { btn: els.buyBtn, label: els.buyBtnLabel },
+      { btn: els.buyBtnDesktop, label: els.buyBtnLabelDesktop }
+    ].forEach(({ btn, label }) => {
+      if (!btn || !label) return;
+      btn.classList.add('is-added');
+      btn.disabled = true;
+      label.textContent = 'Zum Warenkorb hinzugefügt ✓';
+    });
 
     window.setTimeout(() => {
-      els.buyBtn.classList.remove('is-added');
-      els.buyBtn.disabled = false;
+      [els.buyBtn, els.buyBtnDesktop].forEach((btn) => {
+        if (!btn) return;
+        btn.classList.remove('is-added');
+        btn.disabled = false;
+      });
       updateBuyButtonLabel();
     }, 1500);
   }
@@ -264,6 +302,7 @@
     });
 
     if (els.buyBtn) els.buyBtn.addEventListener('click', handleBuyClick);
+    if (els.buyBtnDesktop) els.buyBtnDesktop.addEventListener('click', handleBuyClick);
 
     if (els.backBtn) {
       els.backBtn.addEventListener('click', () => {
