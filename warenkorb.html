@@ -12,11 +12,11 @@
 </head>
 <body>
 <header><div class="header-wrap"><nav>
-<a href="index.html" class="cart-icon-btn nav-back-icon" aria-label="Weiter einkaufen" title="Weiter einkaufen">
+<a href="./" class="cart-icon-btn nav-back-icon" aria-label="Weiter einkaufen" title="Weiter einkaufen">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>
 </a>
 <span class="nav-spacer" aria-hidden="true"></span>
-<a href="index.html" class="logo" style="justify-self:end">🪵 Holzmanufaktur</a>
+<a href="./" class="logo" style="justify-self:end">🪵 Holzmanufaktur</a>
 </nav></div></header>
 
 <main class="wrap" id="cartMain">
@@ -55,7 +55,7 @@
     <div class="row" id="discountRow" style="display:none"><span id="discountLabel">Rabatt</span><span id="discountAmount"></span></div>
     <div class="row"><span>Versand</span><span id="ship">0,00 €</span></div>
     <div class="row total"><span>Gesamt</span><span id="total">0,00 €</span></div>
-    <button class="checkout-btn" onclick="location.href='kasse.html'">Zur Kasse</button>
+    <button class="checkout-btn" onclick="location.href='kasse'">Zur Kasse</button>
     <div class="trust">🔒 Sichere Bezahlung – SSL-verschlüsselte Verbindung</div>
   </div>
 </div>
@@ -278,7 +278,7 @@ function render(){
         </div>
         <p class="empty-title">Dein Warenkorb ist noch leer</p>
         <p class="empty-sub">Entdecke unsere handgefertigten Holzprodukte und finde dein neues Lieblingsstück.</p>
-        <a href="index.html" class="empty-btn">Produkte entdecken</a>
+        <a href="./" class="empty-btn">Produkte entdecken</a>
       </div>`;
     sum.style.display='none'; pbox.style.display='none'; document.getElementById('recommendBox').style.display='none';
     return;
