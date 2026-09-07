@@ -225,17 +225,22 @@ function renderRecommendation(cart){
 
   if(!options.length){ box.style.display='none'; return; }
 
-  document.getElementById('recommendCard').innerHTML=options.map(p=>`
+  // Es soll immer nur genau eine Empfehlung angezeigt werden, auch wenn in
+  // Supabase mehrere Produkte "recommended = true" haben - daher wird hier
+  // bewusst nur die erste passende Option gerendert, der Rest bleibt ungenutzt.
+  const pick=options[0];
+
+  document.getElementById('recommendCard').innerHTML=`
     <div class="recommend-card">
       <div class="recommend-main">
-        <div class="thumb">${p.icon||'📦'}</div>
+        <div class="thumb">${pick.icon||'📦'}</div>
         <div class="recommend-info">
-          <p class="name">${p.name||'Produkt'}</p>
-          <p class="unit">${eur(p.price)}</p>
+          <p class="name">${pick.name||'Produkt'}</p>
+          <p class="unit">${eur(pick.price)}</p>
         </div>
       </div>
-      <button class="recommend-add" data-id="${p.id}">In den Warenkorb</button>
-    </div>`).join('');
+      <button class="recommend-add" data-id="${pick.id}">In den Warenkorb</button>
+    </div>`;
 
   document.querySelectorAll('#recommendCard .recommend-add').forEach(btn=>{
     btn.addEventListener('click', ()=>addRecommendation(btn.dataset.id));
