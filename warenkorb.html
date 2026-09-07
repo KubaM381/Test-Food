@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warenkorb – Holzmanufaktur</title>
 <link rel="stylesheet" href="style.css">
+<!-- Supabase SDK: wird für die dynamischen Empfehlungen (products.recommended = true) benötigt -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header><div class="header-wrap"><nav>
@@ -37,7 +39,7 @@
         <p class="recommend-title">Damit dein neues Stück lange schön bleibt</p>
         <p class="recommend-sub">Ergänze deine Bestellung mit dieser kleinen Pflege-Empfehlung</p>
       </div>
-      <div class="recommend-card" id="recommendCard"></div>
+      <div class="recommend-list" id="recommendCard"></div>
     </div>
   </div>
   <div class="summary" id="summary" style="display:none">
@@ -62,14 +64,35 @@ const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GI
 const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
 let discountPct=0, discountCode='';
 
-const RECOMMENDATIONS=[
-  {name:'Holzpflegeöl, 250 ml', price:9.90, icon:'🧴'},
-  {name:'Filzgleiter-Set, 8 Stück', price:6.50, icon:'🟤'},
-  {name:'Pflegetuch für Holzoberflächen', price:4.90, icon:'🧽'},
-  {name:'Reinigungsspray für Holzmöbel', price:8.50, icon:'🧼'}
-];
+// Supabase wird ausschließlich lesend verwendet, um die Empfehlungen zu laden
+// (products.recommended = true). Preise/Rabatte/Versand werden weiterhin
+// serverseitig über die Checkout-Edge-Function berechnet - daran ändert
+// sich hier nichts.
+const SUPABASE_URL='https://keaahccmqnmvtcmabvvz.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
+let supabaseClient=null;
+function getSupabase(){
+  if(!supabaseClient) supabaseClient=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return supabaseClient;
+}
 
-const eur=n=>n.toFixed(2).replace('.',',')+' €';
+// Cache der aktuell in Supabase als "recommended" markierten Produkte.
+// Wird einmal beim Laden der Seite geholt; die Anzahl ist bewusst nicht
+// begrenzt - es werden immer genau die Produkte angezeigt, bei denen in
+// Supabase der Haken bei "recommended" gesetzt ist.
+let recommendedProducts=[];
+async function loadRecommendedProducts(){
+  try{
+    const { data, error } = await getSupabase().from('products').select('*').eq('recommended', true);
+    if(error) throw error;
+    recommendedProducts = data || [];
+  }catch(err){
+    console.error('Fehler beim Laden der Empfehlungen:', err);
+    recommendedProducts = [];
+  }
+}
+
+const eur=n=>(parseFloat(n)||0).toFixed(2).replace('.',',')+' €';
 
 // Option 1 Icon: Beide Schnüre schwingen nach links
 const SURPRISE_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1.2em;height:1.2em;vertical-align:-3px;margin-right:6px"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>';
@@ -131,32 +154,48 @@ function onQtyInput(el, i){
   updateSummary(cart);
 }
 
+// Zeigt alle aktuell als "recommended" markierten Supabase-Produkte an,
+// die noch nicht im Warenkorb liegen. Abgleich erfolgt über die echte
+// Produkt-ID (Fallback: Name, falls ein Artikel z. B. noch ohne ID im
+// Warenkorb liegt).
 function renderRecommendation(cart){
   const box=document.getElementById('recommendBox');
   if(cart.length!==1){ box.style.display='none'; return; }
-  const currentName=cart[0].name;
-  const options=RECOMMENDATIONS.filter(r=>r.name!==currentName);
-  const pick=options[0];
-  if(!pick){ box.style.display='none'; return; }
-  document.getElementById('recommendCard').innerHTML=`
-    <div class="recommend-main">
-      <div class="thumb">${pick.icon}</div>
-      <div class="recommend-info">
-        <p class="name">${pick.name}</p>
-        <p class="unit">${eur(pick.price)}</p>
+
+  const cartIds=new Set(cart.map(it=>String(it.id)));
+  const cartNames=new Set(cart.map(it=>it.name));
+  const options=recommendedProducts.filter(p=>!cartIds.has(String(p.id)) && !cartNames.has(p.name));
+
+  if(!options.length){ box.style.display='none'; return; }
+
+  document.getElementById('recommendCard').innerHTML=options.map(p=>`
+    <div class="recommend-card">
+      <div class="recommend-main">
+        <div class="thumb">${p.icon||'📦'}</div>
+        <div class="recommend-info">
+          <p class="name">${p.name||'Produkt'}</p>
+          <p class="unit">${eur(p.price)}</p>
+        </div>
       </div>
-    </div>
-    <button class="recommend-add" onclick="addRecommendation('${pick.name.replace(/'/g,"\\'")}')">In den Warenkorb</button>`;
+      <button class="recommend-add" data-id="${p.id}">In den Warenkorb</button>
+    </div>`).join('');
+
+  document.querySelectorAll('#recommendCard .recommend-add').forEach(btn=>{
+    btn.addEventListener('click', ()=>addRecommendation(btn.dataset.id));
+  });
+
   box.style.display='block';
 }
 
-function addRecommendation(name){
-  const pick=RECOMMENDATIONS.find(r=>r.name===name);
+// Übernimmt das echte Supabase-Produkt (inkl. echter id) in den Warenkorb,
+// damit der sichere Checkout später mit den korrekten Produktdaten arbeiten kann.
+function addRecommendation(id){
+  const pick=recommendedProducts.find(p=>String(p.id)===String(id));
   if(!pick) return;
   const cart=load();
-  const existing=cart.find(it=>it.name===pick.name);
+  const existing=cart.find(it=>String(it.id)===String(pick.id) || it.name===pick.name);
   if(existing) existing.qty=Math.min(MAX_QTY, (existing.qty||1)+1);
-  else cart.push({name:pick.name, price:pick.price, icon:pick.icon, qty:1});
+  else cart.push({id:pick.id, name:pick.name, price:parseFloat(pick.price)||0, icon:pick.icon||'📦', qty:1});
   save(cart);
   render();
 }
@@ -277,6 +316,13 @@ function removeItem(i){ const c=mergeDuplicates(load()); c.splice(i,1); save(c);
 })();
 
 render();
+
+// Empfehlungen aus Supabase laden. Der Warenkorb wird sofort gerendert (oben),
+// damit es keine Wartezeit für die eigentliche Kernfunktion gibt; sobald die
+// Empfehlungen geladen sind, wird nur der Empfehlungsbereich aktualisiert.
+loadRecommendedProducts().then(()=>{
+  renderRecommendation(mergeDuplicates(load()));
+});
 </script>
 </body>
 </html>
