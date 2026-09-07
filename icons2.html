@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Back Icons Voting</title>
+  <title>Custom Icons Voting - Seite 2</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -23,7 +23,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       padding: 1.5rem;
-      padding-bottom: 5rem;
+      padding-bottom: 6rem;
       line-height: 1.5;
     }
 
@@ -47,6 +47,12 @@
       margin-bottom: 0.5rem;
     }
 
+    .counter-badges {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+
     .progress-bar {
       height: 10px;
       background: var(--card-bg);
@@ -57,14 +63,14 @@
 
     .progress-fill {
       height: 100%;
-      width: 20%; /* Fest bei 20% für Seite 2 */
+      width: 40%;
       background: linear-gradient(90deg, #38bdf8, #818cf8);
     }
 
     .section-title {
       font-size: 1.25rem;
       color: var(--accent);
-      margin: 1.5rem 0 1rem 0;
+      margin: 2rem 0 1rem 0;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 0.5rem;
       display: flex;
@@ -180,7 +186,10 @@
   <div class="header-sticky">
     <div class="progress-info">
       <span>Fortschritt: Seite 2</span>
-      <span>Ausgewählt: <strong id="count">0</strong> / 5 Icons</span>
+      <div class="counter-badges">
+        <span>Pfeile: <strong id="count-arrow">0</strong> / 5</span>
+        <span>Home: <strong id="count-home">0</strong> / 5</span>
+      </div>
     </div>
     <div class="progress-bar">
       <div class="progress-fill"></div>
@@ -188,190 +197,238 @@
   </div>
 
   <header style="text-align: center;">
-    <h1>Zurück-Icons & Navigation Voting</h1>
-    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Wähle deine Favoriten aus (maximal 5 insgesamt)</p>
+    <h1>Navigation & Home Voting</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Wähle mind. 1 Pfeil (max. 5) und mind. 1 Home-Icon (max. 5) aus.</p>
   </header>
 
+  <!-- KATEGORIE 1: ZURÜCK-PFEILE (15 Varianten) -->
   <div class="section-title">
-    <span>25 Back- / Zurück-Varianten</span>
+    <span>15 Zurück- / Pfeil-Varianten</span>
+    <span style="font-size: 0.8rem; color: var(--text-muted);">(Maximal 5)</span>
   </div>
 
   <div class="grid">
-    <!-- 01. Klassischer Pfeil -->
-    <div class="icon-card" data-id="back-01" data-name="Klassik Pfeil">
+    <div class="icon-card" data-type="arrow" data-id="back-01" data-name="Klassik Pfeil Rund">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      <span class="card-title">01. Klassik Pfeil</span>
+      <span class="card-title">01. Klassik Rund</span>
     </div>
 
-    <!-- 02. Chevron Links -->
-    <div class="icon-card" data-id="back-02" data-name="Chevron Links">
+    <div class="icon-card" data-type="arrow" data-id="back-02" data-name="Chevron Links">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       <span class="card-title">02. Chevron</span>
     </div>
 
-    <!-- 03. Pfeil mit Langer Spitze -->
-    <div class="icon-card" data-id="back-03" data-name="Langer Pfeil">
+    <div class="icon-card" data-type="arrow" data-id="back-03" data-name="Langer Pfeil Rund">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H3M10 5L3 12l7 7"/></svg>
       <span class="card-title">03. Langer Pfeil</span>
     </div>
 
-    <!-- 04. Bogen / Undo -->
-    <div class="icon-card" data-id="back-04" data-name="Bogen / Undo">
+    <div class="icon-card" data-type="arrow" data-id="back-04" data-name="Bogen Undo">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 015.5 5.5v0a5.5 5.5 0 01-5.5 5.5H11"/></svg>
       <span class="card-title">04. Undo Bogen</span>
     </div>
 
-    <!-- 05. Spitzes Dreieck Open -->
-    <div class="icon-card" data-id="back-05" data-name="Spitzer Pfeil">
-      <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12H6M10 8L6 12l4 4"/></svg>
-      <span class="card-title">05. Spitzer Pfeil</span>
-    </div>
-
-    <!-- 06. Abgerundeter Chevron -->
-    <div class="icon-card" data-id="back-06" data-name="Soft Chevron">
+    <div class="icon-card" data-type="arrow" data-id="back-05" data-name="Soft Chevron">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16l-4-4 4-4"/></svg>
-      <span class="card-title">06. Soft Chevron</span>
+      <span class="card-title">05. Soft Chevron</span>
     </div>
 
-    <!-- 07. Doppel-Chevron -->
-    <div class="icon-card" data-id="back-07" data-name="Doppel-Chevron">
+    <div class="icon-card" data-type="arrow" data-id="back-06" data-name="Doppel Chevron Rund">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
-      <span class="card-title">07. Doppel Chevron</span>
+      <span class="card-title">06. Doppel Chevron</span>
     </div>
 
-    <!-- 08. Back mit Strich (End) -->
-    <div class="icon-card" data-id="back-08" data-name="Pfeil bis Stopp">
+    <div class="icon-card" data-type="arrow" data-id="back-07" data-name="Slim Arrow">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6v12M18 12H10M13 16l-4-4 4-4"/></svg>
-      <span class="card-title">08. Pfeil Stop</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M9 17l-5-5 5-5"/></svg>
+      <span class="card-title">07. Slim Line</span>
     </div>
 
-    <!-- 09. Pfeil mit Abknickung nach unten -->
-    <div class="icon-card" data-id="back-09" data-name="Abknickender Pfeil">
+    <div class="icon-card" data-type="arrow" data-id="back-08" data-name="Turn-Back">
       <div class="badge">✓</div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7v4a4 4 0 01-4 4H5M9 11l-4 4 4 4"/></svg>
-      <span class="card-title">09. Turn-Back</span>
+      <span class="card-title">08. Turn-Back</span>
     </div>
 
-    <!-- 10. Text + Pfeil Inline -->
-    <div class="icon-card" data-id="back-10" data-name="Text BACK">
+    <div class="icon-card" data-type="arrow" data-id="back-09" data-name="Smooth Arc Back">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M10 7l-5 5 5 5"/><text x="12" y="7" font-size="6" font-weight="bold" fill="currentColor" stroke="none">BACK</text></svg>
-      <span class="card-title">10. Text "BACK"</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15a6 6 0 00-6-6H5"/><path d="M10 14l-5-5 5-5"/></svg>
+      <span class="card-title">09. Smooth Bogen</span>
     </div>
 
-    <!-- 11. Minimaler dicker Pfeil -->
-    <div class="icon-card" data-id="back-11" data-name="Minimal Bold">
+    <div class="icon-card" data-type="arrow" data-id="back-10" data-name="Rounded Block">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
-      <span class="card-title">11. Bold Chevron</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      <span class="card-title">10. Soft Thick</span>
     </div>
 
-    <!-- 12. Dicker Solid Pfeil -->
-    <div class="icon-card" data-id="back-12" data-name="Solid Block Arrow">
+    <div class="icon-card" data-type="arrow" data-id="back-11" data-name="Soft Corner Arrow">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      <span class="card-title">12. Solid Block</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M10 17l-5-5 5-5"/></svg>
+      <span class="card-title">11. Soft Corner</span>
     </div>
 
-    <!-- 13. Dünner Line-Pfeil -->
-    <div class="icon-card" data-id="back-13" data-name="Thin Line Arrow">
+    <div class="icon-card" data-type="arrow" data-id="back-12" data-name="Rewind Round">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>
-      <span class="card-title">13. Thin Line</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M19 17l-5-5 5-5"/></svg>
+      <span class="card-title">12. Soft Rewind</span>
     </div>
 
-    <!-- 14. Modern Tail-Pfeil -->
-    <div class="icon-card" data-id="back-14" data-name="Modern Tail">
+    <div class="icon-card" data-type="arrow" data-id="back-13" data-name="Pointer Left Round">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H3M3 12l6-6M3 12l6 6"/><circle cx="21" cy="12" r="1" fill="currentColor"/></svg>
-      <span class="card-title">14. Modern Tail</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 7l-6 5 6 5"/></svg>
+      <span class="card-title">13. Pointer Links</span>
     </div>
 
-    <!-- 15. Pfeil nach Links-Oben (Exit) -->
-    <div class="icon-card" data-id="back-15" data-name="Pfeil Links-Oben">
+    <div class="icon-card" data-type="arrow" data-id="back-14" data-name="Rounded Triangle Left">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17L7 7M7 7h9M7 7v9"/></svg>
-      <span class="card-title">15. Return Out</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6l-8 6 8 6V6z"/></svg>
+      <span class="card-title">14. Soft Dreieck</span>
     </div>
 
-    <!-- 16. Rücklauf / Rewind Symbol -->
-    <div class="icon-card" data-id="back-16" data-name="Rewind Symbole">
+    <div class="icon-card" data-type="arrow" data-id="back-15" data-name="Bold Round Arrow">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 16.07V7.93c0-.77-.84-1.25-1.51-.86l-6.4 4.07c-.65.41-.65 1.34 0 1.75l6.4 4.07c.67.39 1.51-.09 1.51-.86zm10 0V7.93c0-.77-.84-1.25-1.51-.86l-6.4 4.07c-.65.41-.65 1.34 0 1.75l6.4 4.07c.67.39 1.51-.09 1.51-.86z"/></svg>
-      <span class="card-title">16. Rewind</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12H6M12 18l-6-6 6-6"/></svg>
+      <span class="card-title">15. Bold Round</span>
     </div>
+  </div>
 
-    <!-- 17. Pfeil mit Tür-Exit -->
-    <div class="icon-card" data-id="back-17" data-name="Door Exit Back">
+  <!-- KATEGORIE 2: 20 HOME VARIANTEN -->
+  <div class="section-title">
+    <span>20 Home / Haus / Unterkunft Varianten</span>
+    <span style="font-size: 0.8rem; color: var(--text-muted);">(Maximal 5)</span>
+  </div>
+
+  <div class="grid">
+    <!-- Home 01: Perfekt mathematisch symmetrisch -->
+    <div class="icon-card" data-type="home" data-id="home-01" data-name="Symmetrisches Haus">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l-5-5 5-5M11 12h10"/></svg>
-      <span class="card-title">17. Exit Door</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1v-9.5z"/>
+        <path d="M9 21v-6a1 1 0 011-1h4a1 1 0 011 1v6"/>
+      </svg>
+      <span class="card-title">01. Symmetrisch</span>
     </div>
 
-    <!-- 18. Kurve um 180 Grad -->
-    <div class="icon-card" data-id="back-18" data-name="180 Grad U-Turn">
+    <div class="icon-card" data-type="home" data-id="home-02" data-name="Solid Home">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11a5 5 0 015 5v0a5 5 0 01-5 5H9"/><path d="M8 14l-4-4 4-4"/></svg>
-      <span class="card-title">18. U-Turn</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="card-title">02. Solid Block</span>
     </div>
 
-    <!-- 19. Schmaler Pfeil mit langer Welle -->
-    <div class="icon-card" data-id="back-19" data-name="Soft Wave Back">
+    <div class="icon-card" data-type="home" data-id="home-03" data-name="Minimal Line Home">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h12c3 0 5 1.5 5 4s-2 4-5 4"/><path d="M8 7l-5 5 5 5"/></svg>
-      <span class="card-title">19. Soft Wave</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 12h3v8a1 1 0 001 1h12a1 1 0 001-1v-8h3L12 3z"/></svg>
+      <span class="card-title">03. Minimal Line</span>
     </div>
 
-    <!-- 20. Dreieck Links (Solid Triangle) -->
-    <div class="icon-card" data-id="back-20" data-name="Solid Dreieck">
+    <div class="icon-card" data-type="home" data-id="home-04" data-name="Soft Outline Home">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5l-10 7 10 7V5z"/></svg>
-      <span class="card-title">20. Solid Triangle</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.25L10.3 3.8a2.5 2.5 0 013.4 0L21 10.25"/><path d="M5 9v10a2 2 0 002 2h10a2 2 0 002-2V9"/></svg>
+      <span class="card-title">04. Soft Outline</span>
     </div>
 
-    <!-- 21. Pfeil mit gepunkteter Linie -->
-    <div class="icon-card" data-id="back-21" data-name="Dotted Back">
+    <div class="icon-card" data-type="home" data-id="home-05" data-name="Organic Flow Home">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke-dasharray="2 2" d="M20 12H5"/><path d="M10 7l-5 5 5 5"/></svg>
-      <span class="card-title">21. Dotted Back</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 11c3.5-3 6.5-7.5 9.5-7.5s6 4.5 9.5 7.5"/><path d="M6 10.5V18a2 2 0 002 2h8a2 2 0 002-2v-7.5"/><path d="M10 20v-4a2 2 0 014 0v4"/></svg>
+      <span class="card-title">05. Organic Flow</span>
     </div>
 
-    <!-- 22. Geschwungener Hand-Drawn-Look Pfeil -->
-    <div class="icon-card" data-id="back-22" data-name="Hand-Drawn Curve">
+    <div class="icon-card" data-type="home" data-id="home-06" data-name="Klassik Haus Tür">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 18c-3-7-8-10-16-7"/><path d="M8 7L4 11l5 3"/></svg>
-      <span class="card-title">22. Curve Arrow</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10"/><rect x="10" y="14" width="4" height="7"/></svg>
+      <span class="card-title">06. Klassik Tür</span>
     </div>
 
-    <!-- 23. Zirkel-Kreis Pfeil -->
-    <div class="icon-card" data-id="back-23" data-name="360 Loop Back">
+    <div class="icon-card" data-type="home" data-id="home-07" data-name="Modern Bungalow">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 10-9-9c0 1.5.4 3 1.1 4.3L2 19l2.7-2.2"/></svg>
-      <span class="card-title">23. History Loop</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11h20"/><path d="M4 11v8a1 1 0 001 1h14a1 1 0 001-1v-8"/><rect x="7" y="14" width="4" height="6"/><line x1="14" y1="14" x2="17" y2="14"/></svg>
+      <span class="card-title">07. Bungalow</span>
     </div>
 
-    <!-- 24. Pfeil mit Schichten (Layers) -->
-    <div class="icon-card" data-id="back-24" data-name="Ebenen-Pfeil">
+    <div class="icon-card" data-type="home" data-id="home-08" data-name="Soft Solid Gable">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 18l-7-5 7-5v10z"/><path d="M10 18L3 13l7-5v10z"/></svg>
-      <span class="card-title">24. Layer Back</span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.1L1 11.4l1.3 1.5L12 4.3l9.7 8.6 1.3-1.5L12 2.1zM4 10.5V20c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-9.5l-8-7.1-8 7.1z"/></svg>
+      <span class="card-title">08. Soft Gable</span>
     </div>
 
-    <!-- 25. Text "< ZURÜCK" Button-Icon -->
-    <div class="icon-card" data-id="back-25" data-name="Text & Chevron">
+    <div class="icon-card" data-type="home" data-id="home-09" data-name="Modern Cabin Home">
       <div class="badge">✓</div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12l4-4m-4 4l4 4"/><text x="11" y="15" font-size="7" font-weight="bold" fill="currentColor" stroke="none">ZURÜCK</text></svg>
-      <span class="card-title">25. Text "ZURÜCK"</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-8 9 8v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8z"/><path d="M9 20v-5a3 3 0 016 0v5"/></svg>
+      <span class="card-title">09. Modern Cabin</span>
     </div>
 
+    <div class="icon-card" data-type="home" data-id="home-10" data-name="Smooth Arch">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5L10.3 3.8a2.5 2.5 0 013.4 0l6.8 6.7"/><path d="M5 9.5V19a2 2 0 002 2h10a2 2 0 002-2V9.5"/><path d="M9.5 21v-4a2.5 2.5 0 015 0v4"/></svg>
+      <span class="card-title">10. Smooth Arch</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-11" data-name="Dome Roof">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12C4 7 7.5 3 12 3s8 4 8 9v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7z"/><path d="M10 21v-4a2 2 0 014 0v4"/></svg>
+      <span class="card-title">11. Kuppeldach</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-12" data-name="Rounded Fill Home">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" rx="1"/></svg>
+      <span class="card-title">12. Rounded Fill</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-13" data-name="Curved Canopy">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11c4-2.5 8-4.5 10-4.5s6 2 10 4.5"/><path d="M5 10v9a2 2 0 002 2h10a2 2 0 002-2v-9"/><path d="M12 14v7"/></svg>
+      <span class="card-title">13. Canopy Dach</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-14" data-name="Home Heart">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 11.5c-1.5-1.5-3 0-1.5 1.5l1.5 1.5 1.5-1.5c1.5-1.5 0-3-1.5-1.5z" fill="currentColor"/></svg>
+      <span class="card-title">14. Home Heart</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-15" data-name="Chalet Style">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M12 3L4 12v9h16v-9L12 3z"/><path d="M10 13h4v4h-4z"/></svg>
+      <span class="card-title">15. Chalet</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-16" data-name="Modern Flat Block">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="9" y1="7" x2="9" y2="7.01"/><line x1="15" y1="7" x2="15" y2="7.01"/><line x1="9" y1="11" x2="9" y2="11.01"/><line x1="15" y1="11" x2="15" y2="11.01"/><path d="M10 21v-4h4v4"/></svg>
+      <span class="card-title">16. Apartment</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-17" data-name="Tiny House Camper">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8a2 2 0 012-2h12a2 2 0 012 2v9H3z"/><path d="M3 12h16"/><circle cx="7" cy="19" r="2"/><circle cx="16" cy="19" r="2"/></svg>
+      <span class="card-title">17. Tiny House</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-18" data-name="A-Frame Cabin">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L3 20h18L12 3z"/><path d="M9 20v-5a3 3 0 016 0v5"/></svg>
+      <span class="card-title">18. A-Frame Cabin</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-19" data-name="Reihenhaus Duplex">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12l6-5 6 5v8H2v-8z"/><path d="M14 12l4-3.33L22 12v8h-8v-8z"/></svg>
+      <span class="card-title">19. Reihenhaus</span>
+    </div>
+
+    <div class="icon-card" data-type="home" data-id="home-20" data-name="Minimal Flachdach">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v12a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/><line x1="8" y1="12" x2="8" y2="20"/><line x1="12" y1="7" x2="12" y2="12"/></svg>
+      <span class="card-title">20. Flachdach</span>
+    </div>
   </div>
 
   <!-- Bottom Bar mit Weiter Button -->
@@ -380,50 +437,80 @@
   </div>
 
   <script>
-    // Link Säuberung: Entfernt .html aus der Adresszeile -> /icons2
     if (window.location.pathname.endsWith('.html')) {
       history.replaceState(null, '', '/icons2');
     }
 
-    const selectedMap = new Map();
+    const selectedArrows = new Map();
+    const selectedHomes = new Map();
 
     document.querySelectorAll('.icon-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = card.dataset.id;
         const name = card.dataset.name;
+        const type = card.dataset.type;
 
-        if (selectedMap.has(id)) {
-          selectedMap.delete(id);
-          card.classList.remove('selected');
-        } else {
-          if (selectedMap.size >= 5) {
-            alert('Du kannst maximal 5 Icons auf dieser Seite auswählen.');
-            return;
+        if (type === 'arrow') {
+          if (selectedArrows.has(id)) {
+            selectedArrows.delete(id);
+            card.classList.remove('selected');
+          } else {
+            if (selectedArrows.size >= 5) {
+              alert('Du kannst maximal 5 Pfeil-Icons auswählen.');
+              return;
+            }
+            selectedArrows.set(id, name);
+            card.classList.add('selected');
           }
-          selectedMap.set(id, name);
-          card.classList.add('selected');
+          document.getElementById('count-arrow').textContent = selectedArrows.size;
+        } 
+        else if (type === 'home') {
+          if (selectedHomes.has(id)) {
+            selectedHomes.delete(id);
+            card.classList.remove('selected');
+          } else {
+            if (selectedHomes.size >= 5) {
+              alert('Du kannst maximal 5 Home-Icons auswählen.');
+              return;
+            }
+            selectedHomes.set(id, name);
+            card.classList.add('selected');
+          }
+          document.getElementById('count-home').textContent = selectedHomes.size;
         }
-
-        document.getElementById('count').textContent = selectedMap.size;
       });
     });
 
     function submitVotes() {
-      // Speichert die ausgewählten Icons (auch wenn 0 ausgewählt wurden)
+      if (selectedArrows.size < 1 || selectedHomes.size < 1) {
+        alert('Bitte wähle mindestens 1 Zurück-Pfeil und mindestens 1 Home-Icon aus!');
+        return;
+      }
+
       const votes = JSON.parse(localStorage.getItem('icon_votes') || '[]');
-      selectedMap.forEach((name, id) => {
+      
+      selectedArrows.forEach((name, id) => {
         votes.push({
           id: id,
           icon: name,
+          category: 'arrow',
+          page: 2,
+          time: new Date().toISOString()
+        });
+      });
+
+      selectedHomes.forEach((name, id) => {
+        votes.push({
+          id: id,
+          icon: name,
+          category: 'home',
           page: 2,
           time: new Date().toISOString()
         });
       });
 
       localStorage.setItem('icon_votes', JSON.stringify(votes));
-
-      // Weiterleitung zu /icons3
-      window.location.href = '/icons3';
+      window.location.href = 'https://kubam381.github.io/Test-Food/icons3';
     }
   </script>
 </body>
