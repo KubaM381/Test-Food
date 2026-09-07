@@ -153,16 +153,18 @@
 
 <script>
 const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95;
-const CODES={'WILLKOMMEN10':0.10,'HOLZ5':0.05};
 const eur=n=>n.toFixed(2).replace('.',',')+' €';
 const cart=JSON.parse(localStorage.getItem(KEY))||[];
 if(!cart.length) location.href='warenkorb.html';
 
-/* --- Supabase-Client: wird ausschließlich verwendet, um die bereits
-   vorhandene sichere "checkout"-Edge-Function aufzurufen. Es findet KEIN
-   direkter Insert/Update in public.orders vom Frontend aus statt - das
-   erledigt weiterhin serverseitig ausschließlich die Edge-Function
-   (inkl. Berechnung von zwischensumme/versand/gesamtbetrag). */
+/* --- Supabase-Client: wird verwendet, um
+   (a) die bereits vorhandene sichere "checkout"-Edge-Function aufzurufen und
+   (b) einen eventuell gespeicherten Rabattcode über "validate-discount" zu
+   prüfen, damit hier in der Bestellübersicht kein hardcodierter/veralteter
+   Rabattwert angezeigt wird. Es findet KEIN direkter Insert/Update in
+   public.orders vom Frontend aus statt - das erledigt weiterhin
+   serverseitig ausschließlich die Edge-Function (inkl. verbindlicher
+   Berechnung von zwischensumme/versand/gesamtbetrag). */
 const SUPABASE_URL='https://keaahccmqnmvtcmabvvz.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -172,14 +174,20 @@ const rawSub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
 // Im Warenkorb angewendeter Rabattcode gilt auch hier - derselbe
 // localStorage-Schlüssel wie in warenkorb.html, damit er beim Wechsel
 // zur Kasse (und zurück) erhalten bleibt statt neu eingegeben werden zu müssen.
-// Hinweis: Diese lokale Berechnung dient NUR der Anzeige in der Bestellübersicht.
-// Die verbindliche Berechnung (inkl. Rabatt, Versand, Gesamtbetrag) erfolgt
-// ausschließlich serverseitig in der checkout-Edge-Function.
+// WICHTIG: Es gibt hier keine lokale Coupon-Liste mehr. Der gespeicherte Code
+// wird über die vorhandene sichere "validate-discount"-Edge-Function geprüft,
+// nur um ihn in der Bestellübersicht korrekt anzuzeigen. Die verbindliche
+// Berechnung (Rabatt, Versand, Gesamtbetrag) erfolgt weiterhin ausschließlich
+// serverseitig in der checkout-Edge-Function.
 const discountCode=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
-const discountPct=CODES[discountCode]||0;
-const discountAmount=rawSub*discountPct;
-const sub=rawSub-discountAmount;
-const ship=rawSub>=FREE_SHIP?0:SHIP_COST;
+
+// Enthält nach initSummary() die Werte, die tatsächlich zur Anzeige kamen
+// (und als Fallback für die Erfolgsmeldung dienen, falls die
+// checkout-Edge-Function keinen eigenen gesamtbetrag zurückgibt).
+let displayTotals={ sub: rawSub, ship: rawSub>=FREE_SHIP?0:SHIP_COST };
+
+const totalQty=cart.reduce((s,it)=>s+(it.qty||1),0);
+document.getElementById('cartBadge').textContent=totalQty;
 
 document.getElementById('miniList').innerHTML=cart.map(it=>
   `<div class="mini-item">
@@ -191,25 +199,55 @@ document.getElementById('miniList').innerHTML=cart.map(it=>
    </div>`
 ).join('');
 
-const totalQty=cart.reduce((s,it)=>s+(it.qty||1),0);
-document.getElementById('cartBadge').textContent=totalQty;
-
-document.getElementById('sumRows').innerHTML=`
-  <div class="row"><span>Artikel (${cart.length})</span><span>${eur(rawSub)}</span></div>
-  ${discountPct>0?`<div class="row"><span>Rabatt (${discountCode})</span><span>−${eur(discountAmount)}</span></div>`:''}
-  <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
-  <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
-
 const surpriseIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>`;
 
 const perksBanner=document.getElementById('perksBanner');
-if(rawSub>=GIFT_AT){
-  perksBanner.style.display='flex';
-  perksBanner.innerHTML=`${surpriseIcon}<span>Du bekommst kostenlosen Versand und eine exklusive Überraschung</span>`;
-}else if(rawSub>=FREE_SHIP){
-  perksBanner.style.display='flex';
-  perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
+
+function renderPerksBanner(){
+  if(rawSub>=GIFT_AT){
+    perksBanner.style.display='flex';
+    perksBanner.innerHTML=`${surpriseIcon}<span>Du bekommst kostenlosen Versand und eine exklusive Überraschung</span>`;
+  }else if(rawSub>=FREE_SHIP){
+    perksBanner.style.display='flex';
+    perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
+  }
 }
+
+// Berechnet die Anzeige-Summen. Ohne gespeicherten Code (oder falls er nicht
+// mehr gültig ist) wird ganz normal ohne Rabatt gerechnet - es gibt dafür
+// keinerlei lokalen Fallback-Prozentsatz mehr.
+async function initSummary(){
+  let discountAmount=0, appliedCode='';
+
+  if(discountCode){
+    try{
+      const { data, error } = await supabaseClient.functions.invoke('validate-discount', { body: { code: discountCode } });
+      if(error) throw error;
+      if(!data || data.valid===false || data.error) throw new Error('ungültig');
+      const type=data.type, value=Number(data.value)||0;
+      discountAmount=type==='fixed' ? Math.min(value, rawSub) : Math.min(rawSub*(value/100), rawSub);
+      appliedCode=data.code || discountCode;
+    }catch(err){
+      // Code nicht mehr gültig -> aus dem Speicher entfernen, kein Rabatt anzeigen.
+      console.error('Gespeicherter Rabattcode ist nicht mehr gültig:', err);
+      localStorage.removeItem(DISCOUNT_KEY);
+    }
+  }
+
+  const sub=rawSub-discountAmount;
+  const ship=rawSub>=FREE_SHIP?0:SHIP_COST;
+  displayTotals={ sub, ship };
+
+  document.getElementById('sumRows').innerHTML=`
+    <div class="row"><span>Artikel (${cart.length})</span><span>${eur(rawSub)}</span></div>
+    ${discountAmount>0?`<div class="row"><span>Rabatt (${appliedCode})</span><span>−${eur(discountAmount)}</span></div>`:''}
+    <div class="row"><span>Versand</span><span class="${ship===0?'free-ship':''}">${ship===0?'Kostenlos ✓':eur(ship)}</span></div>
+    <div class="row total"><span>Gesamt</span><span>${eur(sub+ship)}</span></div>`;
+
+  renderPerksBanner();
+}
+
+initSummary();
 
 const legalTitles={agb:'Allgemeine Geschäftsbedingungen', ds:'Datenschutzerklärung'};
 function openLegal(which){
@@ -425,7 +463,7 @@ checkoutForm.addEventListener('submit', async e=>{
 
     const bestaetigterBetrag=(data && typeof data.gesamtbetrag==='number')
       ? eur(data.gesamtbetrag)
-      : eur(sub+ship);
+      : eur(displayTotals.sub+displayTotals.ship);
 
     alert(`Vielen Dank für deine Bestellung! Gesamtbetrag: ${bestaetigterBetrag}. Du erhältst in Kürze eine Bestätigung per E-Mail.`);
     location.href='index.html';
