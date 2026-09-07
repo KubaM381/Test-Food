@@ -1479,3 +1479,319 @@ h1 {
 .checkout-page .section:last-child {
   border-bottom: none;
 }
+
+/* ========================================================================
+   PRODUKTSEITE REDESIGN — Holzmanufaktur
+   Alle neuen Regeln sind unter dem Präfix `.product-page-*` gekapselt und
+   ans Ende der Datei angehängt. Nichts oben wird verändert oder gelöscht;
+   bestehende Klassen (.product-card, .thumb, .chip, .btn-primary, ...)
+   bleiben unangetastet nutzbar, damit Warenkorb/Kasse/Header unberührt
+   bleiben. Wo eine bestehende Klasse (z. B. .product-card) im Rahmen des
+   neuen Layouts erweitert wird, geschieht das additiv über eine zweite,
+   spezifischere Klasse auf demselben Element — nie durch Überschreiben
+   der Originalregel.
+   ======================================================================== */
+
+/* Craft-Serife nur für den Produkttitel — passend zum Manufaktur-Charakter
+   der Marke, ohne die restliche UI-Typografie (system-ui) zu verändern. */
+.product-page-main {
+  --ppg-serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --ppg-gap: 20px;
+  max-width: 1180px;
+}
+
+/* ------------------------------------------------------------------------
+   Split-Layout: Galerie links (sticky), Kaufinfos rechts
+   ------------------------------------------------------------------------ */
+.product-page-card.product-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 0 48px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  align-items: start;
+}
+
+.product-page-gallery {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f1ede6;
+}
+
+@media (min-width: 769px) {
+  .product-page-gallery {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.product-page-gallery .image-wrapper {
+  border-right: none;
+  border-bottom: none;
+}
+
+.product-page-info {
+  padding: 4px 0 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .product-page-card.product-card {
+    grid-template-columns: 1fr;
+    gap: var(--ppg-gap);
+  }
+  .product-page-info {
+    padding: 0 0 24px;
+  }
+}
+
+/* ------------------------------------------------------------------------
+   Typografie & Kopfbereich
+   ------------------------------------------------------------------------ */
+.product-page-info .product-title {
+  font-family: var(--ppg-serif);
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.product-page-info .rating-row {
+  margin-bottom: 18px;
+}
+
+.product-page-info .product-price {
+  font-family: var(--ppg-serif);
+  font-size: 2.1rem;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 22px;
+}
+
+.product-page-price-note {
+  display: block;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ------------------------------------------------------------------------
+   Highlights: kurze Bullet-Punkte auf einen Blick
+   ------------------------------------------------------------------------ */
+.product-page-highlights {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 26px;
+  padding: 0;
+}
+
+.product-page-highlights .feature-item {
+  align-items: center;
+  gap: 10px;
+}
+
+.product-page-highlights .feature-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f7f0e8;
+  color: var(--acc-d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.product-page-highlights .feature-content {
+  font-size: 0.92rem;
+}
+
+/* ------------------------------------------------------------------------
+   Mengenauswahl & Varianten — sauberes Grid
+   ------------------------------------------------------------------------ */
+.product-page-options {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 22px 0;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-page-options .section-title {
+  margin-bottom: 8px;
+}
+
+.product-page-options .quantity-controls {
+  margin-bottom: 0;
+  gap: 14px;
+}
+
+/* ------------------------------------------------------------------------
+   CTA — hoher Kontrast, weicher Hover, klare Rückmeldung
+   ------------------------------------------------------------------------ */
+.product-page-info .buy-btn.btn-primary {
+  border-radius: 10px;
+  padding: 16px 24px;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 18px rgba(139, 90, 43, 0.25);
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.product-page-info .buy-btn.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(139, 90, 43, 0.32);
+}
+
+.product-page-info .buy-btn.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Auf Desktop sitzt der Kauf-Button direkt im Info-Bereich statt in der
+   unteren Leiste; die fixierte .action-bar bleibt exklusiv für Mobile. */
+.product-page-desktop-cta {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .product-page-desktop-cta {
+    display: block;
+  }
+  /* Die globale Sticky-Leiste unten wird auf Desktop für die Produktseite
+     ausgeblendet, da der CTA jetzt inline neben Titel/Preis sitzt. */
+  body.product-page-body .action-bar {
+    display: none;
+  }
+  body.product-page-body {
+    padding-bottom: 0;
+  }
+}
+
+/* ------------------------------------------------------------------------
+   Trust-Leiste unter dem CTA
+   ------------------------------------------------------------------------ */
+.product-page-trust {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.product-page-trust-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.product-page-trust-item svg {
+  width: 20px;
+  height: 20px;
+  color: var(--acc-d);
+}
+
+@media (max-width: 480px) {
+  .product-page-trust {
+    grid-template-columns: 1fr;
+  }
+  .product-page-trust-item {
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
+
+/* ------------------------------------------------------------------------
+   Accordion: Beschreibung, Highlights im Detail, Versand & Rückgabe
+   ------------------------------------------------------------------------ */
+.product-page-details {
+  margin-top: 34px;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-page-accordion-item {
+  border-bottom: 1px solid var(--line);
+}
+
+.product-page-accordion-item:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.product-page-accordion-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.product-page-accordion-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.product-page-accordion-item summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+  margin-top: -3px;
+}
+
+.product-page-accordion-item[open] summary::after {
+  transform: rotate(-135deg);
+  margin-top: 3px;
+}
+
+.product-page-accordion-body {
+  padding: 0 2px 18px;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.product-page-accordion-body ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.product-page-accordion-body li {
+  margin-bottom: 6px;
+}
+
+/* ------------------------------------------------------------------------
+   Mobile-Reihenfolge: Bild → Titel/Preis → Optionen/CTA → Beschreibung
+   ------------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .product-page-gallery { order: 1; }
+  .product-page-info { order: 2; }
+}
