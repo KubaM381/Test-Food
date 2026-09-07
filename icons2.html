@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Back Icons Voting</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --icon-color: #ffffff;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 1.5rem;
+      padding-bottom: 5rem;
+      line-height: 1.5;
+    }
+
+    /* Sticky Progress Header */
+    .header-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-color);
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 20%; /* Fest bei 20% für Seite 2 */
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin: 1.5rem 0 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Interactive Cards */
+    .icon-card {
+      position: relative;
+      background-color: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .icon-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .icon-card.selected {
+      border-color: var(--accent);
+      background-color: var(--accent-glow);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent);
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: bold;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-card.selected .badge {
+      display: flex;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    .icon-card.selected .card-title {
+      color: var(--accent);
+    }
+
+    svg {
+      width: 44px;
+      height: 44px;
+      color: var(--icon-color);
+    }
+
+    /* Bottom Action Bar */
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0f172abf;
+      backdrop-filter: blur(8px);
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Header mit Progress -->
+  <div class="header-sticky">
+    <div class="progress-info">
+      <span>Fortschritt: Seite 2</span>
+      <span>Ausgewählt: <strong id="count">0</strong> / 5 Icons</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+
+  <header style="text-align: center;">
+    <h1>Zurück-Icons & Navigation Voting</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Wähle deine Favoriten aus (maximal 5 insgesamt)</p>
+  </header>
+
+  <div class="section-title">
+    <span>25 Back- / Zurück-Varianten</span>
+  </div>
+
+  <div class="grid">
+    <!-- 01. Klassischer Pfeil -->
+    <div class="icon-card" data-id="back-01" data-name="Klassik Pfeil">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span class="card-title">01. Klassik Pfeil</span>
+    </div>
+
+    <!-- 02. Chevron Links -->
+    <div class="icon-card" data-id="back-02" data-name="Chevron Links">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span class="card-title">02. Chevron</span>
+    </div>
+
+    <!-- 03. Pfeil mit Langer Spitze -->
+    <div class="icon-card" data-id="back-03" data-name="Langer Pfeil">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H3M10 5L3 12l7 7"/></svg>
+      <span class="card-title">03. Langer Pfeil</span>
+    </div>
+
+    <!-- 04. Bogen / Undo -->
+    <div class="icon-card" data-id="back-04" data-name="Bogen / Undo">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 015.5 5.5v0a5.5 5.5 0 01-5.5 5.5H11"/></svg>
+      <span class="card-title">04. Undo Bogen</span>
+    </div>
+
+    <!-- 05. Spitzes Dreieck Open -->
+    <div class="icon-card" data-id="back-05" data-name="Spitzer Pfeil">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12H6M10 8L6 12l4 4"/></svg>
+      <span class="card-title">05. Spitzer Pfeil</span>
+    </div>
+
+    <!-- 06. Abgerundeter Chevron -->
+    <div class="icon-card" data-id="back-06" data-name="Soft Chevron">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16l-4-4 4-4"/></svg>
+      <span class="card-title">06. Soft Chevron</span>
+    </div>
+
+    <!-- 07. Doppel-Chevron -->
+    <div class="icon-card" data-id="back-07" data-name="Doppel-Chevron">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+      <span class="card-title">07. Doppel Chevron</span>
+    </div>
+
+    <!-- 08. Back mit Strich (End) -->
+    <div class="icon-card" data-id="back-08" data-name="Pfeil bis Stopp">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6v12M18 12H10M13 16l-4-4 4-4"/></svg>
+      <span class="card-title">08. Pfeil Stop</span>
+    </div>
+
+    <!-- 09. Pfeil mit Abknickung nach unten -->
+    <div class="icon-card" data-id="back-09" data-name="Abknickender Pfeil">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7v4a4 4 0 01-4 4H5M9 11l-4 4 4 4"/></svg>
+      <span class="card-title">09. Turn-Back</span>
+    </div>
+
+    <!-- 10. Text + Pfeil Inline -->
+    <div class="icon-card" data-id="back-10" data-name="Text BACK">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M10 7l-5 5 5 5"/><text x="12" y="7" font-size="6" font-weight="bold" fill="currentColor" stroke="none">BACK</text></svg>
+      <span class="card-title">10. Text "BACK"</span>
+    </div>
+
+    <!-- 11. Minimaler dicker Pfeil -->
+    <div class="icon-card" data-id="back-11" data-name="Minimal Bold">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
+      <span class="card-title">11. Bold Chevron</span>
+    </div>
+
+    <!-- 12. Dicker Solid Pfeil -->
+    <div class="icon-card" data-id="back-12" data-name="Solid Block Arrow">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      <span class="card-title">12. Solid Block</span>
+    </div>
+
+    <!-- 13. Dünner Line-Pfeil -->
+    <div class="icon-card" data-id="back-13" data-name="Thin Line Arrow">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>
+      <span class="card-title">13. Thin Line</span>
+    </div>
+
+    <!-- 14. Modern Tail-Pfeil -->
+    <div class="icon-card" data-id="back-14" data-name="Modern Tail">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H3M3 12l6-6M3 12l6 6"/><circle cx="21" cy="12" r="1" fill="currentColor"/></svg>
+      <span class="card-title">14. Modern Tail</span>
+    </div>
+
+    <!-- 15. Pfeil nach Links-Oben (Exit) -->
+    <div class="icon-card" data-id="back-15" data-name="Pfeil Links-Oben">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17L7 7M7 7h9M7 7v9"/></svg>
+      <span class="card-title">15. Return Out</span>
+    </div>
+
+    <!-- 16. Rücklauf / Rewind Symbol -->
+    <div class="icon-card" data-id="back-16" data-name="Rewind Symbole">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 16.07V7.93c0-.77-.84-1.25-1.51-.86l-6.4 4.07c-.65.41-.65 1.34 0 1.75l6.4 4.07c.67.39 1.51-.09 1.51-.86zm10 0V7.93c0-.77-.84-1.25-1.51-.86l-6.4 4.07c-.65.41-.65 1.34 0 1.75l6.4 4.07c.67.39 1.51-.09 1.51-.86z"/></svg>
+      <span class="card-title">16. Rewind</span>
+    </div>
+
+    <!-- 17. Pfeil mit Tür-Exit -->
+    <div class="icon-card" data-id="back-17" data-name="Door Exit Back">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l-5-5 5-5M11 12h10"/></svg>
+      <span class="card-title">17. Exit Door</span>
+    </div>
+
+    <!-- 18. Kurve um 180 Grad -->
+    <div class="icon-card" data-id="back-18" data-name="180 Grad U-Turn">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11a5 5 0 015 5v0a5 5 0 01-5 5H9"/><path d="M8 14l-4-4 4-4"/></svg>
+      <span class="card-title">18. U-Turn</span>
+    </div>
+
+    <!-- 19. Schmaler Pfeil mit langer Welle -->
+    <div class="icon-card" data-id="back-19" data-name="Soft Wave Back">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h12c3 0 5 1.5 5 4s-2 4-5 4"/><path d="M8 7l-5 5 5 5"/></svg>
+      <span class="card-title">19. Soft Wave</span>
+    </div>
+
+    <!-- 20. Dreieck Links (Solid Triangle) -->
+    <div class="icon-card" data-id="back-20" data-name="Solid Dreieck">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5l-10 7 10 7V5z"/></svg>
+      <span class="card-title">20. Solid Triangle</span>
+    </div>
+
+    <!-- 21. Pfeil mit gepunkteter Linie -->
+    <div class="icon-card" data-id="back-21" data-name="Dotted Back">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke-dasharray="2 2" d="M20 12H5"/><path d="M10 7l-5 5 5 5"/></svg>
+      <span class="card-title">21. Dotted Back</span>
+    </div>
+
+    <!-- 22. Geschwungener Hand-Drawn-Look Pfeil -->
+    <div class="icon-card" data-id="back-22" data-name="Hand-Drawn Curve">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 18c-3-7-8-10-16-7"/><path d="M8 7L4 11l5 3"/></svg>
+      <span class="card-title">22. Curve Arrow</span>
+    </div>
+
+    <!-- 23. Zirkel-Kreis Pfeil -->
+    <div class="icon-card" data-id="back-23" data-name="360 Loop Back">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 10-9-9c0 1.5.4 3 1.1 4.3L2 19l2.7-2.2"/></svg>
+      <span class="card-title">23. History Loop</span>
+    </div>
+
+    <!-- 24. Pfeil mit Schichten (Layers) -->
+    <div class="icon-card" data-id="back-24" data-name="Ebenen-Pfeil">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 18l-7-5 7-5v10z"/><path d="M10 18L3 13l7-5v10z"/></svg>
+      <span class="card-title">24. Layer Back</span>
+    </div>
+
+    <!-- 25. Text "< ZURÜCK" Button-Icon -->
+    <div class="icon-card" data-id="back-25" data-name="Text & Chevron">
+      <div class="badge">✓</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12l4-4m-4 4l4 4"/><text x="11" y="15" font-size="7" font-weight="bold" fill="currentColor" stroke="none">ZURÜCK</text></svg>
+      <span class="card-title">25. Text "ZURÜCK"</span>
+    </div>
+
+  </div>
+
+  <!-- Bottom Bar mit Weiter Button -->
+  <div class="action-bar">
+    <button class="btn" onclick="submitVotes()">Weiter zu icons3 ➔</button>
+  </div>
+
+  <script>
+    // Link Säuberung: Entfernt .html aus der Adresszeile -> /icons2
+    if (window.location.pathname.endsWith('.html')) {
+      history.replaceState(null, '', '/icons2');
+    }
+
+    const selectedMap = new Map();
+
+    document.querySelectorAll('.icon-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        const name = card.dataset.name;
+
+        if (selectedMap.has(id)) {
+          selectedMap.delete(id);
+          card.classList.remove('selected');
+        } else {
+          if (selectedMap.size >= 5) {
+            alert('Du kannst maximal 5 Icons auf dieser Seite auswählen.');
+            return;
+          }
+          selectedMap.set(id, name);
+          card.classList.add('selected');
+        }
+
+        document.getElementById('count').textContent = selectedMap.size;
+      });
+    });
+
+    function submitVotes() {
+      // Speichert die ausgewählten Icons (auch wenn 0 ausgewählt wurden)
+      const votes = JSON.parse(localStorage.getItem('icon_votes') || '[]');
+      selectedMap.forEach((name, id) => {
+        votes.push({
+          id: id,
+          icon: name,
+          page: 2,
+          time: new Date().toISOString()
+        });
+      });
+
+      localStorage.setItem('icon_votes', JSON.stringify(votes));
+
+      // Weiterleitung zu /icons3
+      window.location.href = '/icons3';
+    }
+  </script>
+</body>
+</html>
