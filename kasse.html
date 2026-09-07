@@ -12,12 +12,11 @@
 </head>
 <body class="checkout-page">
 <header><div class="header-wrap"><nav>
-<span class="nav-spacer" aria-hidden="true"></span>
-<a href="index.html" class="logo">🪵 Holzmanufaktur</a>
-<a href="warenkorb.html" class="cart-icon-btn" aria-label="Warenkorb">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-  <span class="cart-badge" id="cartBadge">0</span>
+<a href="warenkorb.html" class="cart-icon-btn nav-back-icon" aria-label="Zurück zum Warenkorb" title="Zurück zum Warenkorb">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>
 </a>
+<span class="nav-spacer" aria-hidden="true"></span>
+<a href="index.html" class="logo" style="justify-self:end">🪵 Holzmanufaktur</a>
 </nav></div></header>
 
 <main class="wrap">
@@ -186,9 +185,6 @@ const discountCode=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
 // checkout-Edge-Function keinen eigenen gesamtbetrag zurückgibt).
 let displayTotals={ sub: rawSub, ship: rawSub>=FREE_SHIP?0:SHIP_COST };
 
-const totalQty=cart.reduce((s,it)=>s+(it.qty||1),0);
-document.getElementById('cartBadge').textContent=totalQty;
-
 document.getElementById('miniList').innerHTML=cart.map(it=>
   `<div class="mini-item">
      <span class="mini-item-left">
@@ -209,7 +205,7 @@ function renderPerksBanner(){
     perksBanner.innerHTML=`${surpriseIcon}<span>Du bekommst kostenlosen Versand und eine exklusive Überraschung</span>`;
   }else if(rawSub>=FREE_SHIP){
     perksBanner.style.display='flex';
-    perksBanner.textContent='✓ Kostenloser Versand ist dir sicher!';
+    perksBanner.textContent='✓ Deine Bestellung ist versandkostenfrei!';
   }
 }
 
