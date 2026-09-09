@@ -47,7 +47,16 @@
           <span id="reviewCount" class="review-count">(0)</span>
         </div>
 
-        <div id="productPrice" class="product-price">0,00 €</div>
+        <!-- Preiszeile: normaler Preis ODER (bei Rabatt) durchgestrichener
+             Original-Preis + hervorgehobener Rabattpreis + Badge. Wird
+             vollständig von app.js befüllt/umgeschaltet (renderPrice()).
+             Ohne discount_price bleiben productOriginalPrice und
+             productDiscountBadge einfach hidden -> Darstellung wie bisher. -->
+        <div id="productPriceRow" class="product-page-price-row">
+          <span id="productOriginalPrice" class="product-price-original" hidden></span>
+          <span id="productPrice" class="product-price">0,00 €</span>
+          <span id="productDiscountBadge" class="discount-badge" hidden></span>
+        </div>
 
         <!-- Highlights auf einen Blick -->
         <ul id="featuresList" class="features-list product-page-highlights"></ul>
