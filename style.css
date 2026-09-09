@@ -77,23 +77,6 @@ nav {
   white-space: nowrap;
 }
 
-.nav-back {
-  justify-self: start;
-  color: var(--text);
-  text-decoration: none;
-  font-size: 0.88rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.nav-back:hover {
-  color: var(--acc);
-}
-
 .cart-icon-btn {
   justify-self: end;
   position: relative;
@@ -130,30 +113,9 @@ nav {
   justify-self: end;
 }
 
-.cart-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--acc);
-  color: #fff;
-  font-size: 0.62rem;
-  font-weight: 700;
-  min-width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  line-height: 1;
-}
-
 @media (max-width: 480px) {
   .logo {
     font-size: 1rem;
-  }
-  .nav-back {
-    font-size: 0.78rem;
   }
 }
 
@@ -954,6 +916,39 @@ h1 {
   margin: -8px 0 14px;
 }
 
+/* ========================================================================
+   Rabattpreis-Anzeige (price / discount_price)
+   Rein visuelle Regeln - genutzt in products.html (Produktdetail),
+   warenkorb.html (Artikel- & Empfehlungszeile) und kasse.html
+   (Mini-Bestellübersicht). Die Preislogik selbst lebt in App.js bzw. den
+   jeweiligen Inline-Scripts (effectivePrice = discount_price ?? price).
+   ======================================================================== */
+.price-original {
+  text-decoration: line-through;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.mini-item-original {
+  text-decoration: line-through;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-right: 6px;
+}
+
+.discount-badge {
+  display: inline-block;
+  background: var(--err);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -1052,7 +1047,7 @@ h1 {
 /* ========================================================================
    Kasse (Checkout-Seite)
    Klassen, die es auf anderen Seiten schon mit anderer Bedeutung gibt
-   (.section, .summary, generische input/label/fieldset), werden hier
+   (.section, .summary, generische input/label, .. ), werden hier
    bewusst unter .checkout-page gescoped, damit Warenkorb & Produktseite
    unverändert bleiben. <body> der Kasse braucht dafür class="checkout-page".
    ======================================================================== */
@@ -1118,12 +1113,6 @@ h1 {
   padding: 0;
   border-radius: 0;
   background: none;
-}
-
-.checkout-page fieldset {
-  border: none;
-  padding: 0;
-  margin: 0;
 }
 
 /* Eigene Feldvalidierung: roter Rahmen + Hinweistext statt Browser-Blase */
@@ -1528,11 +1517,6 @@ h1 {
   }
 }
 
-.product-page-gallery .image-wrapper {
-  border-right: none;
-  border-bottom: none;
-}
-
 .product-page-info {
   padding: 4px 0 32px;
   display: flex;
@@ -1573,13 +1557,30 @@ h1 {
   margin-bottom: 22px;
 }
 
-.product-page-price-note {
-  display: block;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
+/* Zeile für Original- + Rabattpreis + Badge. Ist kein Rabatt aktiv, bleibt
+   productOriginalPrice/productDiscountBadge per [hidden] unsichtbar und
+   .product-price sieht exakt wie vorher aus. */
+.product-page-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 22px;
+}
+
+.product-page-price-row .product-price {
+  margin-bottom: 0;
+}
+
+.product-price-original {
+  font-family: var(--ppg-serif);
+  font-size: 1.3rem;
+  text-decoration: line-through;
   color: var(--muted);
-  margin-top: 4px;
+}
+
+.product-page-info .product-price.is-discounted {
+  color: var(--err);
 }
 
 /* ------------------------------------------------------------------------
