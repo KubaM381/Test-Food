@@ -64,9 +64,10 @@
 <script>
 const KEY='warenkorbItems', DISCOUNT_KEY='warenkorbRabattCode', FREE_SHIP=50, GIFT_AT=100, SHIP_COST=4.95, MAX_QTY=1000;
 
-// Rabatt-Zustand: die Quelle ist AUSSCHLIESSLICH die Antwort der
-// "validate-discount"-Edge-Function. Es gibt hier keine lokale Coupon-Liste
-// und keinen lokal hinterlegten Prozentsatz mehr.
+// Rabatt-Zustand (Gutscheincode, NICHT zu verwechseln mit dem
+// Produkt-Rabattpreis discount_price!): die Quelle ist AUSSCHLIESSLICH die
+// Antwort der "validate-discount"-Edge-Function. Es gibt hier keine lokale
+// Coupon-Liste und keinen lokal hinterlegten Prozentsatz mehr.
 let discountCode='';   // vom Server bestätigter Code (Anzeige/Checkout)
 let discountType=null; // 'percent' | 'fixed' - kommt 1:1 vom Server
 let discountValue=0;   // Rohwert vom Server (z.B. 10 für 10%, oder 5 für 5,00€)
@@ -100,6 +101,30 @@ async function loadRecommendedProducts(){
 }
 
 const eur=n=>(parseFloat(n)||0).toFixed(2).replace('.',',')+' €';
+
+/* ------------------------------------------------------------------------
+   Zentrale Produkt-Rabattformel (Produktfeld discount_price, NICHT der
+   Gutscheincode oben). Identisch zu App.js - hier separat implementiert,
+   weil diese Seite ein eigenständiges Inline-Script ohne gemeinsames
+   Modul-System nutzt:
+
+     effectivePrice = discount_price != null ? discount_price : price
+
+   Wird nur für die frisch aus Supabase geladenen Empfehlungsprodukte
+   gebraucht. Die Artikel, die bereits IM Warenkorb liegen, speichern unter
+   "price" schon den effektiven (ggf. reduzierten) Preis - siehe App.js
+   bzw. index.html addToCart(). Alle Summen unten rechnen deshalb weiterhin
+   einfach mit it.price, ohne die Rabattlogik erneut zu kennen.
+   ------------------------------------------------------------------------ */
+function effectivePrice(p){
+  const hasDiscount = p.discount_price!==null && p.discount_price!==undefined && p.discount_price!=='';
+  return parseFloat(hasDiscount ? p.discount_price : p.price) || 0;
+}
+function isDiscounted(p){
+  if(p.discount_price===null || p.discount_price===undefined || p.discount_price==='') return false;
+  const d=parseFloat(p.discount_price), o=parseFloat(p.price);
+  return !isNaN(d) && !isNaN(o) && d<o;
+}
 
 // Option 1 Icon: Beide Schnüre schwingen nach links
 const SURPRISE_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1.2em;height:1.2em;vertical-align:-3px;margin-right:6px"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>';
@@ -230,13 +255,20 @@ function renderRecommendation(cart){
   // bewusst nur die erste passende Option gerendert, der Rest bleibt ungenutzt.
   const pick=options[0];
 
+  // Ist die Empfehlung selbst reduziert, zeigen wir auch hier Original-
+  // (durchgestrichen) + Rabattpreis, statt nur des einen Preises.
+  const discounted=isDiscounted(pick);
+  const priceHtml=discounted
+    ? `<span class="price-original">${eur(pick.price)}</span> ${eur(effectivePrice(pick))}`
+    : eur(pick.price);
+
   document.getElementById('recommendCard').innerHTML=`
     <div class="recommend-card">
       <div class="recommend-main">
         <div class="thumb">${pick.icon||'📦'}</div>
         <div class="recommend-info">
           <p class="name">${pick.name||'Produkt'}</p>
-          <p class="unit">${eur(pick.price)}</p>
+          <p class="unit">${priceHtml}</p>
         </div>
       </div>
       <button class="recommend-add" data-id="${pick.id}">In den Warenkorb</button>
@@ -250,14 +282,24 @@ function renderRecommendation(cart){
 }
 
 // Übernimmt das echte Supabase-Produkt (inkl. echter id) in den Warenkorb,
-// damit der sichere Checkout später mit den korrekten Produktdaten arbeiten kann.
+// damit der sichere Checkout später mit den korrekten Produktdaten arbeiten
+// kann. Speichert - wie überall im Shop - den effektiven (ggf. reduzierten)
+// Preis unter "price" und den Originalpreis (nur falls reduziert) unter
+// "originalPrice" für die durchgestrichene Anzeige.
 function addRecommendation(id){
   const pick=recommendedProducts.find(p=>String(p.id)===String(id));
   if(!pick) return;
   const cart=load();
   const existing=cart.find(it=>String(it.id)===String(pick.id) || it.name===pick.name);
   if(existing) existing.qty=Math.min(MAX_QTY, (existing.qty||1)+1);
-  else cart.push({id:pick.id, name:pick.name, price:parseFloat(pick.price)||0, icon:pick.icon||'📦', qty:1});
+  else cart.push({
+    id:pick.id,
+    name:pick.name,
+    price:effectivePrice(pick),
+    originalPrice: isDiscounted(pick) ? (parseFloat(pick.price)||0) : undefined,
+    icon:pick.icon||'📦',
+    qty:1
+  });
   save(cart);
   render();
 }
@@ -291,7 +333,7 @@ function render(){
       <div class="item-main">
         <button class="remove" onclick="removeItem(${i})" title="Entfernen">✕</button>
         <div class="thumb">${it.icon||'📦'}</div>
-        <div class="info"><p class="name">${it.name}</p><p class="unit">${eur(it.price)} / Stk.</p></div>
+        <div class="info"><p class="name">${it.name}</p><p class="unit">${it.originalPrice!=null?`<span class="price-original">${eur(it.originalPrice)}</span> `:''}${eur(it.price)} / Stk.</p></div>
       </div>
       <div class="item-actions">
         <div class="qty-field">
@@ -311,6 +353,11 @@ function render(){
   updateSummary(cart);
 }
 
+// WICHTIG: it.price ist an dieser Stelle immer schon der effektive (ggf.
+// reduzierte) Preis - siehe App.js/index.html addToCart() bzw.
+// addRecommendation() oben. Zwischensumme und Gesamtbetrag verwenden daher
+// automatisch discount_price statt price, sobald ein Artikel reduziert ist,
+// ohne dass hier zusätzliche Rabattlogik nötig wäre.
 function updateSummary(cart){
   const rawSub=cart.reduce((s,it)=>s+it.price*it.qty,0);
   const discountAmount=computeDiscountAmount(rawSub);
