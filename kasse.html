@@ -109,7 +109,7 @@
   <h4>§2 Vertragspartner und Vertragsschluss</h4>
   <p>Vertragspartner ist die Holzmanufaktur [Firmenname], [Adresse]. Die Darstellung der Produkte im Shop stellt kein bindendes Angebot dar, sondern eine unverbindliche Aufforderung zur Bestellung. Mit Klick auf „Jetzt bestellen" geben Sie ein verbindliches Angebot ab. Der Vertrag kommt durch unsere Bestätigung per E-Mail oder durch Auslieferung der Ware zustande.</p>
   <h4>§3 Preise und Versandkosten</h4>
-  <p>Alle angegebenen Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer, zuzüglich einer im Bestellvorgang ausgewiesenen Versandkostenpauschale. Ab einem Bestellwert von 50,00 € liefern wir innerhalb Deutschlands versandkostenfrei.</p>
+  <p>Alle angegebenen Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer, zuzüglich einer im Bestellvorgang ausgewiesenen Versandkostenpauschale. Ab einem Bestellwert von 50,00 € liefern wir innerhalb Deutschlands versandkostenfrei. Für reduzierte Artikel ist ausschließlich der im Shop angezeigte Rabattpreis maßgeblich.</p>
   <h4>§4 Zahlung</h4>
   <p>Die Zahlung erfolgt wahlweise per Kreditkarte, PayPal, Klarna, Google Pay oder Apple Pay. Die Abwicklung übernehmen die jeweiligen Zahlungsdienstleister gemäß deren eigenen Nutzungsbedingungen.</p>
   <h4>§5 Lieferung und Eigentumsvorbehalt</h4>
@@ -168,9 +168,14 @@ const SUPABASE_URL='https://keaahccmqnmvtcmabvvz.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYWFoY2NtcW5tdnRjbWFidnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQwMjYsImV4cCI6MjA5ODI0MDAyNn0.njXGfpgYqplV5KqFB2QAwpFv8cl_EDsH5CTQBMEciPM';
 const supabaseClient=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// WICHTIG: it.price ist bereits der effektive (ggf. reduzierte) Preis - er
+// wird beim Hinzufügen zum Warenkorb (Produktseite bzw. Shop-Übersicht) aus
+// discount_price ?? price berechnet und so in warenkorbItems gespeichert.
+// rawSub verwendet damit automatisch discount_price statt price, sobald ein
+// Artikel reduziert ist - hier ist keine zusätzliche Rabattlogik nötig.
 const rawSub=cart.reduce((s,it)=>s+it.price*(it.qty||1),0);
 
-// Im Warenkorb angewendeter Rabattcode gilt auch hier - derselbe
+// Im Warenkorb angewendeter Gutscheincode gilt auch hier - derselbe
 // localStorage-Schlüssel wie in warenkorb, damit er beim Wechsel
 // zur Kasse (und zurück) erhalten bleibt statt neu eingegeben werden zu müssen.
 // WICHTIG: Es gibt hier keine lokale Coupon-Liste mehr. Der gespeicherte Code
@@ -185,15 +190,20 @@ const discountCode=(localStorage.getItem(DISCOUNT_KEY)||'').toUpperCase();
 // checkout-Edge-Function keinen eigenen gesamtbetrag zurückgibt).
 let displayTotals={ sub: rawSub, ship: rawSub>=FREE_SHIP?0:SHIP_COST };
 
-document.getElementById('miniList').innerHTML=cart.map(it=>
-  `<div class="mini-item">
+// Mini-Bestellübersicht: zeigt bei reduzierten Artikeln zusätzlich den
+// durchgestrichenen Original-Zeilenpreis (it.originalPrice * qty) an. Der
+// tatsächlich berechnete Betrag rechts bleibt in jedem Fall it.price * qty.
+document.getElementById('miniList').innerHTML=cart.map(it=>{
+  const lineTotal=it.price*(it.qty||1);
+  const lineOriginal=it.originalPrice!=null ? it.originalPrice*(it.qty||1) : null;
+  return `<div class="mini-item">
      <span class="mini-item-left">
        <span class="mini-thumb">${it.icon||'📦'}</span>
        <span>${it.qty||1}× ${it.name}</span>
      </span>
-     <span>${eur(it.price*(it.qty||1))}</span>
-   </div>`
-).join('');
+     <span>${lineOriginal!=null?`<span class="mini-item-original">${eur(lineOriginal)}</span>`:''}${eur(lineTotal)}</span>
+   </div>`;
+}).join('');
 
 const surpriseIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3C6 3 4 5.2 4 8c0 3.5 4.5 7.5 4.5 7.5S13 11.5 13 8c0-2.8-2-5-4.5-5z"/><path d="M14.5 6c1.9 0 3.5 1.6 3.5 3.8 0 2.8-3.5 5.7-3.5 5.7s-1.3-1.1-2.3-2.5"/><path d="M8.5 15.5l-0.8 1.5h1.6z"/><path d="M7.7 17c-1 2-2 3-3.2 4"/><path d="M14.5 15.5l-0.8 1.5h1.6z"/><path d="M13.7 17c-1 2-2 3-3.2 4"/></svg>`;
 
@@ -209,9 +219,11 @@ function renderPerksBanner(){
   }
 }
 
-// Berechnet die Anzeige-Summen. Ohne gespeicherten Code (oder falls er nicht
-// mehr gültig ist) wird ganz normal ohne Rabatt gerechnet - es gibt dafür
-// keinerlei lokalen Fallback-Prozentsatz mehr.
+// Berechnet die Anzeige-Summen. Ohne gespeicherten Gutscheincode (oder
+// falls er nicht mehr gültig ist) wird ganz normal ohne Zusatzrabatt
+// gerechnet - es gibt dafür keinerlei lokalen Fallback-Prozentsatz mehr.
+// rawSub selbst basiert bereits auf den effektiven (ggf. reduzierten)
+// Artikelpreisen, s.o.
 async function initSummary(){
   let discountAmount=0, appliedCode='';
 
@@ -428,9 +440,12 @@ checkoutForm.addEventListener('submit', async e=>{
 
   const fd=new FormData(form);
 
-  // Nur id, name und qty werden mitgeschickt - der Preis wird von der
-  // Edge-Function serverseitig anhand von public.products nachgeschlagen,
-  // damit Beträge nicht vom Client manipuliert werden können.
+  // Nur id, name und qty werden mitgeschickt - der (ggf. reduzierte) Preis
+  // wird von der Edge-Function serverseitig anhand von public.products
+  // (inkl. discount_price) nachgeschlagen, damit Beträge nicht vom Client
+  // manipuliert werden können. rawSub/displayTotals oben sind reine
+  // Vorschau-Werte für die UI, keine vertrauenswürdige Preisquelle für den
+  // Checkout selbst.
   const items=cart.map(it=>({ id: it.id, name: it.name, qty: it.qty||1 }));
 
   const payload={
@@ -449,6 +464,9 @@ checkoutForm.addEventListener('submit', async e=>{
   try{
     // Name der Edge-Function ("checkout") ggf. anpassen, falls deine
     // Function anders heißt - der restliche Aufruf bleibt gleich.
+    // WICHTIG (Rabattpreis): Diese Edge-Function muss beim Preis-Lookup pro
+    // Artikel discount_price berücksichtigen (effectivePrice = discount_price
+    // ?? price), da das Frontend hier bewusst keinen Preis mitschickt.
     const { data, error } = await supabaseClient.functions.invoke('checkout', { body: payload });
 
     if(error) throw error;
