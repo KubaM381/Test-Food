@@ -22,6 +22,43 @@
     '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5L8 14.5L16 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   /* ========================================================================
+     Zentrale Preislogik (Rabattpreis)
+     ------------------------------------------------------------------------
+     Einheitliche Formel für die gesamte Produktseite:
+
+       effectivePrice = discount_price != null ? discount_price : price
+
+     getEffectivePrice() ist die EINZIGE Stelle in dieser Datei, die
+     entscheidet, welcher Preis tatsächlich berechnet/angezeigt wird. Sie
+     wird beim Rendern der Produktseite, beim Aktualisieren des Kauf-Buttons
+     und beim Hinzufügen zum Warenkorb verwendet, damit "price" nie
+     versehentlich anstelle von "discount_price" verwendet wird.
+     ======================================================================== */
+  function getEffectivePrice(product) {
+    if (!product) return 0;
+    const hasDiscount =
+      product.discount_price !== null &&
+      product.discount_price !== undefined &&
+      product.discount_price !== '';
+    const value = hasDiscount ? product.discount_price : product.price;
+    return parseFloat(value) || 0;
+  }
+
+  function isDiscounted(product) {
+    if (!product) return false;
+    if (
+      product.discount_price === null ||
+      product.discount_price === undefined ||
+      product.discount_price === ''
+    ) {
+      return false;
+    }
+    const discount = parseFloat(product.discount_price);
+    const original = parseFloat(product.price);
+    return !isNaN(discount) && !isNaN(original) && discount < original;
+  }
+
+  /* ========================================================================
      Hilfsfunktionen
      ======================================================================== */
   function formatPrice(value) {
@@ -72,6 +109,8 @@
     els.ratingValue = document.getElementById('ratingValue');
     els.reviewCount = document.getElementById('reviewCount');
     els.price = document.getElementById('productPrice');
+    els.originalPrice = document.getElementById('productOriginalPrice');
+    els.discountBadge = document.getElementById('productDiscountBadge');
     els.description = document.getElementById('productDescription');
     els.featuresList = document.getElementById('featuresList');
 
@@ -120,10 +159,19 @@
     if (existingIndex > -1) {
       cart[existingIndex].qty = (cart[existingIndex].qty || 1) + quantity;
     } else {
+      const effective = getEffectivePrice(product);
+      const discounted = isDiscounted(product);
       cart.push({
         id: product.id,
         name: product.name || 'Produkt',
-        price: parseFloat(product.price) || 0,
+        // price ist immer der TATSÄCHLICH zu zahlende Preis (Rabattpreis,
+        // falls vorhanden). Warenkorb & Kasse rechnen weiterhin einfach mit
+        // item.price, ohne die Rabattlogik selbst kennen zu müssen.
+        price: effective,
+        // originalPrice wird NUR gesetzt, wenn das Produkt tatsächlich
+        // reduziert ist. Dient ausschließlich der durchgestrichenen Anzeige
+        // im Warenkorb/an der Kasse - niemals der Berechnung.
+        originalPrice: discounted ? (parseFloat(product.price) || 0) : undefined,
         image: product.image || '',
         qty: quantity
       });
@@ -188,11 +236,49 @@
     });
   }
 
+  // Schaltet die Preiszeile zwischen "normal" und "reduziert" um.
+  // Ohne discount_price bleibt die Darstellung exakt wie vorher: nur
+  // productPrice ist sichtbar, originalPrice/Badge bleiben hidden.
+  function renderPrice(product) {
+    const original = parseFloat(product.price) || 0;
+    const discounted = isDiscounted(product);
+
+    if (discounted) {
+      const effective = getEffectivePrice(product);
+      const percent = original > 0 ? Math.round((1 - effective / original) * 100) : 0;
+
+      if (els.originalPrice) {
+        els.originalPrice.hidden = false;
+        els.originalPrice.textContent = formatPrice(original);
+      }
+      els.price.textContent = formatPrice(effective);
+      els.price.classList.add('is-discounted');
+
+      if (els.discountBadge) {
+        els.discountBadge.hidden = percent <= 0;
+        els.discountBadge.textContent = percent > 0 ? `-${percent}%` : '';
+      }
+    } else {
+      if (els.originalPrice) {
+        els.originalPrice.hidden = true;
+        els.originalPrice.textContent = '';
+      }
+      els.price.textContent = formatPrice(original);
+      els.price.classList.remove('is-discounted');
+
+      if (els.discountBadge) {
+        els.discountBadge.hidden = true;
+        els.discountBadge.textContent = '';
+      }
+    }
+  }
+
   // Aktualisiert Label + Preis auf BEIDEN Kauf-Buttons (Desktop-Inline und
-  // mobile Sticky-Leiste), damit sie nie auseinanderlaufen.
+  // mobile Sticky-Leiste), damit sie nie auseinanderlaufen. Rechnet immer
+  // mit dem effektiven (ggf. reduzierten) Preis.
   function updateBuyButtonLabel() {
     if (!state.product) return;
-    const total = (parseFloat(state.product.price) || 0) * state.quantity;
+    const total = getEffectivePrice(state.product) * state.quantity;
     const label = `In den Warenkorb – ${formatPrice(total)}`;
 
     if (els.buyBtnLabel && els.buyBtn && !els.buyBtn.disabled) {
@@ -241,7 +327,7 @@
     els.ratingValue.textContent = rating.toFixed(1);
     els.reviewCount.textContent = `(${reviews} Bewertungen)`;
 
-    els.price.textContent = formatPrice(product.price);
+    renderPrice(product);
 
     const descriptionText = product.description || 'Keine Beschreibung verfügbar.';
     els.description.textContent = descriptionText;
