@@ -7,7 +7,7 @@
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078}
+:root{--acc:#8b5a2b;--acc-d:#6b431f;--bg:#faf9f7;--line:#e5e1da;--text:#2a2521;--muted:#8a8078;--err:#c0392b}
 *{box-sizing:border-box}
 body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0}
 header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
@@ -26,7 +26,15 @@ h1{font-size:1.6rem;margin:32px 0 20px}
 .thumb{background:#f1ede6;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem}
 .info{padding:20px;display:flex;flex-direction:column;flex:1}
 .name{font-weight:600;margin:0 0 8px;font-size:1.1rem}
-.price{font-weight:700;color:var(--text);font-size:1.2rem;margin-bottom:20px}
+.price{font-weight:700;color:var(--text);font-size:1.2rem;margin-bottom:20px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+
+/* Rabattpreis-Anzeige (discount_price): Originalpreis durchgestrichen,
+   Rabattpreis in der Akzentfarbe hervorgehoben, kleines Badge mit Prozent.
+   Ohne discount_price bleibt .price wie bisher ein einfacher Textknoten. */
+.price-original{text-decoration:line-through;color:var(--muted);font-weight:500;font-size:0.95rem}
+.price-current{color:var(--err)}
+.discount-badge{display:inline-block;background:var(--err);color:#fff;font-size:.7rem;font-weight:700;padding:3px 7px;border-radius:6px;line-height:1.3}
+
 .actions{display:flex;flex-direction:column;gap:8px;margin-top:auto}
 .btn{width:100%;background:#fff;color:var(--text);border:1px solid var(--line);padding:10px;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none}
 .btn-primary{background:var(--acc);color:#fff;border-color:var(--acc)}
@@ -65,6 +73,26 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const KEY = 'warenkorbItems';
 const eur = n => (parseFloat(n) || 0).toFixed(2).replace('.', ',') + ' €';
 
+/* ------------------------------------------------------------------------
+   Zentrale Produkt-Rabattformel - identisch zu App.js/warenkorb.html, hier
+   separat implementiert, da diese Seite ein eigenständiges Inline-Script
+   ohne gemeinsames Modul-System nutzt:
+
+     effectivePrice = discount_price != null ? discount_price : price
+
+   Wird beim Rendern der Karten UND beim Hinzufügen zum Warenkorb benutzt,
+   damit price nie versehentlich statt discount_price verwendet wird.
+   ------------------------------------------------------------------------ */
+function effectivePrice(p){
+  const hasDiscount = p.discount_price!==null && p.discount_price!==undefined && p.discount_price!=='';
+  return parseFloat(hasDiscount ? p.discount_price : p.price) || 0;
+}
+function isDiscounted(p){
+  if(p.discount_price===null || p.discount_price===undefined || p.discount_price==='') return false;
+  const d=parseFloat(p.discount_price), o=parseFloat(p.price);
+  return !isNaN(d) && !isNaN(o) && d<o;
+}
+
 async function loadProducts() {
   const grid = document.getElementById('grid');
   
@@ -80,17 +108,31 @@ async function loadProducts() {
     }
 
     // HTML für Produkte generieren mit Verlinkung auf products.html?id=...
-    grid.innerHTML = data.map(p => `
+    grid.innerHTML = data.map(p => {
+      const discounted = isDiscounted(p);
+      const effective = effectivePrice(p);
+      const original = parseFloat(p.price) || 0;
+      const percent = discounted && original > 0 ? Math.round((1 - effective / original) * 100) : 0;
+
+      // Normales Produkt: Preis wie bisher als einfacher Text.
+      // Reduziertes Produkt: durchgestrichener Original- + hervorgehobener
+      // Rabattpreis + optionales Prozent-Badge.
+      const priceHtml = discounted
+        ? `<span class="price-original">${eur(original)}</span><span class="price-current">${eur(effective)}</span>${percent > 0 ? `<span class="discount-badge">-${percent}%</span>` : ''}`
+        : eur(p.price);
+
+      return `
       <div class="card" data-url="products.html?id=${p.id}">
         <div class="thumb">${p.icon || '📦'}</div>
         <div class="info">
           <h2 class="name">${p.name || 'Produkt'}</h2>
-          <div class="price">${eur(p.price)}</div>
+          <div class="price">${priceHtml}</div>
           <div class="actions">
             <button class="btn btn-primary add-btn" 
               data-id="${p.id}" 
               data-name="${escapeHtml(p.name)}" 
               data-price="${p.price || 0}" 
+              data-discount-price="${p.discount_price != null ? p.discount_price : ''}"
               data-icon="${p.icon || '📦'}">
               In den Warenkorb
             </button>
@@ -100,7 +142,8 @@ async function loadProducts() {
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     // Klick auf die Karte führt zur Produktdetailseite
     document.querySelectorAll('.card').forEach(card => {
@@ -114,10 +157,21 @@ async function loadProducts() {
       btn.addEventListener('click', (e) => {
         e.stopPropagation(); // Verhindert das Öffnen der Produktdetailseite beim Button-Klick
         const dataset = e.currentTarget.dataset;
+        // Kleines "Produkt-ähnliches" Objekt aus den data-Attributen, damit
+        // effectivePrice()/isDiscounted() dieselbe Formel wie überall sonst
+        // im Shop anwenden können.
+        const productLike = {
+          price: dataset.price,
+          discount_price: dataset.discountPrice !== '' ? dataset.discountPrice : null
+        };
         addToCart({
           id: dataset.id,
           name: dataset.name,
-          price: parseFloat(dataset.price),
+          // price = tatsächlich zu zahlender Preis (Rabattpreis, falls vorhanden)
+          price: effectivePrice(productLike),
+          // nur gesetzt, wenn wirklich reduziert - rein für die durchgestrichene
+          // Anzeige im Warenkorb/an der Kasse, niemals für die Berechnung
+          originalPrice: isDiscounted(productLike) ? (parseFloat(dataset.price) || 0) : undefined,
           icon: dataset.icon
         });
       });
